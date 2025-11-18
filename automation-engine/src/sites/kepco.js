@@ -1037,14 +1037,42 @@ async function navigateToApplication(page, emit) {
   ];
 
   const topButton = await waitForLocator(topSelectors, 8000);
-  if (!topButton) {
+  let topClicked = false;
+  if (topButton) {
+    topClicked = await tryClick(topButton);
+  }
+  if (!topClicked) {
+    const extClick = await page.evaluate((label) => {
+      try {
+        const normalized = (label || '').replace(/\s+/g, '');
+        if (window.Ext && Ext.ComponentQuery) {
+          const btns = Ext.ComponentQuery.query('button');
+          for (const btn of btns || []) {
+            const text = String(btn.getText?.() || btn.text || '').replace(/\s+/g, '');
+            if (text.includes(normalized)) {
+              btn.fireEvent?.('click', btn);
+              btn.el?.dom?.click?.();
+              return true;
+            }
+          }
+        }
+        const nodes = Array.from(document.querySelectorAll('a, button, span, div'));
+        for (const node of nodes) {
+          const text = (node.textContent || '').replace(/\s+/g, '');
+          if (text.includes(normalized)) {
+            node.click();
+            node.dispatchEvent?.(new MouseEvent('click', { bubbles: true }));
+            return true;
+          }
+        }
+      } catch {}
+      return false;
+    }, TEXT_BID_CONTRACT).catch(() => false);
+    topClicked = extClick;
+  }
+  if (!topClicked) {
     log('error', '[KEPCO] Unable to locate top menu "' + TEXT_BID_CONTRACT + '".');
     throw new Error('Failed to locate the bid/contract top menu button.');
-  }
-
-  if (!await tryClick(topButton)) {
-    log('error', '[KEPCO] Click on "' + TEXT_BID_CONTRACT + '" did not succeed.');
-    throw new Error('Failed to click the bid/contract top menu button.');
   }
   await sleep(1200);
 
