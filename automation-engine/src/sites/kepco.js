@@ -1,6 +1,8 @@
 "use strict"
 
 const { handleNxCertificate } = require('./nxCertificate');
+
+const KEPCO_POPUP_URL_PATTERNS = [/\/popup\//i, /NoticeFishingPopup/i, /Kepco.*Popup/i];
 async function loginKepco(page, emit, auth = {}) {
   // Query across all frames (main first)
   async function $(selector) {
@@ -107,55 +109,77 @@ async function loginKepco(page, emit, auth = {}) {
       let scope = loginPage;
       for (const c of containerSel) { const found = await loginPage.$(c); if (found) { scope = found; break; } }
 
-      // Prefer label-based resolution across frames
-      async function findByLabel(labelRegex, timeoutMs = 4000){
-        const start = Date.now();
-        while (Date.now() - start < timeoutMs){
-          for (const ctx of gatherContexts()){
+      const loginFieldConfig = {
+        id: {
+          labels: [/\uC544\uC774\uB514/i],
+          selectors: [
+            'input[placeholder*="\uC544\uC774\uB514" i]',
+            'input[title*="\uC544\uC774\uB514" i]',
+            'input[name*="id" i]', 'input[id*="id" i]', 'input[name*="userid" i]',
+            'input[type="text"]'
+          ]
+        },
+        pw: {
+          labels: [/\uBE44\uBC00\uBC88\uD638|\uBE44\uBC88/i],
+          selectors: [
+            'input[placeholder*="\uBE44\uBC00\uBC88\uD638" i]',
+            'input[title*="\uBE44\uBC00\uBC88\uD638" i]',
+            'input[type="password"]', 'input[name*="pw" i]', 'input[id*="pw" i]'
+          ]
+        }
+      };
+
+      const queryInTargets = async (targets, selectors) => {
+        for (const target of targets) {
+          if (!target) continue;
+          for (const sel of selectors) {
             try {
-              const loc = ctx.getByLabel ? ctx.getByLabel(labelRegex) : null;
-              if (loc && await loc.count().catch(()=>0)) return loc.first();
+              const el = await target.$(sel);
+              if (el) return el;
             } catch {}
           }
-          await loginPage.waitForTimeout(150).catch(()=>{});
         }
         return null;
-      }
+      };
 
-      let idLoc = await findByLabel(/\uC544\uC774\uB514/i, 6000);
-      let pwLoc = await findByLabel(/\uBE44\uBC00\uBC88\uD638|\uBE44\uBC88/i, 6000);
+      async function locateFields(timeoutMs = 6500) {
+        const deadline = Date.now() + timeoutMs;
+        const located = { id: null, pw: null };
+        const scopedTargets = scope ? [scope] : [];
 
-      // Candidate selectors including placeholder/title
-      const idCandidates = [
-        'input[placeholder*="\uC544\uC774\uB514" i]',
-        'input[title*="\uC544\uC774\uB514" i]',
-        'input[name*="id" i]', 'input[id*="id" i]', 'input[name*="userid" i]', 'input[type="text"]'
-      ];
-      const pwCandidates = [
-        'input[placeholder*="\uBE44\uBC00\uBC88\uD638" i]',
-        'input[title*="\uBE44\uBC00\uBC88\uD638" i]',
-        'input[type="password"]', 'input[name*="pw" i]', 'input[id*="pw" i]'
-      ];
-
-      async function findInContexts(cands, timeoutMs = 6000){
-        const start = Date.now();
-        while (Date.now() - start < timeoutMs){
-          for (const ctx of gatherContexts()){
-            for (const sel of cands){
-              try {
-                const e = await ctx.$(sel);
-                if (e) return e;
-              } catch {}
+        while (Date.now() < deadline && (!located.id || !located.pw)) {
+          const contexts = gatherContexts();
+          for (const key of ['id','pw']) {
+            if (located[key]) continue;
+            const cfg = loginFieldConfig[key];
+            // label search on page/frame contexts
+            for (const ctx of contexts) {
+              for (const lbl of cfg.labels) {
+                try {
+                  const locator = ctx.getByLabel ? ctx.getByLabel(lbl) : null;
+                  if (locator && await locator.count().catch(()=>0)) {
+                    located[key] = await locator.first().elementHandle().catch(()=>null);
+                    if (located[key]) break;
+                  }
+                } catch {}
+              }
+              if (located[key]) break;
             }
+            if (located[key]) continue;
+            // scoped selectors inside modal container first
+            if (scopedTargets.length) {
+              located[key] = await queryInTargets(scopedTargets, cfg.selectors);
+            }
+            if (located[key]) continue;
+            located[key] = await queryInTargets(contexts, cfg.selectors);
           }
-          await loginPage.waitForTimeout(150).catch(()=>{});
+          if (located.id && located.pw) break;
+          await loginPage.waitForTimeout(100).catch(()=>{});
         }
-        return null;
+        return located;
       }
 
-      // Wait briefly for modal inputs to mount
-      let idField = (idLoc ? await idLoc.elementHandle().catch(()=>null) : null) || await findInContexts(idCandidates, 7000);
-      let pwField = (pwLoc ? await pwLoc.elementHandle().catch(()=>null) : null) || await findInContexts(pwCandidates, 7000);
+      const { id: idField, pw: pwField } = await locateFields();
 
       const setInputValue = async (handle, value) => {
         if (!handle) return false;
@@ -227,7 +251,12 @@ async function loginKepco(page, emit, auth = {}) {
 
 
 async function handleKepcoCertificate(page, emit, cert = {}, extra = {}) {
-  return handleNxCertificate('KEPCO', page, emit, cert, extra);
+  const result = await handleNxCertificate('KEPCO', page, emit, cert, extra);
+  if (result?.ok) {
+    const targetPage = result.page || page;
+    try { await closeExtraKepcoWindows(targetPage, emit); } catch {}
+  }
+  return result;
 }
 async function closeKepcoPostLoginModals(page, emit){
   const selectors = [
@@ -252,7 +281,8 @@ async function closeKepcoPostLoginModals(page, emit){
     'button:has([onclick*="popupClose"])'
   ];
 
-  const popupPagePatterns = [/\/popup\//i, /NoticeFishingPopup/i, /Kepco.*Popup/i];
+  const popupPagePatterns = KEPCO_POPUP_URL_PATTERNS;
+  const handledElements = new WeakSet();
   async function forceClosePopupPage(ctx){
     if (!ctx || typeof ctx.close !== 'function') return false;
     const url = (typeof ctx.url === 'function' ? ctx.url() : '') || '';
@@ -312,7 +342,9 @@ async function closeKepcoPostLoginModals(page, emit){
           const chks = await ctx.$$(chkSel);
           if (chks && chks.length) {
             for (const chk of chks) {
+              if (handledElements.has(chk)) continue;
               await chk.click({ force:true }).catch(()=>{});
+              handledElements.add(chk);
               closed = true;
               emit && emit({ type:'log', level:'info', msg:`[KEPCO] 팝업 '오늘 하루 보지 않기' 체크: ${chkSel}` });
             }
@@ -324,7 +356,9 @@ async function closeKepcoPostLoginModals(page, emit){
           const btns = await ctx.$$(sel);
           if (btns && btns.length) {
             for (const btn of btns) {
+              if (handledElements.has(btn)) continue;
               await btn.click({ force: true }).catch(()=>{});
+              handledElements.add(btn);
               closed = true;
               emit && emit({ type:'log', level:'info', msg:`[KEPCO] 공지/모달 닫기: ${sel}` });
             }
@@ -334,6 +368,25 @@ async function closeKepcoPostLoginModals(page, emit){
     }
     if (!closed) break;
     await page.waitForTimeout(150).catch(()=>{});
+  }
+}
+
+async function closeExtraKepcoWindows(page, emit, options = {}) {
+  if (!page) return;
+  const context = typeof page.context === 'function' ? page.context() : null;
+  if (!context || typeof context.pages !== 'function') return;
+  const keepRegex = Object.prototype.hasOwnProperty.call(options, 'keepRegex') ? options.keepRegex : null;
+  const pages = context.pages();
+  for (const current of pages) {
+    if (!current || current.isClosed?.()) continue;
+    if (current === page) continue;
+    const url = (typeof current.url === 'function' ? current.url() : '') || '';
+    if (!url) continue;
+    if (keepRegex && keepRegex.test(url)) continue;
+    try {
+      await current.close({ runBeforeUnload: true });
+      emit && emit({ type: 'log', level: 'info', msg: `[KEPCO] 별도 창 강제 종료: ${url}` });
+    } catch {}
   }
 }
 
