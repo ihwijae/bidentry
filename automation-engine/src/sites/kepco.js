@@ -989,6 +989,7 @@ async function navigateToApplication(page, emit) {
 module.exports = {
   loginKepco,
   handleKepcoCertificate,
+  closeKepcoPostLoginModals,
   goToBidApplyAndSearch,
   applyAfterSearch,
   navigateToApplication,
