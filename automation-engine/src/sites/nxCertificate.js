@@ -498,7 +498,7 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
       const style = window.getComputedStyle(modal);
       if (style.display === 'none' || modal.offsetWidth === 0 || modal.offsetHeight === 0) return true;
       return false;
-    }).catch(() => false);
+    }).catch(() => true);
     if (!hidden) {
       const errorText = await scope.evaluate(() => {
         const err = document.querySelector('#nx-issue-fail-alert, #nx-error-cert-update, .pki-wrap5, .error, .nx-error, .cert-error-msg');
