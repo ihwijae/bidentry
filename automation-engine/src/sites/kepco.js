@@ -46,6 +46,8 @@ async function loginKepco(page, emit, auth = {}) {
 
   // 1) Top navigation login link/button click
   const loginLinkCandidates = [
+    '#button-1022-btnInnerEl',
+    'span.x-btn-inner:has-text("\uB85C\uADF8\uC778")',
     'header a:has-text("\uB85C\uADF8\uC778")',
     'a[href*="login" i]',
     'text=/\uB85C\uADF8\uC778/i'
