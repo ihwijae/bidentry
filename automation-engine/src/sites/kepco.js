@@ -252,6 +252,26 @@ async function closeKepcoPostLoginModals(page, emit){
     'button:has([onclick*="popupClose"])'
   ];
 
+  const popupPagePatterns = [/\/popup\//i, /NoticeFishingPopup/i, /Kepco.*Popup/i];
+  async function forceClosePopupPage(ctx){
+    if (!ctx || typeof ctx.close !== 'function') return false;
+    const url = (typeof ctx.url === 'function' ? ctx.url() : '') || '';
+    let hit = popupPagePatterns.some(rx => rx.test(url));
+    if (!hit && typeof ctx.title === 'function') {
+      try {
+        const title = await ctx.title();
+        hit = popupPagePatterns.some(rx => rx.test(title));
+      } catch {}
+    }
+    if (!hit) return false;
+    try {
+      await ctx.close({ runBeforeUnload: true });
+      emit && emit({ type:'log', level:'info', msg:`[KEPCO] 팝업 페이지 강제 종료: ${url}` });
+      return true;
+    } catch {}
+    return false;
+  }
+
   const contexts = () => {
     const ctxs = [];
     const seenPages = new Set();
@@ -285,6 +305,8 @@ async function closeKepcoPostLoginModals(page, emit){
   for (let attempt = 0; attempt < 5; attempt++) {
     let closed = false;
     for (const ctx of contexts()) {
+      const forced = await forceClosePopupPage(ctx);
+      if (forced) { closed = true; continue; }
       for (const chkSel of checkSelectors) {
         try {
           const chks = await ctx.$$(chkSel);
