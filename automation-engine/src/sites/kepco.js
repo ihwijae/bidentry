@@ -880,41 +880,90 @@ async function applyAfterSearch(page, emit){
     emit && emit({ type:'log', level:'warn', msg:'[KEPCO] "\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD" \uBC84\uD2BC\uC744 \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.' });
   }
 
-  // 3) Handle 안내/동의 모달 및 팝업
-  // 3-1) Capture popup if spawned
-  let modalPage = null;
+  await handleFinalAgreementAndSubmit(page, emit);
+}
+
+async function handleFinalAgreementAndSubmit(page, emit){
+  const log = (level,msg)=>emit && emit({ type:'log', level, msg });
+  const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+  const AGREEMENT_PATTERNS = [
+    /\uACF5\uAE09\uC790.*\uD589\uB3D9\uAC15\uB839.*\uB3D9\uC758/i,
+    /\uCCAD\uB7C9\uACC4\uC57D.*\uC774\uD589\uAC01\uC11C.*\uB3D9\uC758/i,
+    /\uC870\uC138\uD3EC\uD0AC.*\uC11C\uC57D\uC11C.*\uB3D9\uC758/i
+  ];
+  const SUBMIT_SELECTOR = '#button-1693-btnInnerEl, span.x-btn-inner:has-text("\uC81C\uCD9C"), button:has-text("\uC81C\uCD9C"), a:has-text("\uC81C\uCD9C")';
+  const contexts = () => [page, ...(page.frames?.() || [])];
+
+  // Close newly opened popup windows (공정위 안내 등)
   try {
-    modalPage = await page.waitForEvent('popup', { timeout: 1500 }).catch(()=>null);
-    if (modalPage) { await modalPage.waitForLoadState('domcontentloaded').catch(()=>{}); }
+    const ctx = page.context?.();
+    for (const extra of ctx?.pages?.() || []) {
+      if (!extra || extra === page || extra.isClosed?.()) continue;
+      const url = extra.url?.() || '';
+      if (/bidAttendPopup|noticeCollusive|Popup/i.test(url)) {
+        try { await extra.close({ runBeforeUnload:true }); log('info', `[KEPCO] 팝업 창 닫기: ${url}`); } catch {}
+      }
+    }
   } catch {}
 
-  const ctxCandidates = [modalPage, page, ...page.frames?.()||[]].filter(Boolean);
-  let checked = false;
-  for (const ctx of ctxCandidates){
+  const dismissInlineAlerts = async () => {
+    for (const ctx of contexts()) {
+      try {
+        const buttons = await ctx.$$(`button:has-text("확인"), a:has-text("확인"), span.x-btn-inner:has-text("확인")`);
+        for (const btn of buttons || []) await btn.click({ force:true }).catch(()=>{});
+      } catch {}
+    }
+  };
+
+  const checkAgreement = async (pattern) => {
+    const normalized = pattern instanceof RegExp ? pattern : new RegExp(pattern, 'i');
+    for (const ctx of contexts()) {
+      try {
+        const matched = await ctx.evaluate((regexStr) => {
+          const regex = new RegExp(regexStr, 'i');
+          const nodes = Array.from(document.querySelectorAll('label, span, div'));
+          for (const node of nodes) {
+            const text = (node.textContent || '').replace(/\s+/g,'');
+            if (!text || !regex.test(text)) continue;
+            const checkbox = node.querySelector('input[type="checkbox"]')
+              || node.closest('tr, div, label')?.querySelector('input[type="checkbox"]')
+              || document.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+              checkbox.click();
+              checkbox.checked = true;
+              checkbox.dispatchEvent(new Event('change', { bubbles:true }));
+              return true;
+            }
+          }
+          return false;
+        }, normalized.source);
+        if (matched) return true;
+      } catch {}
+    }
+    log('warn', `[KEPCO] 동의 체크박스를 찾지 못했습니다: ${pattern}`);
+    return false;
+  };
+
+  await dismissInlineAlerts();
+  for (const label of AGREEMENT_PATTERNS) await checkAgreement(label);
+
+  let submitted = false;
+  for (const ctx of contexts()) {
     try {
-      // find window container first to scope search
-      const win = await ctx.$('.x-window').catch(()=>null);
-      const scope = win || ctx;
-      const lab = await scope.$('label:has-text("\uB3D9\uC758 \uC0AC\uD56D")').catch(()=>null)
-               || await scope.$('label[for*="checkbox-"]').catch(()=>null)
-               || await scope.$('xpath=//label[span[contains(normalize-space(.),"\uB3D9\uC758 \uC0AC\uD56D")]]').catch(()=>null);
-      const cb = await scope.$('input[type="checkbox"][id^="checkbox-"][id$="inputEl"]').catch(()=>null)
-              || await scope.$('input[type="checkbox"]').catch(()=>null);
-      const el = lab || cb;
-      if (el){
-        try { await el.click({ force:true }).catch(()=>{}); } catch {}
-        try { await (scope.evaluate ? scope.evaluate(e=>{ e.click(); e.dispatchEvent(new MouseEvent('click', { bubbles:true })); }, el) : Promise.resolve()).catch(()=>{}) } catch {}
-        emit && emit({ type:'log', level:'info', msg:'[KEPCO] \uC548\uB0B4 \uBAA8\uB2EC \uD655\uC778 \uCCB4\uD06C' });
-        // try to click OK/\uD655\uC778 if present
-        const ok = await (win||scope).$('button:has-text("\uD655\uC778")').catch(()=>null)
-                 || await (win||scope).$('a:has-text("\uD655\uC778")').catch(()=>null)
-                 || await (win||scope).$('span.x-btn-inner:has-text("\uD655\uC778")').catch(()=>null);
-        if (ok) { try { await ok.click({ force:true }).catch(()=>{}); } catch {} }
-        checked = true; break;
+      const btn = await ctx.$(SUBMIT_SELECTOR);
+      if (btn) {
+        await btn.scrollIntoViewIfNeeded?.().catch(()=>{});
+        await btn.click({ force:true }).catch(()=>{});
+        log('info', '[KEPCO] 최종 "제출" 버튼 클릭');
+        submitted = true;
+        break;
       }
     } catch {}
   }
-  if (!checked) emit && emit({ type:'log', level:'warn', msg:'[KEPCO] 안내 모달 확인 체크박스를 찾지 못했습니다' });
+  if (!submitted) {
+    log('warn', '[KEPCO] 최종 제출 버튼을 찾지 못했습니다. 수동 확인 필요');
+  }
+  await sleep(200);
 }
 
 async function navigateToApplication(page, emit) {
