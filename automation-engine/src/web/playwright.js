@@ -8,7 +8,7 @@ function requirePlaywright(emit){
   }
 }
 
-const { loginKepco } = require('../sites/kepco');
+const { loginKepco, closeKepcoPostLoginModals } = require('../sites/kepco');
 const { loginMnd } = require('../sites/mnd');
 const fs = require('fs');
 const os = require('os');
@@ -81,6 +81,7 @@ async function openAndPrepareLogin(job, emit, outDir){
     if (site === 'kepco') {
       const newPage = await loginKepco(page, emit, job?.auth || {});
       if (newPage) page = newPage;
+      try { await closeKepcoPostLoginModals(page, emit, { abortOnCertModal: true }); } catch {}
     } else if (site === 'mnd') {
       const newPage = await loginMnd(page, emit, job?.auth || {});
       if (newPage) page = newPage;
@@ -157,7 +158,6 @@ async function fillCommonCredentials(page, auth, emit){
 }
 
 module.exports = { openAndPrepareLogin };
-
 
 
 

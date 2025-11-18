@@ -258,7 +258,7 @@ async function handleKepcoCertificate(page, emit, cert = {}, extra = {}) {
   }
   return result;
 }
-async function closeKepcoPostLoginModals(page, emit){
+async function closeKepcoPostLoginModals(page, emit, options = {}){
   const selectors = [
     '.x-tool-close',
     '.x-window .x-tool-close',
@@ -302,6 +302,9 @@ async function closeKepcoPostLoginModals(page, emit){
     return false;
   }
 
+  const abortOnCertModal = options.abortOnCertModal === true;
+  const certSelectors = ['#nx-cert-select', '.nx-cert-select', '#browser-guide-added-wrapper', '#nx-cert-select-wrap'];
+
   const contexts = () => {
     const ctxs = [];
     const seenPages = new Set();
@@ -323,6 +326,19 @@ async function closeKepcoPostLoginModals(page, emit){
     return ctxs;
   };
 
+  const hasCertificateModal = async () => {
+    if (!abortOnCertModal) return false;
+    for (const ctx of contexts()) {
+      for (const sel of certSelectors) {
+        try {
+          const modal = await ctx.$(sel);
+          if (modal) return true;
+        } catch {}
+      }
+    }
+    return false;
+  };
+
   const checkSelectors = [
     'label:has-text("오늘 하루 이 창 열지 않기")',
     'label:has-text("하루 동안 보지 않기")',
@@ -334,6 +350,10 @@ async function closeKepcoPostLoginModals(page, emit){
   ];
   for (let attempt = 0; attempt < 5; attempt++) {
     let closed = false;
+    if (await hasCertificateModal()) {
+      emit && emit({ type:'log', level:'debug', msg:'[KEPCO] 인증서 모달 감지로 공지 닫기 루틴을 중단합니다.' });
+      break;
+    }
     for (const ctx of contexts()) {
       const forced = await forceClosePopupPage(ctx);
       if (forced) { closed = true; continue; }
