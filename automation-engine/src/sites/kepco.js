@@ -107,7 +107,21 @@ async function loginKepco(page, emit, auth = {}) {
         'div.layer:has-text("\uB85C\uADF8\uC778")'
       ];
       let scope = loginPage;
-      for (const c of containerSel) { const found = await loginPage.$(c); if (found) { scope = found; break; } }
+      const resolveModalScope = async (timeoutMs = 4500) => {
+        const deadline = Date.now() + timeoutMs;
+        while (Date.now() < deadline) {
+          for (const c of containerSel) {
+            try {
+              const found = await loginPage.$(c);
+              if (found) return found;
+            } catch {}
+          }
+          await loginPage.waitForTimeout(120).catch(()=>{});
+        }
+        return null;
+      };
+      const modalScope = await resolveModalScope();
+      if (modalScope) scope = modalScope;
 
       const loginFieldConfig = {
         id: {
@@ -179,7 +193,15 @@ async function loginKepco(page, emit, auth = {}) {
         return located;
       }
 
-      const { id: idField, pw: pwField } = await locateFields();
+      let { id: idField, pw: pwField } = await locateFields();
+      if (!idField || !pwField) {
+        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW 입력 필드 탐색 재시도 (팝업 정리 후)' });
+        try { await closeKepcoPostLoginModals(loginPage, emit, { abortOnCertModal: true }); } catch {}
+        await loginPage.waitForTimeout(300).catch(()=>{});
+        const retry = await locateFields(4000);
+        idField ||= retry.id;
+        pwField ||= retry.pw;
+      }
 
       const setInputValue = async (handle, value) => {
         if (!handle) return false;
