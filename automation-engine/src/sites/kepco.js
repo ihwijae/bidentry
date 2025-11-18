@@ -187,10 +187,16 @@ async function closeKepcoPostLoginModals(page, emit){
     'button:has-text("확인")',
     'a:has-text("확인")',
     '.popup-close',
-    '.btn-close'
+    '.btn-close',
+    'span[onclick*="close"]',
+    'button.btn-popup-close'
   ];
   const contexts = () => [page, ...(page.frames?.() || [])];
-  const checkSelectors = ['label:has-text("오늘 하루 이 창 열지 않기")', 'input[type="checkbox"][name*="today" i]'];
+  const checkSelectors = [
+    'label:has-text("오늘 하루 이 창 열지 않기")',
+    'input[type="checkbox"][name*="today" i]',
+    'input[type="checkbox"][id*="today" i]'
+  ];
   for (let attempt = 0; attempt < 3; attempt++) {
     let closed = false;
     for (const ctx of contexts()) {
