@@ -3,7 +3,7 @@
 let pw = null;
 function requirePlaywright(emit){
   try { return require('playwright'); } catch (e) {
-    emit && emit({ type:'error', msg:'Playwright 미설? automation-engine ?렉?리?서 npm i -D playwright && npx playwright install chromium ??행?세??' });
+    emit && emit({ type:'error', msg:'Playwright 미설치: automation-engine 디렉터리에서 "npm i -D playwright" 후 "npx playwright install chromium"을 실행해 주세요.' });
     throw e;
   }
 }
@@ -70,14 +70,14 @@ async function openAndPrepareLogin(job, emit, outDir){
     return { ok:false, error:'URL not configured (job.url missing)' };
   }
   await page.goto(url, { waitUntil: 'load', timeout: 60000 });
-  emit && emit({ type:'log', level:'info', msg:`?이지 ?속: ${await page.title().catch(()=>url)} (${page.url()})` });
+  emit && emit({ type:'log', level:'info', msg:`페이지 접속: ${await page.title().catch(()=>url)} (${page.url()})` });
   await dismissCommonOverlays(page, emit);
 
   const site = (job?.site || '').toLowerCase();
   try {
     const hasId = !!(job?.auth?.id);
     const hasPw = !!(job?.auth?.pw);
-    emit && emit({ type:'log', level:'info', msg:`?격?보 존재 ??: id=${hasId}, pw=${hasPw}` });
+    emit && emit({ type:'log', level:'info', msg:`자격정보 존재 여부: id=${hasId}, pw=${hasPw}` });
     if (site === 'kepco') {
       const newPage = await loginKepco(page, emit, job?.auth || {});
       if (newPage) page = newPage;
@@ -85,7 +85,7 @@ async function openAndPrepareLogin(job, emit, outDir){
       const newPage = await loginMnd(page, emit, job?.auth || {});
       if (newPage) page = newPage;
     } else {
-      emit && emit({ type:'log', level:'warn', msg:`Unknown site '${site}', 기본 로그??버튼 ?색 ?도` });
+      emit && emit({ type:'log', level:'warn', msg:`알 수 없는 사이트 '${site}', 기본 로그인 버튼 탐색을 시도합니다.` });
       if (job?.auth?.id && job?.auth?.pw) {
         await fillCommonCredentials(page, job.auth, emit);
       } else {
@@ -97,7 +97,7 @@ async function openAndPrepareLogin(job, emit, outDir){
     try {
       const htmlPath = path.join(outDir, '02_login_error.html');
       fs.writeFileSync(htmlPath, await page.content(), 'utf-8');
-      emit && emit({ type:'log', level:'error', msg:`HTML ??? ${htmlPath}` });
+      emit && emit({ type:'log', level:'error', msg:`HTML 덤프 저장: ${htmlPath}` });
     } catch {}
     // Optional pause to observe before closing
     const pauseMs = Number(job?.options?.pauseOnErrorMs) || 5000;
@@ -107,21 +107,21 @@ async function openAndPrepareLogin(job, emit, outDir){
     return { ok:false, error: String(e) };
   }
 
-  // 추? 진단: 로그???력값이 존재?는지 ?플 체크 (가?한 경우)
+  // 추후 진단: 로그인 입력값이 실제로 채워졌는지 추가 확인 (필요한 경우)
   try {
     const hasPwField = await page.$('input[type="password"]').catch(()=>null);
     if (hasPwField) {
       const v = await page.evaluate(el => el && el.value, hasPwField).catch(()=>null);
-      if (!v) emit && emit({ type:'log', level:'warn', msg:'주의: 비?번호 ?드 값이 비어?을 ???습?다.' });
+      if (!v) emit && emit({ type:'log', level:'warn', msg:'주의: 비밀번호 입력 필드 값이 비어 있을 수 있습니다.' });
     }
   } catch {}
-  // ?기까?: ?증???택 ????이?브 모듈 ?계 직전 ?태
-  // ?이?브(UIA) 처리??해 브라????? ?고 ?들??반환
+  // 여기까지: 인증서 선택 자동화 모듈 호출 직전 상태 유지
+  // 네이티브(UIA) 처리까지 위해 브라우저와 페이지 핸들을 반환
   return { ok:true, site, browser, context: ctx, page };
 }
 
 async function clickCommonLogin(page, emit){
-  // ?한 ?스??aria ?벨 기반 로그??버튼 ?색
+  // 일반 케이스: aria 라벨 기반 로그인 버튼 탐색
   const candidates = [
     'text=/\uACF5\uB3D9\uC778\uC99D/',
     'text=/\uACF5\uC778\uC99D/',
@@ -135,11 +135,11 @@ async function clickCommonLogin(page, emit){
     const el = await page.$(sel);
     if (el){
       await el.click();
-      emit && emit({ type:'log', level:'info', msg:`로그???리??릭: ${sel}` });
+      emit && emit({ type:'log', level:'info', msg:`로그인 후보 클릭: ${sel}` });
       return;
     }
   }
-  throw new Error('로그??버튼??찾? 못했?니?? ??터 보완???요?니??');
+  throw new Error('로그인 버튼을 찾지 못했습니다. 셀렉터 보완이 필요합니다.');
 }
 
 async function fillCommonCredentials(page, auth, emit){
@@ -148,16 +148,15 @@ async function fillCommonCredentials(page, auth, emit){
   let idBox = null, pwBox = null;
   for (const s of idSel){ idBox = await page.$(s); if (idBox) break; }
   for (const s of pwSel){ pwBox = await page.$(s); if (pwBox) break; }
-  if (!idBox || !pwBox) throw new Error('ID/PW ?력창을 찾? 못했?니??');
+  if (!idBox || !pwBox) throw new Error('ID/PW 입력창을 찾지 못했습니다.');
   await idBox.fill(auth.id || '');
   await pwBox.fill(auth.pw || '');
-  const submitSel = ['button[type="submit"]','button:has-text("로그??)','input[type="submit"]'];
+  const submitSel = ['button[type="submit"]','button:has-text("\uB85C\uADF8\uC778")','input[type="submit"]'];
   for (const s of submitSel){ const el = await page.$(s); if (el){ await el.click(); break; } }
-  emit && emit({ type:'log', level:'info', msg:'?반 ID/PW 로그???도(비?번호??로그??기록?? ?음)' });
+  emit && emit({ type:'log', level:'info', msg:'일반 ID/PW 로그인 시도(비밀번호는 로그에 기록되지 않음)' });
 }
 
 module.exports = { openAndPrepareLogin };
-
 
 
 

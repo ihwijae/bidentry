@@ -234,10 +234,13 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
   }
 
 
+  const preferBizNo = String(extra?.company?.bizNo || cert.bizNo || '').replace(/[^0-9]/g, '');
+
   const selectionPrefs = {
     subject: preferSubject,
     issuer: preferIssuer,
     serial: preferSerial,
+    bizNo: preferBizNo,
     rowSelectors
   };
 
@@ -253,9 +256,11 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
     const norm = (s) => normalizeCorporateMarks(s)
       .toLowerCase()
       .replace(/[\s\u00a0\-_/()\[\]]/g, '');
+    const onlyDigits = (s) => (s || '').replace(/[^0-9]/g, '');
     const wantSubject = norm(prefs.subject);
     const wantIssuer = norm(prefs.issuer);
     const wantSerial = norm(prefs.serial);
+    const wantBiz = onlyDigits(prefs.bizNo);
     const selectors = (Array.isArray(prefs.rowSelectors) && prefs.rowSelectors.length)
       ? prefs.rowSelectors
       : ['#NXcertList tr', '.nx-cert-list tr', '.nx-cert-list li', '.cert-list tbody tr', '.cert-list tr', '.cert-list li', '.nx-cert-row', '.cert-row', '.cert-item', '[role="row"]'];
@@ -291,16 +296,22 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
       const text = row.innerText || row.textContent || '';
       const ntext = norm(text);
       let score = 0;
+      const rowDigits = onlyDigits(text);
       if (wantSerial && ntext.includes(wantSerial)) score += 500;
       if (wantSubject && ntext.includes(wantSubject)) score += 220;
       if (wantIssuer && ntext.includes(wantIssuer)) score += 80;
-      if (!wantSerial && !wantSubject && !wantIssuer) score += Math.max(0, rows.length - idx);
+      if (wantBiz && rowDigits.includes(wantBiz)) score += 400;
+      if (!wantSerial && !wantSubject && !wantIssuer && !wantBiz) {
+        score += Math.max(0, rows.length - idx);
+      }
       if (score > bestScore) {
         bestScore = score;
         bestIdx = idx;
       }
     });
-    if (bestIdx < 0) bestIdx = 0;
+    if (bestScore <= 0 || bestIdx < 0) {
+      return { ok: false, reason: 'no_match' };
+    }
     const target = rows[bestIdx];
     if (!target) {
       return { ok: false, reason: 'no_target' };

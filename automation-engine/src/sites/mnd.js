@@ -19,13 +19,13 @@ async function loginMnd(page, emit, auth = {}) {
     for (const sel of candidates) {
       const el = await targetPage.$(sel).catch(() => null) || await $(sel);
       if (!el) continue;
-      emit && emit({ type: 'log', level: 'info', msg: `[MND] ?대┃ ?쒕룄: ${sel}` });
+      emit && emit({ type: 'log', level: 'info', msg: `[MND] 클릭 시도: ${sel}` });
       const popupPromise = targetPage.waitForEvent('popup', { timeout: 1500 }).catch(() => null);
       await el.click().catch(() => {});
       const popup = await popupPromise;
       if (popup) {
         await popup.waitForLoadState('load').catch(() => {});
-        emit && emit({ type: 'log', level: 'info', msg: '[MND] ??李?popup)?쇰줈 ?대룞' });
+        emit && emit({ type: 'log', level: 'info', msg: '[MND] 새 창(팝업)으로 전환' });
         return popup;
       }
       await targetPage.waitForTimeout(200).catch(()=>{});
@@ -34,7 +34,7 @@ async function loginMnd(page, emit, auth = {}) {
     return null;
   }
 
-  // 1) 硫붿씤?먯꽌 濡쒓렇??踰꾪듉 ?대┃
+  // 1) 메인 페이지에서 로그인 버튼 클릭
   const loginCandidates = [
     'button:has-text("\uB85C\uADF8\uC778")',
     'a:has-text("\uB85C\uADF8\uC778")',
@@ -47,10 +47,10 @@ async function loginMnd(page, emit, auth = {}) {
   try { loginPage.on('dialog', d => d.dismiss().catch(()=>{})); } catch {}
   await loginPage.waitForLoadState('domcontentloaded').catch(()=>{});
 
-  // 2) 濡쒓렇???섎떒 ?좏깮 ?먮뒗 ID/PW ?낅젰
+  // 2) 로그인 방식 선택 또는 ID/PW 입력
   if (auth.id && auth.pw) {
     try {
-      // Container near the orange 濡쒓렇??踰꾪듉
+      // 주황색 로그인 버튼 근처 컨테이너 기준으로 필드 탐색
       const container = await (
         loginPage.$('form:has(button:has-text("\uB85C\uADF8\uC778"))') ||
         loginPage.$('section:has(button:has-text("\uB85C\uADF8\uC778"))')
@@ -98,12 +98,12 @@ async function loginMnd(page, emit, auth = {}) {
       let pwField = (pwLoc ? await pwLoc.elementHandle().catch(()=>null) : null) || await findInFrames(pwCandidates);
       if (!pwField) { try { await loginPage.waitForSelector(pwCandidates.join(', '), { timeout: 1500 }); pwField = await findInFrames(pwCandidates); } catch {} }
       if (!pwField) {
-        emit && emit({ type:'log', level:'warn', msg:'[MND] PW ?꾨낫 ??됲꽣濡??붿냼 ?먯깋 ?ㅽ뙣' });
+        emit && emit({ type:'log', level:'warn', msg:'[MND] PW 입력 필드를 찾지 못했습니다. DOM 정보를 수집합니다.' });
         try {
           const info = await loginPage.evaluate(() => Array.from(document.querySelectorAll('input')).map(e => ({
             type: e.type, name: e.name, id: e.id, ph: e.getAttribute('placeholder')||'', disabled: !!e.disabled, vis: !!(e.offsetParent)
           })));
-          emit && emit({ type:'log', level:'info', msg:`[MND] input 紐⑸줉: ${JSON.stringify(info)}` });
+          emit && emit({ type:'log', level:'info', msg:`[MND] input 목록: ${JSON.stringify(info)}` });
         } catch {}
       }
       // If still no PW, click area below ID to focus next input
@@ -127,7 +127,7 @@ async function loginMnd(page, emit, auth = {}) {
             // assume [0]=ID, [1]=PW
             if (!idField) idField = visInputs[0];
             pwField = visInputs[1];
-            emit && emit({ type:'log', level:'info', msg:`[MND] ?대갚: ??踰덉㎏ ?낅젰??PW濡??ъ슜 (count=${visInputs.length})` });
+            emit && emit({ type:'log', level:'info', msg:`[MND] 대안 적용: 두 번째 입력을 PW 필드로 사용 (count=${visInputs.length})` });
           }
         } catch {}
       }
@@ -150,12 +150,12 @@ async function loginMnd(page, emit, auth = {}) {
             const t = (ae.getAttribute('type')||'').toLowerCase();
             const ph = (ae.getAttribute('placeholder')||'').toLowerCase();
             return t === 'password' || n.includes('pw') || n.includes('pass') || n.includes('password') ||
-                   i.includes('pw') || i.includes('pass') || i.includes('password') || ph.includes('鍮꾨?踰덊샇');
+                   i.includes('pw') || i.includes('pass') || i.includes('password') || ph.includes('비밀번호');
           });
           if (isPwActive) {
             await loginPage.keyboard.type(String(auth.pw), { delay: 30 });
             usedKeyboard = true;
-            emit && emit({ type:'log', level:'info', msg:'[MND] Tab?쇰줈 PW ?꾨뱶 ?ъ빱?????ㅼ엯???꾨즺' });
+            emit && emit({ type:'log', level:'info', msg:'[MND] Tab 이동으로 PW 필드 활성화 후 입력 완료' });
           }
         } catch {}
         if (!usedKeyboard) {
@@ -202,10 +202,10 @@ async function loginMnd(page, emit, auth = {}) {
           try { await pwField.focus(); await pwField.press('Enter'); } catch {}
           await loginPage.waitForNavigation({ waitUntil:'load', timeout: 10000 }).catch(()=>{});
         }
-        emit && emit({ type:'log', level:'info', msg:'[MND] ID/PW 濡쒓렇???쒕룄 ?꾨즺' });
+        emit && emit({ type:'log', level:'info', msg:'[MND] ID/PW 로그인 시도 완료' });
         return popup || null;
       }
-      // If only ID is found, try to focus and TAB into PW once, but do NOT click 濡쒓렇??yet
+      // If only ID is found, try to focus and TAB into PW once, but do NOT click login yet
       if (idField && !pwField) {
         // Strictly follow: ID -> Tab -> PW -> Login
         try { await idField.focus(); await idField.type(String(auth.id), { delay: 20 }); await loginPage.keyboard.press('Tab'); await loginPage.waitForTimeout(120); } catch {}
@@ -218,10 +218,10 @@ async function loginMnd(page, emit, auth = {}) {
           const i = (ae.id||'').toLowerCase();
           const t = (ae.getAttribute('type')||'').toLowerCase();
           const ph = (ae.getAttribute('placeholder')||'').toLowerCase();
-          return t === 'password' || n.includes('pw') || n.includes('pass') || n.includes('password') || i.includes('pw') || i.includes('pass') || i.includes('password') || ph.includes('鍮꾨?踰덊샇');
+          return t === 'password' || n.includes('pw') || n.includes('pass') || n.includes('password') || i.includes('pw') || i.includes('pass') || i.includes('password') || ph.includes('비밀번호');
         }).catch(()=>false);
         if (focusedIsPw) {
-          try { await loginPage.keyboard.type(String(auth.pw), { delay: 30 }); emit && emit({ type:'log', level:'info', msg:'[MND] Tab ?ъ빱?ㅻ맂 PW???ㅼ엯???꾨즺' }); } catch {}
+          try { await loginPage.keyboard.type(String(auth.pw), { delay: 30 }); emit && emit({ type:'log', level:'info', msg:'[MND] Tab 이동 PW 필드 입력 완료' }); } catch {}
         }
         pwField = await findInFrames(pwCandidates);
         if (!pwField) {
@@ -230,16 +230,16 @@ async function loginMnd(page, emit, auth = {}) {
           pwField = await findInFrames(pwCandidates);
         }
         if (!pwField) {
-          emit && emit({ type:'log', level:'warn', msg:'[MND] PW ?꾨뱶 ?ы깘???ㅽ뙣' });
-          throw new Error('[MND] PW ?꾨뱶 ?먯깋 ?ㅽ뙣');
+          emit && emit({ type:'log', level:'warn', msg:'[MND] PW 입력 필드를 끝내 찾지 못했습니다.' });
+          throw new Error('[MND] PW 입력 필드 탐색 실패');
         }
         try { await pwField.focus(); await pwField.fill(''); await pwField.type(String(auth.pw), { delay: 30 }); } catch {}
         const submit = await scope.$(`button[type="submit"], button:has-text("${TEXT_LOGIN}"), input[type="submit"]`);
 
         if (submit) { try { await submit.click(); } catch {} }
       }
-      emit && emit({ type:'log', level:'warn', msg:'[MND] ID/PW ?낅젰 ?꾨뱶 ?먯깋 ?ㅽ뙣' });
-      throw new Error('[MND] 濡쒓렇???낅젰 ?꾨뱶 ?먯깋 ?ㅽ뙣');
+      emit && emit({ type:'log', level:'warn', msg:'[MND] ID/PW 입력 필드를 확보하지 못했습니다.' });
+      throw new Error('[MND] 로그인 입력 필드 탐색 실패');
     } catch {}
   }
 
@@ -278,10 +278,3 @@ async function handleMndCertificate(page, emit, cert = {}, extra = {}) {
 }
 
 module.exports = { loginMnd, handleMndCertificate };
-
-
-
-
-
-
-
