@@ -889,7 +889,8 @@ async function handleFinalAgreementAndSubmit(page, emit){
   const AGREEMENT_PATTERNS = [
     /\uACF5\uAE09\uC790.*\uD589\uB3D9\uAC15\uB839.*\uB3D9\uC758/i,
     /\uCCAD\uB7C9\uACC4\uC57D.*\uC774\uD589\uAC01\uC11C.*\uB3D9\uC758/i,
-    /\uC870\uC138\uD3EC\uD0AC.*\uC11C\uC57D\uC11C.*\uB3D9\uC758/i
+    /\uC870\uC138\uD3EC\uD0AC.*\uC11C\uC57D\uC11C.*\uB3D9\uC758/i,
+    /\uC704\uC758\uC0AC\uD56D.*\uD655\uC778\uD588\uC2B5\uB2C8\uB2E4/i
   ];
   const SUBMIT_SELECTOR = '#button-1693-btnInnerEl, span.x-btn-inner:has-text("\uC81C\uCD9C"), button:has-text("\uC81C\uCD9C"), a:has-text("\uC81C\uCD9C")';
   const contexts = () => [page, ...(page.frames?.() || [])];
