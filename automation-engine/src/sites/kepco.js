@@ -938,7 +938,10 @@ async function handleFinalAgreementAndSubmit(page, emit){
           }
           return false;
         }, normalized.source);
-        if (matched) return true;
+        if (matched) {
+          log('info', `[KEPCO] 동의 체크 완료: ${pattern}`);
+          return true;
+        }
       } catch {}
     }
     log('warn', `[KEPCO] 동의 체크박스를 찾지 못했습니다: ${pattern}`);
@@ -946,7 +949,34 @@ async function handleFinalAgreementAndSubmit(page, emit){
   };
 
   await dismissInlineAlerts();
-  for (const label of AGREEMENT_PATTERNS) await checkAgreement(label);
+  let checked = 0;
+  for (const label of AGREEMENT_PATTERNS) {
+    if (await checkAgreement(label)) checked++;
+  }
+  if (!checked) {
+    for (const ctx of contexts()) {
+      try {
+        const touched = await ctx.evaluate(() => {
+          const boxes = Array.from(document.querySelectorAll('.x-window input[type="checkbox"], .x-panel input[type="checkbox"], input[type="checkbox"]'));
+          let count = 0;
+          for (const cb of boxes) {
+            if (cb.disabled) continue;
+            if (!cb.checked) {
+              cb.click();
+              cb.checked = true;
+              cb.dispatchEvent(new Event('change', { bubbles:true }));
+              count++;
+            }
+          }
+          return count;
+        });
+        if (touched > 0) {
+          log('info', `[KEPCO] 텍스트 매칭 실패로 ${touched}개의 체크박스를 일괄 선택했습니다.`);
+          break;
+        }
+      } catch {}
+    }
+  }
 
   let submitted = false;
   for (const ctx of contexts()) {
