@@ -242,7 +242,17 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
   };
 
   const attemptSelection = async (ctx) => ctx.evaluate((prefs) => {
-    const norm = (s) => (s || '').toLowerCase().replace(/[\s\u00a0\-_/()\[\]]/g, '');
+    const normalizeCorporateMarks = (s) => (s || '')
+      .replace(/㈜/g, '')
+      .replace(/\(주\)/gi, '')
+      .replace(/주식회사/gi, '')
+      .replace(/유한회사/gi, '')
+      .replace(/co\.?,?ltd/gi, '')
+      .replace(/limited/gi, '')
+      .replace(/corp\.?/gi, '');
+    const norm = (s) => normalizeCorporateMarks(s)
+      .toLowerCase()
+      .replace(/[\s\u00a0\-_/()\[\]]/g, '');
     const wantSubject = norm(prefs.subject);
     const wantIssuer = norm(prefs.issuer);
     const wantSerial = norm(prefs.serial);
