@@ -203,7 +203,9 @@ async function closeKepcoPostLoginModals(page, emit){
     'span[onclick*="close"]',
     'button.btn-popup-close',
     '#btnClose',
-    '.btn-popup-close'
+    '.btn-popup-close',
+    '#reopenCheck ~ button',
+    'button:has([onclick*="popupClose"])'
   ];
   const contexts = () => [page, ...(page.frames?.() || [])];
   const checkSelectors = [
@@ -211,7 +213,8 @@ async function closeKepcoPostLoginModals(page, emit){
     'label:has-text("하루 동안 보지 않기")',
     'input[type="checkbox"][name*="today" i]',
     'input[type="checkbox"][id*="today" i]',
-    '#todayCheck'
+    '#todayCheck',
+    '#reopenCheck'
   ];
   for (let attempt = 0; attempt < 2; attempt++) {
     let closed = false;
