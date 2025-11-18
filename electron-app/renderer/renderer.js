@@ -238,7 +238,43 @@ document.getElementById('addCompany').addEventListener('click', () => {
 
 // Engine run/stop
 const siteEl = document.getElementById('site');
-const bidIdsEl = document.getElementById('bidIds');
+const bidListEl = document.getElementById('bidList');
+const addBidBtn = document.getElementById('addBidBtn');
+
+function createBidInput(value = '') {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'bid-item';
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = '공고번호를 입력하세요';
+  input.value = value || '';
+  const removeBtn = document.createElement('button');
+  removeBtn.type = 'button';
+  removeBtn.textContent = '삭제';
+  removeBtn.addEventListener('click', () => {
+    if (bidListEl.children.length > 1) {
+      wrapper.remove();
+    }
+  });
+  wrapper.appendChild(input);
+  wrapper.appendChild(removeBtn);
+  bidListEl.appendChild(wrapper);
+}
+
+function ensureBidInputs() {
+  if (!bidListEl) return;
+  if (!bidListEl.children.length) {
+    createBidInput('');
+  }
+}
+
+if (addBidBtn) {
+  addBidBtn.addEventListener('click', () => {
+    createBidInput('');
+  });
+}
+
+ensureBidInputs();
 const runBtn = document.getElementById('runBtn');
 const stopBtn = document.getElementById('stopBtn');
 const logEl = document.getElementById('log');
@@ -356,7 +392,9 @@ runBtn.addEventListener('click', async () => {
   const url = siteEl.value === 'kepco' ? (s.urls.kepco || '') : (s.urls.mnd || '');
   if (!url) { toast('설정에서 사이트 URL을 먼저 입력해 주세요.'); return; }
   const authSet = siteEl.value === 'kepco' ? (company.auth.kepco || {}) : (company.auth.mnd || {});
-  const rawBidInput = (bidIdsEl?.value || '').split(/\r?\n|,|;/g).map(s => s.trim()).filter(Boolean);
+  const rawBidInput = Array.from(bidListEl?.querySelectorAll('input') || [])
+    .map(input => input.value.trim())
+    .filter(Boolean);
   if (rawBidInput.length === 0) {
     toast('공고번호를 한 개 이상 입력해 주세요.');
     return;
@@ -560,7 +598,6 @@ function updateSummary(job){
   const bidSummaryEl = document.getElementById('summaryBid');
   if (bidSummaryEl) bidSummaryEl.textContent = bidSummary;
 }
-
 
 
 

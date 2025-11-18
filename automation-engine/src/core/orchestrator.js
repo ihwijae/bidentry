@@ -197,8 +197,9 @@ async function run(job, emit) {
         try {
           await goToBidApplyAndSearch(openRes.page, emit, bid);
         } catch (e) {
-          emit({ type:'log', level:'warn', msg:`[KEPCO] 공고번호 ${bid} 이동 실패: ${(e && e.message) || e}` });
-          continue;
+          const msg = `[KEPCO] 공고번호 ${bid} 이동 실패: ${(e && e.message) || e}`;
+          emit({ type:'log', level:'error', msg });
+          throw new Error(msg);
         }
         try { await sweepPopups(openRes.page.context?.(), emit); } catch {}
         try { await dismissCommonOverlays(openRes.page, emit); } catch {}
@@ -206,8 +207,9 @@ async function run(job, emit) {
         try {
           await applyAfterSearch(openRes.page, emit);
         } catch (e) {
-          emit({ type:'log', level:'warn', msg:`[KEPCO] 공고번호 ${bid} 신청 단계 경고: ${(e && e.message) || e}` });
-          continue;
+          const msg = `[KEPCO] 공고번호 ${bid} 참가신청 실패: ${(e && e.message) || e}`;
+          emit({ type:'log', level:'error', msg });
+          throw new Error(msg);
         }
         processed += 1;
       }
@@ -233,7 +235,6 @@ async function run(job, emit) {
 }
 
 module.exports = { run };
-
 
 
 
