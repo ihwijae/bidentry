@@ -238,7 +238,7 @@ document.getElementById('addCompany').addEventListener('click', () => {
 
 // Engine run/stop
 const siteEl = document.getElementById('site');
-const bidIdEl = document.getElementById('bidId');
+const bidIdsEl = document.getElementById('bidIds');
 const runBtn = document.getElementById('runBtn');
 const stopBtn = document.getElementById('stopBtn');
 const logEl = document.getElementById('log');
@@ -356,9 +356,16 @@ runBtn.addEventListener('click', async () => {
   const url = siteEl.value === 'kepco' ? (s.urls.kepco || '') : (s.urls.mnd || '');
   if (!url) { toast('설정에서 사이트 URL을 먼저 입력해 주세요.'); return; }
   const authSet = siteEl.value === 'kepco' ? (company.auth.kepco || {}) : (company.auth.mnd || {});
+  const rawBidInput = (bidIdsEl?.value || '').split(/\r?\n|,|;/g).map(s => s.trim()).filter(Boolean);
+  if (rawBidInput.length === 0) {
+    toast('공고번호를 한 개 이상 입력해 주세요.');
+    return;
+  }
+
   const job = {
     site: siteEl.value,
-    bidId: bidIdEl.value,
+    bidId: rawBidInput[0] || '',
+    bidIds: rawBidInput,
     url,
     company,
     auth: { id: authSet.id || '', pw: authSet.pw || '' },
@@ -547,8 +554,12 @@ function updateSummary(job){
   document.getElementById('summaryCompany').textContent = job.company?.name || '-';
   document.getElementById('summaryBizNo').textContent = job.company?.bizNo || '-';
   document.getElementById('summaryRep').textContent = job.company?.representative || '-';
+  const bidSummary = Array.isArray(job.bidIds) && job.bidIds.length > 1
+    ? `${job.bidIds[0]} 외 ${job.bidIds.length - 1}건`
+    : (job.bidIds?.[0] || job.bidId || '-');
+  const bidSummaryEl = document.getElementById('summaryBid');
+  if (bidSummaryEl) bidSummaryEl.textContent = bidSummary;
 }
-
 
 
 
