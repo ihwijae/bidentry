@@ -201,13 +201,17 @@ async function closeKepcoPostLoginModals(page, emit){
     '.popup-close',
     '.btn-close',
     'span[onclick*="close"]',
-    'button.btn-popup-close'
+    'button.btn-popup-close',
+    '#btnClose',
+    '.btn-popup-close'
   ];
   const contexts = () => [page, ...(page.frames?.() || [])];
   const checkSelectors = [
     'label:has-text("오늘 하루 이 창 열지 않기")',
+    'label:has-text("하루 동안 보지 않기")',
     'input[type="checkbox"][name*="today" i]',
-    'input[type="checkbox"][id*="today" i]'
+    'input[type="checkbox"][id*="today" i]',
+    '#todayCheck'
   ];
   for (let attempt = 0; attempt < 2; attempt++) {
     let closed = false;
@@ -233,7 +237,7 @@ async function closeKepcoPostLoginModals(page, emit){
       }
     }
     if (!closed) break;
-    await page.waitForTimeout(120).catch(()=>{});
+    await page.waitForTimeout(150).catch(()=>{});
   }
 }
 
