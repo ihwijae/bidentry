@@ -22,7 +22,7 @@ async function openAndPrepareLogin(job, emit, outDir){
   const slowMo = debug ? 250 : 0;
   const viewport = { width: 1280, height: 900 };
 
-  const reuseProfile = job?.options?.reuseEdgeProfile !== false;
+  const reuseProfile = job?.options?.reuseEdgeProfile === true;
   const profileRoot = job?.options?.edgeUserDataDir
     || path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'Microsoft', 'Edge', 'User Data');
   const profileDirName = job?.options?.edgeProfileDir || 'Default';
@@ -157,7 +157,6 @@ async function fillCommonCredentials(page, auth, emit){
 }
 
 module.exports = { openAndPrepareLogin };
-
 
 
 

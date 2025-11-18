@@ -428,7 +428,7 @@ runBtn.addEventListener('click', async () => {
       keepBrowserOnError: true,
       keepBrowserOnSuccess: true,
       useCertPath: true,
-      reuseEdgeProfile: siteEl.value !== 'mnd'
+      reuseEdgeProfile: false
     }
   };
   if (!job.cert.pin) {
@@ -598,7 +598,6 @@ function updateSummary(job){
   const bidSummaryEl = document.getElementById('summaryBid');
   if (bidSummaryEl) bidSummaryEl.textContent = bidSummary;
 }
-
 
 
 
