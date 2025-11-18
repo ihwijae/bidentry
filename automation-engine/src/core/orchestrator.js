@@ -42,9 +42,6 @@ async function run(job, emit) {
 
   // Site-specific hooks could go here (fill common prelims)
   emit({ type: 'progress', step: 'fill_form', pct: 55 });
-  if (site === 'kepco') {
-    try { await closeKepcoPostLoginModals(openRes.page, emit); } catch {}
-  }
 
   // Handle certificate dialog (web or native)
   emit({ type: 'progress', step: 'cert_dialog', pct: 75 });
@@ -187,6 +184,9 @@ async function run(job, emit) {
     try { await sweepPopups(openRes.page.context?.(), emit); } catch {}
     try { await dismissCommonOverlays(openRes.page, emit); } catch {}
     if (site === 'kepco') {
+      try { await closeKepcoPostLoginModals(openRes.page, emit); } catch {}
+    }
+    if (site === 'kepco') {
       const bidQueue = Array.isArray(job?.bidIds) && job.bidIds.length
         ? job.bidIds.map(b => String(b || '').trim()).filter(Boolean)
         : (job?.bidId ? [String(job.bidId).trim()] : []);
@@ -238,6 +238,5 @@ async function run(job, emit) {
 }
 
 module.exports = { run };
-
 
 
