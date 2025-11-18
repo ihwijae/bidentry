@@ -418,6 +418,10 @@ async function closeExtraKepcoWindows(page, emit, options = {}) {
   const context = typeof page.context === 'function' ? page.context() : null;
   if (!context || typeof context.pages !== 'function') return;
   const keepRegex = Object.prototype.hasOwnProperty.call(options, 'keepRegex') ? options.keepRegex : null;
+  const popupPatterns = Array.isArray(options.popupPatterns) && options.popupPatterns.length
+    ? options.popupPatterns
+    : KEPCO_POPUP_URL_PATTERNS;
+  const allowNonPopupClose = options.forceAll === true;
   const pages = context.pages();
   for (const current of pages) {
     if (!current || current.isClosed?.()) continue;
@@ -425,6 +429,7 @@ async function closeExtraKepcoWindows(page, emit, options = {}) {
     const url = (typeof current.url === 'function' ? current.url() : '') || '';
     if (!url) continue;
     if (keepRegex && keepRegex.test(url)) continue;
+    if (!allowNonPopupClose && !popupPatterns.some((rx) => rx.test(url))) continue;
     try {
       await current.close({ runBeforeUnload: true });
       emit && emit({ type: 'log', level: 'info', msg: `[KEPCO] 별도 창 강제 종료: ${url}` });
