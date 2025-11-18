@@ -282,25 +282,30 @@ async function closeKepcoPostLoginModals(page, emit){
     '#todayCheck',
     '#reopenCheck'
   ];
-  for (let attempt = 0; attempt < 2; attempt++) {
+  for (let attempt = 0; attempt < 5; attempt++) {
     let closed = false;
     for (const ctx of contexts()) {
       for (const chkSel of checkSelectors) {
         try {
-          const chk = await ctx.$(chkSel);
-          if (chk) {
-            await chk.click({ force:true }).catch(()=>{});
-            emit && emit({ type:'log', level:'info', msg:`[KEPCO] 팝업 '오늘 하루 보지 않기' 체크: ${chkSel}` });
+          const chks = await ctx.$$(chkSel);
+          if (chks && chks.length) {
+            for (const chk of chks) {
+              await chk.click({ force:true }).catch(()=>{});
+              closed = true;
+              emit && emit({ type:'log', level:'info', msg:`[KEPCO] 팝업 '오늘 하루 보지 않기' 체크: ${chkSel}` });
+            }
           }
         } catch {}
       }
       for (const sel of selectors) {
         try {
-          const btn = await ctx.$(sel);
-          if (btn) {
-            await btn.click({ force: true }).catch(()=>{});
-            closed = true;
-            emit && emit({ type:'log', level:'info', msg:`[KEPCO] 공지/모달 닫기: ${sel}` });
+          const btns = await ctx.$$(sel);
+          if (btns && btns.length) {
+            for (const btn of btns) {
+              await btn.click({ force: true }).catch(()=>{});
+              closed = true;
+              emit && emit({ type:'log', level:'info', msg:`[KEPCO] 공지/모달 닫기: ${sel}` });
+            }
           }
         } catch {}
       }
