@@ -196,21 +196,48 @@ async function closeKepcoPostLoginModals(page, emit){
     '.x-window .x-tool-close',
     'button:has-text("닫기")',
     'a:has-text("닫기")',
+    'input[type="button"][value*="닫기" i]',
     'button:has-text("확인")',
     'a:has-text("확인")',
     '.popup-close',
     '.btn-close',
     'span[onclick*="close"]',
+    'a[onclick*="close" i]',
+    'img[onclick*="close" i]',
     'button.btn-popup-close',
     '#btnClose',
     '.btn-popup-close',
     '#reopenCheck ~ button',
+    'div.auclose ~ div button',
+    'div.auclose ~ div a[onclick*="close" i]',
     'button:has([onclick*="popupClose"])'
   ];
-  const contexts = () => [page, ...(page.frames?.() || [])];
+
+  const contexts = () => {
+    const ctxs = [];
+    const seenPages = new Set();
+    const basePages = [];
+    if (page) basePages.push(page);
+    try {
+      const ctxObj = typeof page?.context === 'function' ? page.context() : null;
+      const extraPages = ctxObj?.pages?.() || [];
+      for (const pg of extraPages) basePages.push(pg);
+    } catch {}
+    for (const pg of basePages) {
+      if (!pg || seenPages.has(pg) || pg.isClosed?.()) continue;
+      seenPages.add(pg);
+      ctxs.push(pg);
+      try {
+        for (const fr of pg.frames?.() || []) ctxs.push(fr);
+      } catch {}
+    }
+    return ctxs;
+  };
+
   const checkSelectors = [
     'label:has-text("오늘 하루 이 창 열지 않기")',
     'label:has-text("하루 동안 보지 않기")',
+    '.auclose input[type="checkbox"]',
     'input[type="checkbox"][name*="today" i]',
     'input[type="checkbox"][id*="today" i]',
     '#todayCheck',
