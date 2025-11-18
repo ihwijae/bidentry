@@ -39,8 +39,17 @@ async function loginKepco(page, emit, auth = {}) {
       }
       // Give modal animations a brief moment
       await targetPage.waitForTimeout(200).catch(()=>{});
-      return null;
+      continue;
     }
+    try {
+      const locator = targetPage.getByRole?.('link', { name: /\uB85C\uADF8\uC778/i });
+      if (locator && await locator.count().catch(()=>0)) {
+        emit && emit({ type:'log', level:'info', msg:'[KEPCO] 링크 역할 기반 로그인 클릭' });
+        const popup = await targetPage.waitForEvent('popup', { timeout: 1500 }).catch(()=>null);
+        await locator.first().click().catch(()=>{});
+        return popup;
+      }
+    } catch {}
     return null;
   }
 
@@ -49,8 +58,11 @@ async function loginKepco(page, emit, auth = {}) {
     '#button-1022-btnInnerEl',
     'span.x-btn-inner:has-text("\uB85C\uADF8\uC778")',
     'header a:has-text("\uB85C\uADF8\uC778")',
+    'nav a:has-text("\uB85C\uADF8\uC778")',
+    '.util a:has-text("\uB85C\uADF8\uC778")',
+    'a:has-text("\uB85C\uADF8\uC778")',
     'a[href*="login" i]',
-    'text=/\uB85C\uADF8\uC778/i'
+    'xpath=//a[contains(normalize-space(.),"\uB85C\uADF8\uC778")]'
   ];
   const popup = await clickWithPopup(page, loginLinkCandidates);
   const loginPage = popup || page;
