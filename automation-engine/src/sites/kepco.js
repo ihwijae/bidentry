@@ -637,7 +637,8 @@ async function applyAfterSearch(page, emit){
       // 2) Find clickable button (resolve wrapper element)
       let target = await ctx.$(`button:has-text("${APPLY_BUTTON_TEXT}")`).catch(()=>null)
                  || await ctx.$(`a:has-text("${APPLY_BUTTON_TEXT}")`).catch(()=>null)
-                 || await ctx.$(`span.x-btn-inner:has-text("${APPLY_BUTTON_TEXT}")`).catch(()=>null);
+                 || await ctx.$(`span.x-btn-inner:has-text("${APPLY_BUTTON_TEXT}")`).catch(()=>null)
+                 || await ctx.$('#button-1416-btnInnerEl').catch(()=>null);
       if (target) {
         try {
           const clickableHandle = await target.evaluateHandle((node)=> (node.closest('a.x-btn, button, .x-btn') || node));
@@ -721,6 +722,8 @@ async function applyAfterSearch(page, emit){
           const requestBtn = root.querySelector('.x-toolbar-docked-bottom .btn-request');
           return matches(requestBtn);
         };
+        const direct = document.getElementById('button-1416-btnInnerEl');
+        if (matches(direct)) return direct.closest('a.x-btn, button, .x-btn') || direct;
         const selected = document.querySelector('.x-grid-row-selected, tr.x-grid-row-selected');
         const base = selected ? selected.closest('.x-panel') : document.querySelector('.x-panel');
         let cand = findIn(base);
@@ -813,6 +816,8 @@ async function applyAfterSearch(page, emit){
       const matchText = (node)=>!!(node && (node.textContent || '').indexOf(text) > -1);
       const root = e.closest ? e.closest('a.x-btn, button, .x-btn') || e : e;
       let inner = null;
+      const direct = document.getElementById('button-1416-btnInnerEl');
+      if (!inner && matchText(direct)) inner = direct;
       if (root && root.querySelector){
         const found = Array.from(root.querySelectorAll('.x-btn-inner, span')).find(matchText);
         if (found) inner = found;
