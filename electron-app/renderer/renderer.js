@@ -386,6 +386,10 @@ runBtn.addEventListener('click', async () => {
       reuseEdgeProfile: siteEl.value !== 'mnd'
     }
   };
+  if (!job.cert.pin) {
+    toast('인증서 비밀번호를 먼저 입력하고 저장해 주세요.');
+    return;
+  }
   // Reset UI
   lastErrorToastMessage = '';
   resetProgressUI();
@@ -544,7 +548,6 @@ function updateSummary(job){
   document.getElementById('summaryBizNo').textContent = job.company?.bizNo || '-';
   document.getElementById('summaryRep').textContent = job.company?.representative || '-';
 }
-
 
 
 

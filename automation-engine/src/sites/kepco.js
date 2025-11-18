@@ -20,7 +20,7 @@ async function loginKepco(page, emit, auth = {}) {
     for (const sel of candidates) {
       const el = await targetPage.$(sel).catch(() => null) || await $(sel);
       if (!el) continue;
-      emit && emit({ type: 'log', level: 'info', msg: `[KEPCO] Ŭ õ: ${sel}` });
+      emit && emit({ type: 'log', level: 'info', msg: `[KEPCO] 클릭 시도: ${sel}` });
       const popupPromise = targetPage.waitForEvent('popup', { timeout: 1500 }).catch(() => null);
       await el.click().catch(() => {});
       const popup = await popupPromise;
@@ -30,10 +30,10 @@ async function loginKepco(page, emit, auth = {}) {
         const url = popup.url?.() || '';
         // Ignore notice popups (handled by auto-closer); stay on current page
         if (/\uACF5\uC9C0|\uC548\uB0B4|\uC774\uBCA4\uD2B8/i.test(title) || /popup/i.test(url) || popup.isClosed()) {
-          emit && emit({ type:'log', level:'info', msg:`[KEPCO] ˸ ˾ (title='${title}')` });
+          emit && emit({ type:'log', level:'info', msg:`[KEPCO] 안내 팝업 닫힘 (title='${title}')` });
           try { if (!popup.isClosed()) await popup.close({ runBeforeUnload:true }); } catch {}
         } else {
-          emit && emit({ type: 'log', level: 'info', msg: '[KEPCO]  popup ̵' });
+          emit && emit({ type: 'log', level: 'info', msg: '[KEPCO] 새로운 팝업으로 전환' });
           return popup;
         }
       }
@@ -831,5 +831,4 @@ module.exports = {
   applyAfterSearch,
   navigateToApplication,
 };
-
 
