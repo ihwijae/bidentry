@@ -122,9 +122,9 @@ async function loginKepco(page, emit, auth = {}) {
 
       // Wait briefly for modal inputs to mount
       let idField = (idLoc ? await idLoc.elementHandle().catch(()=>null) : null) || await findInFrames(idCandidates);
-      if (!idField) { try { await loginPage.waitForSelector(idCandidates.join(', '), { timeout: 900 }); idField = await findInFrames(idCandidates); } catch {} }
+      if (!idField) { try { await loginPage.waitForSelector(idCandidates.join(', '), { timeout: 700 }); idField = await findInFrames(idCandidates); } catch {} }
       let pwField = (pwLoc ? await pwLoc.elementHandle().catch(()=>null) : null) || await findInFrames(pwCandidates);
-      if (!pwField) { try { await loginPage.waitForSelector(pwCandidates.join(', '), { timeout: 900 }); pwField = await findInFrames(pwCandidates); } catch {} }
+      if (!pwField) { try { await loginPage.waitForSelector(pwCandidates.join(', '), { timeout: 700 }); pwField = await findInFrames(pwCandidates); } catch {} }
 
       if (idField && pwField) {
         try { await idField.focus(); } catch {}
