@@ -70,6 +70,31 @@ async function loginKepco(page, emit, auth = {}) {
   try { loginPage.on('dialog', d => d.dismiss().catch(()=>{})); } catch {}
   await loginPage.waitForLoadState('domcontentloaded').catch(()=>{});
 
+  const gatherContexts = () => {
+    const ctxs = [];
+    const seen = new Set();
+    const basePages = [];
+    if (loginPage) basePages.push(loginPage);
+    try {
+      const ctxObj = typeof loginPage?.context === 'function' ? loginPage.context() : null;
+      const extraPages = ctxObj?.pages?.() || [];
+      for (const pg of extraPages) basePages.push(pg);
+    } catch {}
+    for (const pg of basePages) {
+      if (!pg || seen.has(pg) || pg.isClosed?.()) continue;
+      seen.add(pg);
+      ctxs.push(pg);
+      try {
+        for (const fr of pg.frames?.() || []) {
+          if (!fr || seen.has(fr)) continue;
+          seen.add(fr);
+          ctxs.push(fr);
+        }
+      } catch {}
+    }
+    return ctxs;
+  };
+
   // 2) Login modal option selection
   if (auth.id && auth.pw) {
     try {
@@ -83,20 +108,22 @@ async function loginKepco(page, emit, auth = {}) {
       for (const c of containerSel) { const found = await loginPage.$(c); if (found) { scope = found; break; } }
 
       // Prefer label-based resolution across frames
-      async function findByLabel(labelRegex){
-        // try in current page and all frames
-        const frames = [loginPage, ...loginPage.frames?.() || []];
-        for (const ctx of frames){
-          try {
-            const loc = ctx.getByLabel(labelRegex);
-            if (await loc.count()) return loc.first();
-          } catch {}
+      async function findByLabel(labelRegex, timeoutMs = 4000){
+        const start = Date.now();
+        while (Date.now() - start < timeoutMs){
+          for (const ctx of gatherContexts()){
+            try {
+              const loc = ctx.getByLabel ? ctx.getByLabel(labelRegex) : null;
+              if (loc && await loc.count().catch(()=>0)) return loc.first();
+            } catch {}
+          }
+          await loginPage.waitForTimeout(150).catch(()=>{});
         }
         return null;
       }
 
-      let idLoc = await findByLabel(/\uC544\uC774\uB514/i);
-      let pwLoc = await findByLabel(/\uBE44\uBC00\uBC88\uD638|\uBE44\uBC88/i);
+      let idLoc = await findByLabel(/\uC544\uC774\uB514/i, 6000);
+      let pwLoc = await findByLabel(/\uBE44\uBC00\uBC88\uD638|\uBE44\uBC88/i, 6000);
 
       // Candidate selectors including placeholder/title
       const idCandidates = [
@@ -110,27 +137,39 @@ async function loginKepco(page, emit, auth = {}) {
         'input[type="password"]', 'input[name*="pw" i]', 'input[id*="pw" i]'
       ];
 
-      async function findInFrames(cands){
-        const frames = [loginPage, ...loginPage.frames?.() || []];
-        for (const sel of cands){
-          for (const f of frames){
-            try { const e = await f.$(sel); if (e) return e; } catch {}
+      async function findInContexts(cands, timeoutMs = 6000){
+        const start = Date.now();
+        while (Date.now() - start < timeoutMs){
+          for (const ctx of gatherContexts()){
+            for (const sel of cands){
+              try {
+                const e = await ctx.$(sel);
+                if (e) return e;
+              } catch {}
+            }
           }
+          await loginPage.waitForTimeout(150).catch(()=>{});
         }
         return null;
       }
 
       // Wait briefly for modal inputs to mount
-      let idField = (idLoc ? await idLoc.elementHandle().catch(()=>null) : null) || await findInFrames(idCandidates);
-      if (!idField) { try { await loginPage.waitForSelector(idCandidates.join(', '), { timeout: 700 }); idField = await findInFrames(idCandidates); } catch {} }
-      let pwField = (pwLoc ? await pwLoc.elementHandle().catch(()=>null) : null) || await findInFrames(pwCandidates);
-      if (!pwField) { try { await loginPage.waitForSelector(pwCandidates.join(', '), { timeout: 700 }); pwField = await findInFrames(pwCandidates); } catch {} }
+      let idField = (idLoc ? await idLoc.elementHandle().catch(()=>null) : null) || await findInContexts(idCandidates, 7000);
+      let pwField = (pwLoc ? await pwLoc.elementHandle().catch(()=>null) : null) || await findInContexts(pwCandidates, 7000);
+
+      const setInputValue = async (handle, value) => {
+        if (!handle) return false;
+        const text = String(value ?? '');
+        try { await handle.focus(); } catch {}
+        try { await handle.fill(''); } catch {}
+        try { await handle.fill(text); return true; } catch {}
+        try { await handle.type(text, { delay: 8 }); return true; } catch {}
+        return false;
+      };
 
       if (idField && pwField) {
-        try { await idField.focus(); } catch {}
-        await idField.fill(String(auth.id));
-        try { await pwField.focus(); } catch {}
-        await pwField.fill(String(auth.pw));
+        await setInputValue(idField, auth.id);
+        await setInputValue(pwField, auth.pw);
         // Verify values set; if not, force via DOM
         const ok = await loginPage.evaluate((i, p) => {
           const get = (h) => h && (h.value ?? '');
