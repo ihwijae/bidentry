@@ -185,6 +185,18 @@ async function run(job, emit) {
     try { await dismissCommonOverlays(openRes.page, emit); } catch {}
     if (site === 'kepco') {
       try { await closeKepcoPostLoginModals(openRes.page, emit); } catch {}
+      try {
+        const ctxPages = openRes.context?.pages?.() || [];
+        const mainPage = ctxPages.find((p) => {
+          const url = p.url?.() || '';
+          return /\/mdi\.do/i.test(url);
+        }) || ctxPages.find((p) => /kepco/i.test(p.url?.() || ''));
+        if (mainPage && mainPage !== openRes.page) {
+          await mainPage.bringToFront?.().catch(()=>{});
+          openRes.page = mainPage;
+          emit && emit({ type:'log', level:'debug', msg:'[KEPCO] 메인 페이지로 포커스 전환' });
+        }
+      } catch {}
     }
     if (site === 'kepco') {
       const bidQueue = Array.isArray(job?.bidIds) && job.bidIds.length
@@ -238,5 +250,4 @@ async function run(job, emit) {
 }
 
 module.exports = { run };
-
 
