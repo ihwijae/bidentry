@@ -5,7 +5,7 @@ const fs = require('fs');
 const { openAndPrepareLogin } = require('../web/playwright');
 const { sweepPopups, dismissCommonOverlays } = require('../web/popups');
 const { selectCertificateAndConfirm } = require('../native/uia');
-const { goToBidApplyAndSearch, handleKepcoCertificate, applyAfterSearch } = require('../sites/kepco');
+const { goToBidApplyAndSearch, handleKepcoCertificate, applyAfterSearch, closeKepcoPostLoginModals } = require('../sites/kepco');
 const { handleMndCertificate } = require('../sites/mnd');
 const { scanLocalCerts } = require('../native/scanCerts');
 
@@ -42,6 +42,9 @@ async function run(job, emit) {
 
   // Site-specific hooks could go here (fill common prelims)
   emit({ type: 'progress', step: 'fill_form', pct: 55 });
+  if (site === 'kepco') {
+    try { await closeKepcoPostLoginModals(openRes.page, emit); } catch {}
+  }
 
   // Handle certificate dialog (web or native)
   emit({ type: 'progress', step: 'cert_dialog', pct: 75 });
@@ -235,8 +238,6 @@ async function run(job, emit) {
 }
 
 module.exports = { run };
-
-
 
 
 
