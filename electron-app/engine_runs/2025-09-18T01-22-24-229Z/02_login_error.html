@@ -1,0 +1,2367 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <!-- W3C조치 2017-12-14
+	<meta http-equiv="Expires" content="-1" />
+	<meta http-equiv="Pragma" content="no-cache" />
+	<meta http-equiv="Cache-Control" content="no-cache" />
+	-->
+	<title>방위사업청 국방전자조달시스템</title>
+	<link rel="shortcut icon" href="/images/common/favicon.ico"> <!-- 170110 : 파비콘 추가 -->
+	<link type="text/css" rel="stylesheet" href="/css/common.css">
+	<link type="text/css" rel="stylesheet" href="/css/jquery-ui.css">
+	
+	<script type="text/javascript" src="/js/lib/jquery-1.10.1.js"></script>
+	<script type="text/javascript" src="/js/lib/basic-ui.js"></script>
+	<script type="text/javascript" src="/js/lib/jquery-ui.js"></script>
+	<script type="text/javascript" src="/js/common/gitis_common.js"></script>
+	<script type="text/javascript" src="/js/pdb/util/code.js"></script>
+	<script type="text/javascript" src="/js/jquery.mtz.monthpicker.js"></script>
+	
+	<link rel="stylesheet" href="/css/sym/treeview.css">
+
+	<script type="text/javascript" src="/js/main.js"></script>
+	<script type="text/javascript">
+	/* $(document).ready(function() {
+		$(document).bind("contextmenu", function(e) {
+			alert("오른쪽 마우스를 사용하실 수 없습니다.");
+		});
+	})
+	document.oncontextmenu=function(){return false;}
+	document.onselectstart=function(){return false;}
+	document.ondragstart=function(){return false;}
+	document.onmousedown=function(){return false;} */
+	
+	</script>
+</head>
+<body style=""><div id="nppfs-loading-modal" style="display: none; position: fixed; z-index: 10000; top: 0px; left: 0px; height: 0px; width: 0px; background: url(&quot;data:image/gif;base64,R0lGODlhIAAgAPMAAP///wAAAMbGxoSEhLa2tpqamjY2NlZWVtjY2OTk5Ly8vB4eHgQEBAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAIAAgAAAE5xDISWlhperN52JLhSSdRgwVo1ICQZRUsiwHpTJT4iowNS8vyW2icCF6k8HMMBkCEDskxTBDAZwuAkkqIfxIQyhBQBFvAQSDITM5VDW6XNE4KagNh6Bgwe60smQUB3d4Rz1ZBApnFASDd0hihh12BkE9kjAJVlycXIg7CQIFA6SlnJ87paqbSKiKoqusnbMdmDC2tXQlkUhziYtyWTxIfy6BE8WJt5YJvpJivxNaGmLHT0VnOgSYf0dZXS7APdpB309RnHOG5gDqXGLDaC457D1zZ/V/nmOM82XiHRLYKhKP1oZmADdEAAAh+QQJCgAAACwAAAAAIAAgAAAE6hDISWlZpOrNp1lGNRSdRpDUolIGw5RUYhhHukqFu8DsrEyqnWThGvAmhVlteBvojpTDDBUEIFwMFBRAmBkSgOrBFZogCASwBDEY/CZSg7GSE0gSCjQBMVG023xWBhklAnoEdhQEfyNqMIcKjhRsjEdnezB+A4k8gTwJhFuiW4dokXiloUepBAp5qaKpp6+Ho7aWW54wl7obvEe0kRuoplCGepwSx2jJvqHEmGt6whJpGpfJCHmOoNHKaHx61WiSR92E4lbFoq+B6QDtuetcaBPnW6+O7wDHpIiK9SaVK5GgV543tzjgGcghAgAh+QQJCgAAACwAAAAAIAAgAAAE7hDISSkxpOrN5zFHNWRdhSiVoVLHspRUMoyUakyEe8PTPCATW9A14E0UvuAKMNAZKYUZCiBMuBakSQKG8G2FzUWox2AUtAQFcBKlVQoLgQReZhQlCIJesQXI5B0CBnUMOxMCenoCfTCEWBsJColTMANldx15BGs8B5wlCZ9Po6OJkwmRpnqkqnuSrayqfKmqpLajoiW5HJq7FL1Gr2mMMcKUMIiJgIemy7xZtJsTmsM4xHiKv5KMCXqfyUCJEonXPN2rAOIAmsfB3uPoAK++G+w48edZPK+M6hLJpQg484enXIdQFSS1u6UhksENEQAAIfkECQoAAAAsAAAAACAAIAAABOcQyEmpGKLqzWcZRVUQnZYg1aBSh2GUVEIQ2aQOE+G+cD4ntpWkZQj1JIiZIogDFFyHI0UxQwFugMSOFIPJftfVAEoZLBbcLEFhlQiqGp1Vd140AUklUN3eCA51C1EWMzMCezCBBmkxVIVHBWd3HHl9JQOIJSdSnJ0TDKChCwUJjoWMPaGqDKannasMo6WnM562R5YluZRwur0wpgqZE7NKUm+FNRPIhjBJxKZteWuIBMN4zRMIVIhffcgojwCF117i4nlLnY5ztRLsnOk+aV+oJY7V7m76PdkS4trKcdg0Zc0tTcKkRAAAIfkECQoAAAAsAAAAACAAIAAABO4QyEkpKqjqzScpRaVkXZWQEximw1BSCUEIlDohrft6cpKCk5xid5MNJTaAIkekKGQkWyKHkvhKsR7ARmitkAYDYRIbUQRQjWBwJRzChi9CRlBcY1UN4g0/VNB0AlcvcAYHRyZPdEQFYV8ccwR5HWxEJ02YmRMLnJ1xCYp0Y5idpQuhopmmC2KgojKasUQDk5BNAwwMOh2RtRq5uQuPZKGIJQIGwAwGf6I0JXMpC8C7kXWDBINFMxS4DKMAWVWAGYsAdNqW5uaRxkSKJOZKaU3tPOBZ4DuK2LATgJhkPJMgTwKCdFjyPHEnKxFCDhEAACH5BAkKAAAALAAAAAAgACAAAATzEMhJaVKp6s2nIkolIJ2WkBShpkVRWqqQrhLSEu9MZJKK9y1ZrqYK9WiClmvoUaF8gIQSNeF1Er4MNFn4SRSDARWroAIETg1iVwuHjYB1kYc1mwruwXKC9gmsJXliGxc+XiUCby9ydh1sOSdMkpMTBpaXBzsfhoc5l58Gm5yToAaZhaOUqjkDgCWNHAULCwOLaTmzswadEqggQwgHuQsHIoZCHQMMQgQGubVEcxOPFAcMDAYUA85eWARmfSRQCdcMe0zeP1AAygwLlJtPNAAL19DARdPzBOWSm1brJBi45soRAWQAAkrQIykShQ9wVhHCwCQCACH5BAkKAAAALAAAAAAgACAAAATrEMhJaVKp6s2nIkqFZF2VIBWhUsJaTokqUCoBq+E71SRQeyqUToLA7VxF0JDyIQh/MVVPMt1ECZlfcjZJ9mIKoaTl1MRIl5o4CUKXOwmyrCInCKqcWtvadL2SYhyASyNDJ0uIiRMDjI0Fd30/iI2UA5GSS5UDj2l6NoqgOgN4gksEBgYFf0FDqKgHnyZ9OX8HrgYHdHpcHQULXAS2qKpENRg7eAMLC7kTBaixUYFkKAzWAAnLC7FLVxLWDBLKCwaKTULgEwbLA4hJtOkSBNqITT3xEgfLpBtzE/jiuL04RGEBgwWhShRgQExHBAAh+QQJCgAAACwAAAAAIAAgAAAE7xDISWlSqerNpyJKhWRdlSAVoVLCWk6JKlAqAavhO9UkUHsqlE6CwO1cRdCQ8iEIfzFVTzLdRAmZX3I2SfZiCqGk5dTESJeaOAlClzsJsqwiJwiqnFrb2nS9kmIcgEsjQydLiIlHehhpejaIjzh9eomSjZR+ipslWIRLAgMDOR2DOqKogTB9pCUJBagDBXR6XB0EBkIIsaRsGGMMAxoDBgYHTKJiUYEGDAzHC9EACcUGkIgFzgwZ0QsSBcXHiQvOwgDdEwfFs0sDzt4S6BK4xYjkDOzn0unFeBzOBijIm1Dgmg5YFQwsCMjp1oJ8LyIAACH5BAkKAAAALAAAAAAgACAAAATwEMhJaVKp6s2nIkqFZF2VIBWhUsJaTokqUCoBq+E71SRQeyqUToLA7VxF0JDyIQh/MVVPMt1ECZlfcjZJ9mIKoaTl1MRIl5o4CUKXOwmyrCInCKqcWtvadL2SYhyASyNDJ0uIiUd6GGl6NoiPOH16iZKNlH6KmyWFOggHhEEvAwwMA0N9GBsEC6amhnVcEwavDAazGwIDaH1ipaYLBUTCGgQDA8NdHz0FpqgTBwsLqAbWAAnIA4FWKdMLGdYGEgraigbT0OITBcg5QwPT4xLrROZL6AuQAPUS7bxLpoWidY0JtxLHKhwwMJBTHgPKdEQAACH5BAkKAAAALAAAAAAgACAAAATrEMhJaVKp6s2nIkqFZF2VIBWhUsJaTokqUCoBq+E71SRQeyqUToLA7VxF0JDyIQh/MVVPMt1ECZlfcjZJ9mIKoaTl1MRIl5o4CUKXOwmyrCInCKqcWtvadL2SYhyASyNDJ0uIiUd6GAULDJCRiXo1CpGXDJOUjY+Yip9DhToJA4RBLwMLCwVDfRgbBAaqqoZ1XBMHswsHtxtFaH1iqaoGNgAIxRpbFAgfPQSqpbgGBqUD1wBXeCYp1AYZ19JJOYgH1KwA4UBvQwXUBxPqVD9L3sbp2BNk2xvvFPJd+MFCN6HAAIKgNggY0KtEBAAh+QQJCgAAACwAAAAAIAAgAAAE6BDISWlSqerNpyJKhWRdlSAVoVLCWk6JKlAqAavhO9UkUHsqlE6CwO1cRdCQ8iEIfzFVTzLdRAmZX3I2SfYIDMaAFdTESJeaEDAIMxYFqrOUaNW4E4ObYcCXaiBVEgULe0NJaxxtYksjh2NLkZISgDgJhHthkpU4mW6blRiYmZOlh4JWkDqILwUGBnE6TYEbCgevr0N1gH4At7gHiRpFaLNrrq8HNgAJA70AWxQIH1+vsYMDAzZQPC9VCNkDWUhGkuE5PxJNwiUK4UfLzOlD4WvzAHaoG9nxPi5d+jYUqfAhhykOFwJWiAAAIfkECQoAAAAsAAAAACAAIAAABPAQyElpUqnqzaciSoVkXVUMFaFSwlpOCcMYlErAavhOMnNLNo8KsZsMZItJEIDIFSkLGQoQTNhIsFehRww2CQLKF0tYGKYSg+ygsZIuNqJksKgbfgIGepNo2cIUB3V1B3IvNiBYNQaDSTtfhhx0CwVPI0UJe0+bm4g5VgcGoqOcnjmjqDSdnhgEoamcsZuXO1aWQy8KAwOAuTYYGwi7w5h+Kr0SJ8MFihpNbx+4Erq7BYBuzsdiH1jCAzoSfl0rVirNbRXlBBlLX+BP0XJLAPGzTkAuAOqb0WT5AH7OcdCm5B8TgRwSRKIHQtaLCwg1RAAAOwAAAAAAAAAAAA==&quot;) 50% 50% no-repeat rgb(255, 255, 255); opacity: 0.7;"></div>
+<div id="skipnav" title="바로가기 메뉴">
+	<ul>
+		<li><a href="#gnb">주메뉴 영역 바로가기</a></li>
+		<!-- <li><a href="#lnb">서브메뉴 영역 바로가기 </a></li> -->
+		<li><a href="#content">본문영역 바로가기</a></li>
+	</ul>
+</div>
+<div id="header_wrap">
+	
+
+
+
+
+
+
+
+
+
+
+<script>
+	document.cookie = "Name=Value; httpOnly";
+	
+	function search() {
+		
+		var param = {
+				"category":$('#_category').val(),			// 부서코드
+				"kwd":$('#_kwd').val()
+			};
+		f_submit(param, "_searchForm", "/search.do");
+		//document.searchForm.submit();
+	}
+	
+	
+	var IEIndex  = navigator.userAgent.indexOf("MSIE"); //MSIE를 찾고 인덱스를 리턴
+  	var IE8Over  = navigator.userAgent.indexOf("Trident"); //MS IE 8 이상 버전 체크
+  	var trident  = navigator.userAgent.match(/Trident\/(\d.\d)/i); //Trident  버전 확인
+  	var strIEver = "";
+	//console.log( IEIndex, IE8Over, trident )
+  	if(IEIndex > 0 || IE8Over > 0){
+  		if(trident != null){
+  			switch(trident[1]){
+  			case "4.0":
+  				strVer = "8.0";
+  				Trident8(strVer)
+  				break;
+  			default:
+  				break;
+  			}
+  		}
+  	}
+
+  	function Trident8(strVer){
+  		strIEver=strVer;
+		//alert(navigator.userAgent);    //alert 창으로 버전을 확인해 본다
+		if(navigator.userAgent.match(/MSIE 7.*Trident/) != null || navigator.userAgent.indexOf("Mozilla/5.0 (compatible") >= 0 || navigator.userAgent.indexOf("Mozilla/4.0 (compatible; MSIE 7.0") >= 0){
+			return;
+		} else {
+  			alert("웹 브라우져 버전을 최신버전으로 업그레이드 해주시기 바랍니다.");
+  		}
+  	}
+
+	
+	/// (호환성보기 설정확인 추가 end)
+
+
+	
+</script>
+ 
+<script type="text/javascript" src="/pluginfree/js/nppfs-1.13.0.js" charset="utf-8"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+	npPfsStartup(null, true, false, false, false, "npkencrypt", "on");
+
+	//통합검색 keypress 이벤트 추가
+	$("#_kwd").on("keypress",function(e){
+		if(e.keyCode === 13){
+			search();
+		}
+	});
+	
+});
+</script>
+
+<div id="header">
+	<div class="header_top">
+	<h1><a href="/"><img src="/images/common/img_logo.png" alt="국방전자조달시스템 투명한 전자입찰"></a></h1>
+	<h2>상단영역</h2>
+	
+	<!-- <a href="/fbis/" class="head_global" target="_blank">DAPA-FBIS</a> -->
+	
+	<div id="total_sch">
+		<select name="category" id="_category" title="검색분야 선택">
+			<option value="TOTAL">통합검색</option>
+			<option value="ANNOUNCE">입찰공고</option>
+			<option value="ANNOUNCERESULT">개찰결과</option>
+			<option value="WINBID">낙찰자 안내</option>
+			<option value="CONTINFO">계약정보</option>
+			<option value="PROCUREPLAN">조달계획</option>
+			<option value="PRESTD">사전규격(군부대)</option>
+			<option value="SEOGO">전자서고</option>
+		</select>
+		<strong><input type="text" name="kwd" id="_kwd" title="검색어 입력" style=""></strong>
+		<button type="button" title="검색" onclick="javascript:search();">검색</button>
+	</div>
+	
+	<div class="head_util">
+	
+		<ul>
+			<li class="util_regi"><a href="/join/userJoinRgrt.do">사용자등록</a></li>
+			<li class="util_login"><a href="/loginForm.do">로그인</a></li>
+		</ul>
+	
+	
+			
+	</div>
+	</div>
+	<!-- GNB -->
+	
+	
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<!-- 비로그인 -->
+			
+
+
+
+<!-- GNB -->
+<div id="gnb">
+    <ul>
+        <!--  li 상단메뉴 -->
+                    <li>
+                <a href="#none">물품</a>
+                <div class="gnbSm" style="display: none;">
+                    <ul>
+                                    <li><a href="/pdb/plan/goodsProcurePlanList.do?key=10" target="_self">조달계획</a></li>
+                                    <li><a href="/pdb/bid/goodsBidAnnounceList.do?key=13" target="_self">입찰</a></li>
+                                    <li><a href="/edi/cont/contList.do?key=26&amp;menuOption=1" target="_self">계약</a></li>
+                                    <li><a href="/edi/bill/billList.do?key=27&amp;menuOption=1" target="_self">대금청구</a></li>
+                                    <li><a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=28&amp;menuOption=1&amp;listOption=TL" target="_self">세금계산서</a></li>
+                                    <li><a href="/edi/insprecord/inspReqContList.do?key=29" target="_self">검사 및 납품조서</a></li>
+                                    <li><a href="/edi/goods/goodsDlvryNotiMgtList.do?key=86&amp;menuOption=1" target="_self">물품납품/물량배정</a></li>
+                                    <li><a href="/sym/item/itemTreeList.do?key=922" target="_self">사업구조별품목</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li>
+                <a href="#none">용역</a>
+                <div class="gnbSm" style="display: none;">
+                    <ul>
+                                    <li><a href="/psb/plan/serviceProcurePlanList.do?key=31" target="_self">조달계획</a></li>
+                                    <li><a href="/psb/bid/serviceBidAnnounceList.do?key=32" target="_self">입찰</a></li>
+                                    <li><a href="/edi/cont/psbContList.do?key=36&amp;menuOption=2" target="_self">계약</a></li>
+                                    <li><a href="/edi/bill/billList.do?key=37&amp;menuOption=2" target="_self">대금청구</a></li>
+                                    <li><a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=38&amp;menuOption=2&amp;listOption=TL" target="_self">세금계산서</a></li>
+                                    <li><a href="/edi/insprecord/psbInspReqContList.do?key=39" target="_self">검사 및 납품조서</a></li>
+                                    <li><a href="/edi/cmpdcmpninsp/psbCmpdCmpnInspList.do?key=430" target="_self">기성 및 준공검사</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li>
+                <a href="#none">공사</a>
+                <div class="gnbSm" style="display: none;">
+                    <ul>
+                                    <li><a href="/peb/plan/planList.do?key=22" target="_self">공사계획</a></li>
+                                    <li><a href="/peb/bid/announceList.do?key=41" target="_self">입찰</a></li>
+                                    <li><a href="/edi/cont/pebContList.do?key=45&amp;menuOption=3" target="_self">계약</a></li>
+                                    <li><a href="/edi/cmpdcmpninsp/cmpdCmpnInspList.do?key=46" target="_self">기성 및 준공검사</a></li>
+                                    <li><a href="/edi/equconstbill/equConstBillList.do?key=47&amp;menuOption=3" target="_self">대금청구</a></li>
+                                    <li><a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=301&amp;menuOption=3&amp;listOption=TL" target="_self">세금계산서</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li>
+                <a href="#none" class="on">국외</a>
+                <div class="gnbSm" style="display: none;">
+                    <ul>
+                                    <li><a href="/pcb/plan/yearProcurePlanList.do?key=48" target="_self">조달계획</a></li>
+                                    <li><a href="/pcb/bid/exchangeRateList.do?key=49" target="_self">환율조회</a></li>
+                                    <li><a href="/pcb/bid/todayBidAnnounceList.do?key=50" target="_self">오늘의 입찰공고</a></li>
+                                    <li><a href="/pcb/bid/bidAnnounceList.do?key=51" target="_self">경쟁입찰</a></li>
+                                    <li><a href="/pcb/revbid/revBidAnnounceList.do?key=52" target="_self">역경매</a></li>
+                                    <li><a href="/pcb/nego/negoItemInfoRegi.do?key=53" target="_self">협상관리</a></li>
+                                    <li><a href="/pcb/cont/contInfoList.do?key=54" target="_self">계약정보</a></li>
+                                    <li><a href="/edi/mydoc/commerceContList.do?key=58" target="_self">상업</a></li>
+                    </ul>
+                </div>
+            </li>
+        <li class="gnbcu1"><a href="/techBidAnnounceList.do?key=901">신기술 입찰공고</a></li>	
+        <li class="gnbcu"><a href="/board/notice/getNoticeList.do?key=91&amp;bbs_id=NEW01">고객센터</a></li>
+        <li class="gnbmy"><a href="/edi/mydoc/receiveDocBoxList.do?key=102">마이페이지</a></li>
+        <li class="gnball"><a href="#layer_allmenu">전체메뉴</a></li>
+    </ul>
+</div>  
+<!-- //GNB -->
+
+<!-- 전체메뉴 -->
+<div id="layer_allmenu" class="lp_view" tabindex="0">
+    <div class="allmenu_wrap">
+	    <ul class="clfix">
+        
+        
+            <li class="allmenuGrp">
+                <h4>물품</h4>
+                <ul>
+                        <li>
+                            <strong>조달계획</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pdb/plan/goodsProcureAdcanceList.do?key=928">조달품목사전의향서(방사청)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/plan/goodsProcurePlanList.do?key=127">조달계획</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/plan/goodsPreStdList.do?key=128">사전규격(군부대)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>입찰</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pdb/bid/goodsBidAnnounceList.do?key=129">입찰공고</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/bid/goodsBidResultList.do?key=528">입찰결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/bid/simulatedScreeningA.do?key=810">물품구매모의심사</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/bid/simulatedScreeningB.do?key=811">이행능력모의심사</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>계약</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/cont/contList.do?key=74&amp;menuOption=1">계약</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/adtioncontdepo/adtionContDepoList.do?key=146&amp;menuOption=1">추가계약보증금 관리</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/taxpymt/taxPymtList.do?key=160&amp;menuOption=1">인지세관리</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/contract/goodsContList.do?key=530&amp;pageDivs=G">계약정보</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>대금청구</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/bill/billList.do?key=84&amp;menuOption=1">선금/착·중도금/기성대가 신청</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/bill/billStatusList.do?key=487&amp;menuOption=1">대금청구 진행현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>세금계산서</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=158&amp;menuOption=1&amp;listOption=TL">세금계산서목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/electtaxbill/getElectTaxBillStatusList.do?key=243&amp;menuOption=1&amp;listOption=SL">세금계산서 진행현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>검사 및 납품조서</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/insprecord/inspReqContList.do?key=77">검사 및 납품조서</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/insprecord/inspRecordStatusList.do?key=78">검사 및 납품조서 현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/gfp/gfpDeliveryList.do?key=79">관급자산관리</a>
+                                        <ul>
+                                            <li><a href="/edi/gfp/gfpDeliveryList.do?key=80">납품확인 요청</a></li>
+                                            <li><a href="/edi/gfp/gfpGoodsRecvList.do?key=108">물품수령확인</a></li>
+                                            <li><a href="/edi/gfp/gfpCashMgtLedList.do?key=123">관급자재 출납 관리대장</a></li>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>물품납품/물량배정</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/goods/goodsDlvryNotiMgtList.do?key=87&amp;menuOption=1">물품납품/물량배정</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/goods/goodsDlvryReqNotiList.do?key=88&amp;menuOption=1">납품요구서 조회</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>사업구조별품목</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/sym/item/itemTreeList.do?key=923">사업구조별품목</a>
+                                    </li>
+                                    <li>
+                                        <a href="/sym/item/localizationList.do?key=924">국산화개발품목</a>
+                                    </li>
+                            </ul>
+                        </li>
+                </ul>
+            </li>
+        
+	    
+        
+        
+            <li class="allmenuGrp">
+                <h4>용역</h4>
+                <ul>
+                        <li>
+                            <strong>조달계획</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/psb/plan/serviceProcurePlanList.do?key=135">조달계획</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/plan/servicePreStdList.do?key=136">사전규격(군부대)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>입찰</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/psb/bid/serviceBidAnnounceList.do?key=137">입찰공고</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/bid/serviceBidResultList.do?key=608">입찰결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/bid/simulatedScreeningC.do?key=812">용역모의심사</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>계약</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/cont/psbContList.do?key=356&amp;menuOption=2">계약</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/taxpymt/taxPymtList.do?key=483&amp;menuOption=2">인지세관리</a>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/contract/serviceContList.do?key=591">계약정보</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>대금청구</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/bill/billList.do?key=429&amp;menuOption=2">대금/선금/착·중도금 신청</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/bill/billStatusList.do?key=496&amp;menuOption=2">대금청구 진행현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>세금계산서</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=300&amp;menuOption=2&amp;listOption=TL">세금계산서목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/electtaxbill/getElectTaxBillStatusList.do?key=306&amp;menuOption=2&amp;listOption=SL">세금계산서 진행현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>검사 및 납품조서</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/insprecord/psbInspReqContList.do?key=410">검사 및 납품조서</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/insprecord/psbInspRecordStatusList.do?key=411">검사 및 납품조서 현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>기성 및 준공검사</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/cmpdcmpninsp/psbCmpdCmpnInspList.do?key=434&amp;contDivs=2">기성 및 준공검사 목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                </ul>
+            </li>
+        
+	    
+        
+        
+            <li class="allmenuGrp">
+                <h4>공사</h4>
+                <ul>
+                        <li>
+                            <strong>공사계획</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/peb/plan/planList.do?key=204">공사계획</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/plan/preStdList.do?key=700">사전규격(군부대)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>입찰</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/peb/bid/announceList.do?key=541">입찰공고</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/bid/bidResultList.do?key=545">입찰결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>계약</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/cont/pebContList.do?key=484&amp;menuOption=3">계약</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/taxpymt/taxPymtList.do?key=485&amp;menuOption=3">인지세관리</a>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/contract/contList.do?key=586">계약정보</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>기성 및 준공검사</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/cmpdcmpninsp/cmpdCmpnInspList.do?key=686">기성 및 준공검사 목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>대금청구</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/equconstbill/equConstBillList.do?key=76&amp;menuOption=3">대금청구 목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>세금계산서</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=302&amp;menuOption=3&amp;listOption=TL">세금계산서목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/electtaxbill/getElectTaxBillStatusList.do?key=307&amp;menuOption=3&amp;listOption=SL">세금계산서 진행현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                </ul>
+            </li>
+        
+	    
+        
+        
+            <li class="allmenuGrp" style="border-right: 0px;">
+                <h4>국외</h4>
+                <ul>
+                        <li>
+                            <strong>조달계획</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pcb/plan/yearProcurePlanList.do?key=259">연간조달계획</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/plan/procureDecisionList.do?key=113">조달판단내역</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                                <strong><a href="/pcb/bid/exchangeRateList.do?key=49">환율조회</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/pcb/bid/todayBidAnnounceList.do?key=50">오늘의 입찰공고</a></strong>
+                        </li>
+                        <li>
+                            <strong>경쟁입찰</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pcb/bid/bidAnnounceList.do?key=114">입찰공고</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/bid/bidResultList.do?key=171">입찰결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>역경매</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pcb/revbid/revBidAnnounceList.do?key=175">입찰공고</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/revbid/revBidResultList.do?key=421">입찰결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>협상관리</strong>
+                            <ul>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>계약정보</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pcb/cont/contInfoList.do?key=182">계약목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>상업</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/mydoc/commerceContList.do?key=81">상업계약현황</a>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/mydoc/lumpsumContList.do?key=933">확정계약현황</a>
+                                    </li>
+                                    <li>
+                                        <a href="#?key=82">한도액계약(BOA)</a>
+                                        <ul>
+                                            <li><a href="/edi/boa/estimateReqList.do?key=83">견적의뢰서조회</a></li>
+                                            <li><a href="/edi/boa/estimateNotiMgt.do?key=109">견적통보서관리</a></li>
+                                            <li><a href="/edi/boa/orderContList.do?key=153">발주의뢰서조회</a></li>
+                                            <li><a href="/edi/boa/orderNotiMgt.do?key=165">발주통보서관리</a></li>
+                                            <li><a href="/edi/boa/defectReqList.do?key=166">하자의뢰서조회</a></li>
+                                            <li><a href="/edi/boa/defectNotiMgt.do?key=167">하자통보서관리</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/transportinsurance/transportInsuranceList.do?key=161">운송보험부보</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="#?key=162">운송비청구/입고확인의뢰</a>
+                                        <ul>
+                                            <li><a href="/edi/transfarechargestockedreq/stockedreqList.do?key=163">입고확인/의뢰</a></li>
+                                            <li><a href="/edi/transfarechargestockedreq/transFareChargeList.do?key=164">운송비청구</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/shipmentlist/shipmentList.do?key=168">선적내역조회/작성</a>
+                                    </li>
+                            </ul>
+                        </li>
+                </ul>
+            </li>
+        </ul>
+	    
+        <ul class="clfix two">
+        
+            <li class="allmenuGrp2">
+                <h4>마이페이지</h4>
+                <ul>
+                </ul>
+            </li>
+        
+	    
+        
+        
+            <li class="allmenuGrp2">
+                <h4>고객센터</h4>
+                <ul>
+                        <li>
+                            <strong>공지사항</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/board/notice/getNoticeList.do?key=91&amp;bbsId=NEWS01">일반공지사항(시스템)</a>
+                                    </li>
+                                    <li>
+                                        <a href="/board/notice/demandNoticeList.do?key=357&amp;bbsId=NEWS03">방위사업청공지사항</a>
+                                    </li>
+                                    <li>
+                                        <a href="/board/notice/demandNoticeList.do?key=92&amp;bbsId=NEWS02">수요부대별공지사항</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>자료실</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/board/pds/getPdsList.do?key=94">일반자료실</a>
+                                    </li>
+                                    <li>
+                                        <a href="/board/pds/demandPdsList.do?key=95">수요부대별자료실</a>
+                                    </li>
+                                    <li>
+                                        <a href="/board/pds/contPdsList.do?key=96">계약관련서식자료실</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                                <strong><a href="/board/faq/faqList.do?key=97">자주묻는질문</a></strong>
+                        </li>
+                        <li>
+                            <strong>민원서류발급신청</strong>
+                            <ul>
+                                    <li>
+                                        <a href="#?key=148">실적증명서</a>
+                                        <ul>
+                                            <li><a href="/pvb/civil/resultCertGuide.do?key=149">신청절차 및 안내</a></li>
+                                            <li><a href="/pvb/civil/resultCertReq.do?key=154">실적증명서 신청</a></li>
+                                            <li><a href="/pvb/civil/resultCertReqList.do?key=156">실적증명서 조회</a></li>
+                                            <li><a href="/pvb/civil/resultCertConfirm.do?key=194">실적증명서 확인</a></li>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                                <strong><a href="/pvb/mnufmgt/centProcureRegiItemCodeList.do?key=866">중앙조달품목 조회</a></strong>
+                        </li>
+                        <li>
+                            <strong>조달정보공개/개방</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/openapi/yearProcurePlanList.do?key=386">조달계획/판단정보</a>
+                                        <ul>
+                                            <li><a href="/openapi/yearProcurePlanList.do?key=387">년간조달계획</a></li>
+                                            <li><a href="/openapi/procureDcsList.do?key=388">조달판단및집행계획</a></li>
+                                            <li><a href="/openapi/defenArtList.do?key=389">방산생산물량확인</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/openapi/sealedBidAnnounceList.do?key=390">경쟁입찰공고 정보</a>
+                                        <ul>
+                                            <li><a href="/openapi/sealedBidAnnounceList.do?key=391">경쟁입찰공고</a></li>
+                                            <li><a href="/openapi/sealedBidResultList.do?key=392">경쟁입찰결과</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/openapi/openNegoPlanList.do?key=393">공개수의협상 정보</a>
+                                        <ul>
+                                            <li><a href="/openapi/openNegoPlanList.do?key=394">공개수의협상계획</a></li>
+                                            <li><a href="/openapi/openNegoResultList.do?key=395">공개수의협상결과</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/openapi/contInfoList.do?key=396">계약정보</a>
+                                        <ul>
+                                            <li><a href="/openapi/contInfoList.do?key=397&amp;itemList=D">계약정보</a></li>
+                                            <li><a href="/openapi/privateContList.do?key=398">수의계약현황</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/openapi/board/orderPlanList.do?key=706">국방부 사전정보 공표</a>
+                                        <ul>
+                                            <li><a href="/openapi/board/orderPlanList.do?key=707">분기별 발주계획</a></li>
+                                            <li><a href="/openapi/contInfoUpisList.do?key=709">입찰 및 계약현황</a></li>
+                                            <li><a href="/openapi/privateUpisContList.do?key=710">수의계약현황</a></li>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                                <strong><a href="/pvb/nation/nation.do?key=533">국민신문고</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/pvb/survey/survey.do?key=703">설문조사</a></strong>
+                        </li>
+                </ul>
+            </li>
+        
+	    
+        
+        
+            <li class="allmenuGrp2">
+                <h4>국방전자조달 소개</h4>
+                <ul>
+                        <li>
+                                <strong><a href="/contents/guide/introduce.do?key=503">시스템소개</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/contents/guide/feature.do?key=504">주요특징</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/contents/guide/history.do?key=505">연혁</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/contents/guide/graphic.do?key=506">인포그래픽스</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/contents/guide/system.do?key=507">관련시스템</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/contents/guide/inquiry.do?key=508">이용문의</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/contents/info/mobile.do?key=607">모바일앱 서비스안내</a></strong>
+                        </li>
+                </ul>
+            </li>
+        
+	    
+        
+        
+            <li class="allmenuGrp2" style="border-right: 0px;">
+                <h4>이용안내</h4>
+                <ul>
+                        <li>
+                            <strong>조달사전준비안내</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/contents/info/preparation01.do?key=511">사전준비사항</a>
+                                    </li>
+                                    <li>
+                                        <a href="/contents/info/preparation02.do?key=512">청렴계약제</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>국내조달안내</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/contents/info/domestic01.do?key=515">국방조달참여절차</a>
+                                    </li>
+                                    <li>
+                                        <a href="/contents/info/domestic02.do?key=537">전자입찰절차</a>
+                                    </li>
+                                    <li>
+                                        <a href="/contents/info/domestic03.do?key=539">전자대금청구절차</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>국외조달안내</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/contents/info/foreign01.do?key=518">국외조달원 등록절차</a>
+                                    </li>
+                                    <li>
+                                        <a href="/contents/info/foreign02.do?key=519">국외조달원 등록/변경안내</a>
+                                    </li>
+                                    <li>
+                                        <a href="/contents/info/foreign03.do?key=540">전자입찰절차</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>환경설정안내</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/contents/info/setting01.do?key=522">관련프로그램 다운로드</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>법령조회</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/contents/info/ordinance.do?key=525">법령조회</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                                <strong><a href="/contents/info/site.do?key=526">관련사이트</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="#none" onclick="javascript:window.open('/contents/info/termPop.do','용어사전','width=780px,height=770px,scrollbars=yes')">용어사전</a></strong>
+                        </li>
+                </ul>
+            </li>
+        </ul>
+	    
+        
+        <ul class="clfix two">
+            <li class="allmenuGrp2">
+                <h4>신기술 입찰공고</h4>
+                <ul>
+                        <li>
+                                <strong><a href="/techBidAnnounceList.do?key=902">신기술 입찰공고 목록</a></strong>
+                        </li>
+                </ul>
+            </li>
+        
+        
+    </ul></div>
+    <div class="bg"></div>
+</div>
+<!-- //전체메뉴 -->
+<script>
+$(document).ready(function(){
+    $('.allmenu_wrap > ul > li:nth-child(4)').css('border-right','0');
+    $('.gnball').click(function(){
+        $('html, body').scrollTop('0');
+        $(this).toggleClass('on');
+        $('.allmenuGrp, .allmenuGrp2').toggleClass('on');
+        $('#layer_allmenu').toggle();
+        var allwrapHeight = $('.allmenu_wrap').height();
+        $('.bg').css({'height':(allwrapHeight)+800+'px'});
+        var menuHeight = $('.allmenu_wrap > ul').height();
+        $('.allmenuGrp.on').css('height',menuHeight);
+        var menuHeight2 = $('.allmenu_wrap > ul.two').height();
+        $('.allmenuGrp2.on').css('height',menuHeight2);
+    });
+});
+</script>
+
+		
+	
+	<!-- //GNB -->
+</div>
+<!-- 차세대 나라장터 오픈으로 서비스 중단 안내 @G2BNEW_CHG@ 추후 삭제-header-->
+<script>
+function fn_blocking_g2bNew() {
+	var openAlert = false;
+	if(openAlert) {
+		var message = "차세대 나라장터 개통으로 인해\n나라장터 정보 송수신 서비스가 중단되었습니다.\n2024.12.31(화) 18:00 ~ 2025.1/6(월) 09:00";
+		alert(message);
+	}	
+	return openAlert;
+}
+</script>
+</div>
+
+<div id="container" class="main">
+
+	<div id="content_wrap">
+		<div id="content">
+		
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/pdb/commonPdb.js"></script>
+<script type="text/javascript" src="/js/jquery.bxslider.min.js"></script>
+<div class="m_top">
+    <div class="m_side">
+        <!-- 배너 롤링 -->
+        <div class="mcl_rolling_wrap">
+            <div class="mcl_rolling">
+                <div class="bx-wrapper" style="max-width: 100%; margin: 0px auto;"><div class="bx-viewport" style="width: 100%; overflow: hidden; position: relative; height: 175px;"><ul style="width: 1115%; position: relative; transition-duration: 0s; transform: translate3d(-200px, 0px, 0px);"><li style="float: left; list-style: none; position: relative; width: 200px;" class="bx-clone"><a href="/board/notice/demandNoticeView.do?key=357&amp;bbsId=NEWS03&amp;contentId=4367"><img src="/images/main/img_mainBanner9.jpg" alt="방위사업 청렴 실천 안내"></a></li>
+                    <!-- <li><a href="#"><img src="/images/main/bnr_event01.png" alt="민원업무 전산화체계 구축안내"></a></li> -->
+                    <li style="float: left; list-style: none; position: relative; width: 200px;"><a href="/board/notice/getNoticeView.do?key=91&amp;bbsId=NEWS01&amp;contentId=5747"><img src="/images/main/img_mainBanner14.png" alt="입찰담합 사전예방(입찰담합유형) 안내"></a></li>
+                    <li style="float: left; list-style: none; position: relative; width: 200px;"><a href="/board/notice/demandNoticeView.do?key=357&amp;bbsId=NEWS03&amp;contentId=4509" rel="external" onclick="javascript:window.open(this.href);return false;" title="방산업체 현장맞춤용 목록교육 안내"><img src="/images/main/img_mainBanner13.jpg" alt="방산업체 현장맞춤용 목록교육 안내"></a></li>			
+                    <li style="float: left; list-style: none; position: relative; width: 200px;"><a href="http://www.kbei.org/helpline/report_step1.html?cid=dapa" rel="external" onclick="javascript:window.open(this.href);return false;" title="익명신고시스템 새창열림"><img src="/images/main/img_mainBanner1.jpg" alt="익명으로 신고하세요! 부정,비리,부패 행위 행동강령 위반 [익명신고시스템]"></a></li>
+                    <li style="float: left; list-style: none; position: relative; width: 200px;"><a href="/board/notice/getNoticeView.do?key=91&amp;bbsId=NEWS01&amp;contentId=2054"><img src="/images/main/img_mainBanner2.jpg" alt="국외조달원(국내소재상사) 등록방법 안내"></a></li>                    
+                    <!-- <li><a href="/board/notice/getNoticeView.do?key=91&amp;bbsId=NEWS01&amp;contentId=1337"><img src="/images/main/img_mainBanner3.jpg" alt="전자입찰 입찰대리인 및 지문인식(BIO토큰) 사용안내 [자세히보기]"></a></li> -->
+                    <li style="float: left; list-style: none; position: relative; width: 200px;"><a href="/board/faq/faqList.do?key=97&amp;schBbsCode=FAQCD11"><img src="/images/main/img_mainBanner4.jpg" alt="윈도우10 사용자를 위한 PC환경설정 방법 [FAQ 바로가기]"></a></li>
+                    <li style="float: left; list-style: none; position: relative; width: 200px;"><a href="/board/notice/getNoticeView.do?key=91&amp;bbsId=NEWS01&amp;contentId=3822"><img src="/images/main/img_mainBanner5.jpg" alt="국방규격 열람장소 확대 [자세히보기 GO]"></a></li>
+                    <!-- <li><a href="/board/notice/getNoticeView.do?key=91&amp;bbsId=NEWS01&amp;contentId=3945"><img src="/images/main/img_mainBanner6.jpg" alt="윈도우XP 사용자 서비스 지원 종료 안내"></a></li> -->
+                    <li style="float: left; list-style: none; position: relative; width: 200px;"><a href="/board/pds/getPdsView.do?key=94&amp;contentId=2067"><img src="/images/main/img_mainBanner7.jpg" alt="군수품무역대리업 등록절차 안내 [자세히보기]"></a></li>
+                    <li style="float: left; list-style: none; position: relative; width: 200px;"><a href="/download/manual/user_manual_mobile.pdf" target="_blank"><img src="/images/main/img_mainBanner8.jpg" alt="국방전자조달 모바일 앱 서비스 안내"></a></li>
+                    <li style="float: left; list-style: none; position: relative; width: 200px;"><a href="/board/notice/demandNoticeView.do?key=357&amp;bbsId=NEWS03&amp;contentId=4367"><img src="/images/main/img_mainBanner9.jpg" alt="방위사업 청렴 실천 안내"></a></li>
+                    <!--li><a href="/board/notice/demandNoticeView.do?key=357&bbsId=NEWS03&contentId=4395"><img src="/images/main/img_mainBanner10.jpg" alt="방위사업청 옴부즈만 지체상금 심의위원회 설치 및 운영 안내"></a></li-->
+                <li style="float: left; list-style: none; position: relative; width: 200px;" class="bx-clone"><a href="/board/notice/getNoticeView.do?key=91&amp;bbsId=NEWS01&amp;contentId=5747"><img src="/images/main/img_mainBanner14.png" alt="입찰담합 사전예방(입찰담합유형) 안내"></a></li></ul></div><div class="bx-controls bx-has-controls-direction bx-has-controls-auto"><div class="bx-controls-direction"><a class="bx-prev" href="">Prev</a><a class="bx-next" href="">Next</a></div><div class="bx-controls-auto"><div class="bx-controls-auto-item"><a class="bx-stop" href="">Stop</a></div></div></div></div>
+            </div>
+            <!-- 
+            <div class="mcl_rolling_btn">
+                <ul>
+                    <li class="pr17"><button><img src="/images/main/ico_prev.png" alt="이전" onClick="startMainImg2_click_2_2();"></button></li>
+                    <li class="plr17 stop2" onClick="stopMainImg2_click_2();"><button><img src="/images/main/ico_stop.png" alt="정지"></button></li>
+                    <li class="plr17 play2" onClick="startMainImg2_click_2();"><button><img src="/images/main/ico_play.png" alt="재생"></button></li>
+                    <li class="pl17"><button><img src="/images/main/ico_next.png" alt="다음" onclick="startMainImg2_click_2_2();"></button></li>
+                </ul>
+            </div>
+             -->
+        </div>
+        <!-- //배너 롤링 -->
+    </div>
+    <h2>메인검색영역</h2>
+    <!-- search_area -->
+    <!--  <form id="frm1" name="frm1" method="POST"  action="/mainBidAnnounceList.do">  -->
+    <div class="m_sch">
+        <div class="sch_tit">
+            <strong>검색</strong>
+            <div class="sch_inp">
+                <ul>
+                	<li>
+                		<input id="allCheck" class="iRadio" type="checkbox" name="exctDivsDspAll" value="ALL" checked="" style=""><label for="pgb" class="iLabel">전체</label> |&nbsp;                		
+                    </li>
+                    <li>                        
+                        <!-- <span class="designRadio">
+                             <span class="radio checked"></span> 
+                        </span> -->
+                        
+                        <input id="pgb" class="iRadio" type="checkbox" name="exctDivsDsp" value="B" style=""><label for="pgb" class="iLabel">물품</label>
+                    </li>
+                    <li>
+                         <!-- <span class="designRadio">
+                            <span class="radio"></span>
+                        </span> -->
+                        
+                        <input id="psb" class="iRadio" type="checkbox" name="exctDivsDsp" value="A" style=""><label for="psb" class="iLabel">용역</label>
+                    </li>
+                    <li>
+                         
+                        <!-- <span class="designRadio">
+                            <span class="radio"></span>
+                        </span> -->
+                        
+                        <input id="peb" class="iRadio" type="checkbox" name="exctDivsDsp" value="C" style=""><label for="peb" class="iLabel">공사</label>
+                    </li>
+                    <li>
+                        
+                        <!-- <span class="designRadio">
+                            <span class="radio"></span>
+                        </span> -->
+                        
+                        <input id="pcb" class="iRadio" type="checkbox" name="exctDivsDsp" value="D" style=""><label for="pcb" class="iLabel">국외</label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="sch_detail">
+            <dl>
+                <dt>공고명</dt>
+                <dd><input type="text" name="anmt_name" id="anmt_name" class="w95p" title="공고건명" style=""></dd>
+                <dt class="ti2">공고구분</dt>
+                <dd>
+                    <select name="anmt_divs" id="anmt_divs" title="공고구분" class="w100">
+                        <option value="">전체</option>
+                        <option value="A">정상공고</option>
+                        <option value="B">긴급공고</option>                     
+                        <option value="H">정정공고</option>                     
+                        <option value="J">취소공고</option>                     
+                        <option value="K">연기공고</option>                     
+                        <option value="D">재공고</option>                      
+                        <option value="C">갱신공고</option>                     
+                        <option value="E">긴급갱신</option>                     
+                        <option value="F">재공고(3차)</option>                      
+                        <option value="G">긴급갱신재공고</option>                      
+                    </select>
+                </dd>
+            </dl>
+            <dl>
+                <dt>공고/개찰일</dt>
+                <dd>
+                    <select name="gubun" id="gubun" title="공고/개찰일" class="w80">
+                        <option value="1">개찰일자</option>
+                        <option value="2">공고일자</option>
+                    </select>
+                    <input type="text" class="date hasDatepicker" name="date_from" id="datepicker_from" readonly="readonly" title="시작날짜 입력" style=""><button type="button" class="ui-datepicker-trigger"><img src="/images/common/ico_cal.png" alt="" title=""></button><em>~</em><input type="text" class="date hasDatepicker" name="date_to" id="datepicker_to" readonly="readonly" title="마지막날짜 입력" style=""><button type="button" class="ui-datepicker-trigger"><img src="/images/common/ico_cal.png" alt="" title=""></button>
+                    <input type="radio" name="chgDate" id="rdo_chgDate1" value="-1m" tabindex="0" style=""><label for="rdo_chgDate1">최근1개월</label>
+                    <input type="radio" name="chgDate" id="rdo_chgDate2" value="-3m" tabindex="0" style=""><label for="rdo_chgDate2">최근3개월</label>
+                    <input type="radio" name="chgDate" id="rdo_chgDate3" value="-6m" tabindex="0" style=""><label for="rdo_chgDate3">최근6개월</label>
+                </dd>
+            </dl>
+            <dl class="last">
+                <dt>G2B공고번호</dt>
+                <dd><input type="text" name="numb_divs" id="numb_divs" class="w95p" title="G2B공고번호" style=""></dd>
+                <dt class="ti2">발주기관</dt>
+                <dd>
+                    <input type="text" id="dprt_name" name="dprt_name" class="w65p" readonly="readonly" title="발주기관" style="">
+                    <input type="hidden" name="dprt_code" id="dprt_code" style="">
+                    <input type="hidden" name="edix_gtag" id="edix_gtag" style="">
+                    <button type="button" class="ico_sch" id="btn_dprt_search">발주기관 검색 새창 열림</button> 
+                    <button type="button" title="리셋" class="ico_reset" style="margin-left: 2px !important;" id="btn_dprt_reset">발주기관 검색 초기화</button>
+                </dd>
+            </dl>
+        </div>
+        <button type="button" class="btn_tbBlue" id="btn_search">검색</button>
+    </div>
+    
+    <input type="hidden" id="mnuf_code" name="mnuf_code" value="" style="">
+    <input type="hidden" id="searchData" value="{&quot;NoticeList&quot;:[{&quot;contentId&quot;:6008,&quot;bbsNo&quot;:2009,&quot;writer&quot;:&quot;관리자&quot;,&quot;unitName&quot;:null,&quot;deptName&quot;:&quot;정보화데이터담당관&quot;,&quot;showStartDay&quot;:&quot;20250825&quot;,&quot;showEndDay&quot;:&quot;20251231&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;[안내]보이스 피싱 예방&quot;,&quot;viewCount&quot;:666,&quot;fileCnt&quot;:0,&quot;creDate&quot;:&quot;2025-08-19&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;N&quot;},{&quot;contentId&quot;:5747,&quot;bbsNo&quot;:1991,&quot;writer&quot;:&quot;관리자&quot;,&quot;unitName&quot;:null,&quot;deptName&quot;:&quot;정보화데이터담당관&quot;,&quot;showStartDay&quot;:&quot;20240605&quot;,&quot;showEndDay&quot;:&quot;20300605&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;[안내]입찰담합 사전예방을 위한 입찰담합유형 안내&quot;,&quot;viewCount&quot;:16374,&quot;fileCnt&quot;:0,&quot;creDate&quot;:&quot;2024-06-05&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;N&quot;},{&quot;contentId&quot;:5284,&quot;bbsNo&quot;:1965,&quot;writer&quot;:&quot;관리자&quot;,&quot;unitName&quot;:null,&quot;deptName&quot;:&quot;정보화데이터담당관&quot;,&quot;showStartDay&quot;:&quot;20230214&quot;,&quot;showEndDay&quot;:&quot;20251231&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;[안내]국방전자조달 고객지원(콜센터) 상담분야 개편 안내&quot;,&quot;viewCount&quot;:26814,&quot;fileCnt&quot;:0,&quot;creDate&quot;:&quot;2023-02-14&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;N&quot;},{&quot;contentId&quot;:5215,&quot;bbsNo&quot;:1963,&quot;writer&quot;:&quot;관리자&quot;,&quot;unitName&quot;:null,&quot;deptName&quot;:&quot;정보화데이터담당관&quot;,&quot;showStartDay&quot;:&quot;20221017&quot;,&quot;showEndDay&quot;:&quot;20251231&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;[안내]국방전자조달시스템 접속 차단 시 안내&quot;,&quot;viewCount&quot;:24024,&quot;fileCnt&quot;:0,&quot;creDate&quot;:&quot;2022-10-17&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;N&quot;},{&quot;contentId&quot;:5114,&quot;bbsNo&quot;:1954,&quot;writer&quot;:&quot;관리자&quot;,&quot;unitName&quot;:null,&quot;deptName&quot;:&quot;정보화데이터담당관&quot;,&quot;showStartDay&quot;:&quot;20220616&quot;,&quot;showEndDay&quot;:&quot;20251231&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;[안내]국방전자조달시스템 SMS(알림톡) 신청 안내&quot;,&quot;viewCount&quot;:36597,&quot;fileCnt&quot;:0,&quot;creDate&quot;:&quot;2022-06-16&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;N&quot;},{&quot;contentId&quot;:4915,&quot;bbsNo&quot;:1934,&quot;writer&quot;:&quot;관리자&quot;,&quot;unitName&quot;:null,&quot;deptName&quot;:&quot;정보화데이터담당관&quot;,&quot;showStartDay&quot;:&quot;20210722&quot;,&quot;showEndDay&quot;:&quot;20251231&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;[중요]국방전자조달시스템 이용 시 멀티 브라우저 사용방법 안내(크롬, 엣지 등)&quot;,&quot;viewCount&quot;:67311,&quot;fileCnt&quot;:0,&quot;creDate&quot;:&quot;2021-07-22&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;N&quot;},{&quot;contentId&quot;:4796,&quot;bbsNo&quot;:1932,&quot;writer&quot;:&quot;관리자&quot;,&quot;unitName&quot;:null,&quot;deptName&quot;:&quot;정보화데이터담당관&quot;,&quot;showStartDay&quot;:&quot;20210405&quot;,&quot;showEndDay&quot;:&quot;20251231&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;[안내]국방전자조달 동가 낙찰자 선정방식 변경 안내&quot;,&quot;viewCount&quot;:41122,&quot;fileCnt&quot;:2,&quot;creDate&quot;:&quot;2021-04-05&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;N&quot;},{&quot;contentId&quot;:1892,&quot;bbsNo&quot;:750,&quot;writer&quot;:&quot;관리자&quot;,&quot;unitName&quot;:null,&quot;deptName&quot;:&quot;정보화데이터담당관&quot;,&quot;showStartDay&quot;:&quot;20120514&quot;,&quot;showEndDay&quot;:&quot;20261231&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;중복/이중투찰 방지를 위한 시스템 개선 안내&quot;,&quot;viewCount&quot;:7611,&quot;fileCnt&quot;:1,&quot;creDate&quot;:&quot;2012-05-14&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;N&quot;}],&quot;dapaNoticeList&quot;:[{&quot;contentId&quot;:6031,&quot;bbsId&quot;:&quot;NEWS03&quot;,&quot;bbsNo&quot;:818,&quot;writer&quot;:&quot;황병순&quot;,&quot;unitName&quot;:&quot;유도무기총괄계약팀&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250917&quot;,&quot;showEndDay&quot;:&quot;20260930&quot;,&quot;bbsCode&quot;:&quot;BIZCD02&quot;,&quot;className&quot;:&quot;국내조달&quot;,&quot;title&quot;:&quot;「레이저대공무기(Block-I)용 상호통화기세트」에 대한 생산능력확인 관련 사전 공고(안내)_연장&quot;,&quot;viewCount&quot;:16,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-09-17&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;D&quot;},{&quot;contentId&quot;:6030,&quot;bbsId&quot;:&quot;NEWS03&quot;,&quot;bbsNo&quot;:817,&quot;writer&quot;:&quot;이영수&quot;,&quot;unitName&quot;:&quot;국제확정전력운영계약팀&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250915&quot;,&quot;showEndDay&quot;:&quot;20260915&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;2025년 국외조달 수리부속 전자협상 관련 안내&quot;,&quot;viewCount&quot;:94,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-09-15&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;D&quot;},{&quot;contentId&quot;:6019,&quot;bbsId&quot;:&quot;NEWS03&quot;,&quot;bbsNo&quot;:816,&quot;writer&quot;:&quot;황병순&quot;,&quot;unitName&quot;:&quot;유도무기총괄계약팀&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250904&quot;,&quot;showEndDay&quot;:&quot;20250930&quot;,&quot;bbsCode&quot;:&quot;BIZCD02&quot;,&quot;className&quot;:&quot;국내조달&quot;,&quot;title&quot;:&quot;'레이저대공무기(Block-I)용 상호통화기세트' 생산능력확인 관련 사전 공고(안내)&quot;,&quot;viewCount&quot;:153,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-09-04&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;D&quot;},{&quot;contentId&quot;:6018,&quot;bbsId&quot;:&quot;NEWS03&quot;,&quot;bbsNo&quot;:815,&quot;writer&quot;:&quot;배혜민&quot;,&quot;unitName&quot;:&quot;첨단기술총괄계약팀&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250904&quot;,&quot;showEndDay&quot;:&quot;20260930&quot;,&quot;bbsCode&quot;:&quot;BIZCD02&quot;,&quot;className&quot;:&quot;국내조달&quot;,&quot;title&quot;:&quot;'육군합성전장훈련체계 전력화지원장비' 구매요구서 사전공개&quot;,&quot;viewCount&quot;:100,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-09-04&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;D&quot;},{&quot;contentId&quot;:6017,&quot;bbsId&quot;:&quot;NEWS03&quot;,&quot;bbsNo&quot;:814,&quot;writer&quot;:&quot;안은영&quot;,&quot;unitName&quot;:&quot;국방기술품질원&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250901&quot;,&quot;showEndDay&quot;:&quot;20261016&quot;,&quot;bbsCode&quot;:&quot;BIZCD03&quot;,&quot;className&quot;:&quot;국외조달&quot;,&quot;title&quot;:&quot;KF-16 성능개량 항공기 헬멧장착 시현장치 (HMD) 국외 상업구매 \&quot;입찰공고 취소 후 신규 입찰공고\&quot; 안내 &quot;,&quot;viewCount&quot;:186,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-09-01&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;D&quot;},{&quot;contentId&quot;:6016,&quot;bbsId&quot;:&quot;NEWS03&quot;,&quot;bbsNo&quot;:813,&quot;writer&quot;:&quot;손성민&quot;,&quot;unitName&quot;:&quot;함정총괄계약팀&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250901&quot;,&quot;showEndDay&quot;:&quot;20260901&quot;,&quot;bbsCode&quot;:&quot;BIZCD03&quot;,&quot;className&quot;:&quot;국외조달&quot;,&quot;title&quot;:&quot;2025년 함정 패키지탄약 국외조달 탄약 구매요구서 사전공개 및 설명회 개최 계획 공지(127mm 단장약 등 7개 품목)&quot;,&quot;viewCount&quot;:69,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-09-01&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;D&quot;},{&quot;contentId&quot;:6014,&quot;bbsId&quot;:&quot;NEWS03&quot;,&quot;bbsNo&quot;:812,&quot;writer&quot;:&quot;이영수&quot;,&quot;unitName&quot;:&quot;국제확정전력운영계약팀&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250829&quot;,&quot;showEndDay&quot;:&quot;20260829&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;2025년 국외조달 수리부속 전자협상 관련 안내&quot;,&quot;viewCount&quot;:122,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-08-29&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;D&quot;},{&quot;contentId&quot;:6012,&quot;bbsId&quot;:&quot;NEWS03&quot;,&quot;bbsNo&quot;:811,&quot;writer&quot;:&quot;김태정&quot;,&quot;unitName&quot;:&quot;기동총괄계약팀&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250826&quot;,&quot;showEndDay&quot;:&quot;20261026&quot;,&quot;bbsCode&quot;:&quot;BIZCD03&quot;,&quot;className&quot;:&quot;국외조달&quot;,&quot;title&quot;:&quot;9mm 소형권총(9mm Concealable Pistol) 구매요구서 사전공개&quot;,&quot;viewCount&quot;:97,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-08-26&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;D&quot;}],&quot;demandNoticeList&quot;:[{&quot;contentId&quot;:6032,&quot;bbsId&quot;:&quot;NEWS02&quot;,&quot;bbsNo&quot;:2366,&quot;writer&quot;:&quot;임채훈&quot;,&quot;unitName&quot;:&quot;공군 제8전투비행단&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250917&quot;,&quot;showEndDay&quot;:&quot;20260930&quot;,&quot;bbsCode&quot;:&quot;BIZCD02&quot;,&quot;className&quot;:&quot;국내조달&quot;,&quot;title&quot;:&quot;입찰건(8비 작전지휘부 신축 선행연구 용역) 관련 제안서 평가결과&quot;,&quot;viewCount&quot;:11,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-09-17&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;Y&quot;},{&quot;contentId&quot;:6029,&quot;bbsId&quot;:&quot;NEWS02&quot;,&quot;bbsNo&quot;:2365,&quot;writer&quot;:&quot;권명진&quot;,&quot;unitName&quot;:&quot;국군재정관리단&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250911&quot;,&quot;showEndDay&quot;:&quot;20260911&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;25-A-00부대 시설공사(1267) 균형가격공지&quot;,&quot;viewCount&quot;:66,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-09-11&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;Y&quot;},{&quot;contentId&quot;:6028,&quot;bbsId&quot;:&quot;NEWS02&quot;,&quot;bbsNo&quot;:2364,&quot;writer&quot;:&quot;이현주&quot;,&quot;unitName&quot;:&quot;국군재정관리단&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250911&quot;,&quot;showEndDay&quot;:&quot;20260911&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;25-F-Y-지역 본공사(4046) 균형가격 공지&quot;,&quot;viewCount&quot;:46,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-09-11&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;Y&quot;},{&quot;contentId&quot;:6027,&quot;bbsId&quot;:&quot;NEWS02&quot;,&quot;bbsNo&quot;:2363,&quot;writer&quot;:&quot;이현주&quot;,&quot;unitName&quot;:&quot;국군재정관리단&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250911&quot;,&quot;showEndDay&quot;:&quot;20260911&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;25-U-00부대 항공전자시설 시설공사(5004) 균형가격 공지&quot;,&quot;viewCount&quot;:32,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-09-11&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;Y&quot;},{&quot;contentId&quot;:6026,&quot;bbsId&quot;:&quot;NEWS02&quot;,&quot;bbsNo&quot;:2362,&quot;writer&quot;:&quot;권명진&quot;,&quot;unitName&quot;:&quot;국군재정관리단&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250911&quot;,&quot;showEndDay&quot;:&quot;20260911&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;25-A-00부대 시설공사(1278) 균형가격 공지&quot;,&quot;viewCount&quot;:42,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-09-11&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;Y&quot;},{&quot;contentId&quot;:6025,&quot;bbsId&quot;:&quot;NEWS02&quot;,&quot;bbsNo&quot;:2361,&quot;writer&quot;:&quot;임선빈&quot;,&quot;unitName&quot;:&quot;육군본부&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250910&quot;,&quot;showEndDay&quot;:&quot;20260910&quot;,&quot;bbsCode&quot;:&quot;BIZCD02&quot;,&quot;className&quot;:&quot;국내조달&quot;,&quot;title&quot;:&quot;육군 여성필수시설(GOP 개선형) 규격화 공고&quot;,&quot;viewCount&quot;:23,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-09-10&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;Y&quot;},{&quot;contentId&quot;:6024,&quot;bbsId&quot;:&quot;NEWS02&quot;,&quot;bbsNo&quot;:2360,&quot;writer&quot;:&quot;권명진&quot;,&quot;unitName&quot;:&quot;국군재정관리단&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250909&quot;,&quot;showEndDay&quot;:&quot;20260909&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;25-A-00부대 시설공사(1199) 균형가격 공지&quot;,&quot;viewCount&quot;:86,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-09-09&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;Y&quot;},{&quot;contentId&quot;:6023,&quot;bbsId&quot;:&quot;NEWS02&quot;,&quot;bbsNo&quot;:2359,&quot;writer&quot;:&quot;권명진&quot;,&quot;unitName&quot;:&quot;국군재정관리단&quot;,&quot;deptName&quot;:null,&quot;showStartDay&quot;:&quot;20250909&quot;,&quot;showEndDay&quot;:&quot;20260909&quot;,&quot;bbsCode&quot;:&quot;BIZCD01&quot;,&quot;className&quot;:&quot;공통&quot;,&quot;title&quot;:&quot;25-A-00부대 시설공사(1239) 균형가격 공지&quot;,&quot;viewCount&quot;:67,&quot;fileCnt&quot;:5,&quot;creDate&quot;:&quot;2025-09-09&quot;,&quot;isnew&quot;:&quot;OLD&quot;,&quot;unitFlag&quot;:&quot;Y&quot;}],&quot;pdbBidAnnounceList&quot;:[{&quot;anmtDivsName&quot;:&quot;긴급공고&quot;,&quot;anmtName&quot;:&quot;긴급&quot;,&quot;anmtNumb&quot;:&quot;LDH0770&quot;,&quot;lv2Divs&quot;:&quot;1&quot;,&quot;lv1Divs&quot;:&quot;PDB&quot;,&quot;dprtCode&quot;:&quot;LDH&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:&quot;1&quot;,&quot;dmstItnb&quot;:null,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;38661&quot;,&quot;rpstItnm&quot;:&quot;(일장) 다목적굴착기 절연체,열차단용 6종 구매&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-23&quot;,&quot;bidxEndt&quot;:&quot;2025-09-24&quot;,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;B&quot;,&quot;bidxDivs&quot;:&quot;PDB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;LHK0062&quot;,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;lv1Divs&quot;:&quot;PDB&quot;,&quot;dprtCode&quot;:&quot;LHK&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:&quot;1&quot;,&quot;dmstItnb&quot;:&quot;***&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;37194&quot;,&quot;rpstItnm&quot;:&quot;25년 영상데이터압축장비 설치납품&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;-&quot;,&quot;bidxDivs&quot;:&quot;PDB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;LHK0061&quot;,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;lv1Divs&quot;:&quot;PDB&quot;,&quot;dprtCode&quot;:&quot;LHK&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:&quot;1&quot;,&quot;dmstItnb&quot;:&quot;***&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;37540&quot;,&quot;rpstItnm&quot;:&quot;25년 차량용 전원공급기 인버터 설치 납품&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;-&quot;,&quot;bidxDivs&quot;:&quot;PDB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;SCF0784&quot;,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;lv1Divs&quot;:&quot;PDB&quot;,&quot;dprtCode&quot;:&quot;SCF&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:&quot;1&quot;,&quot;dmstItnb&quot;:&quot;***&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;38381&quot;,&quot;rpstItnm&quot;:&quot;(긴급) 센서, 주위온도용 등 2종&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;-&quot;,&quot;bidxDivs&quot;:&quot;PDB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;SCF0785&quot;,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;lv1Divs&quot;:&quot;PDB&quot;,&quot;dprtCode&quot;:&quot;SCF&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:&quot;1&quot;,&quot;dmstItnb&quot;:&quot;***&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;38394&quot;,&quot;rpstItnm&quot;:&quot;(긴급) 밸브 유닛조립체, 작동수용 등 2종&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;-&quot;,&quot;bidxDivs&quot;:&quot;PDB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;HCC0130&quot;,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;lv1Divs&quot;:&quot;PDB&quot;,&quot;dprtCode&quot;:&quot;HCC&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:&quot;1&quot;,&quot;dmstItnb&quot;:&quot;***&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;38809&quot;,&quot;rpstItnm&quot;:&quot;펌프 1품목(232)&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;-&quot;,&quot;bidxDivs&quot;:&quot;PDB&quot;},{&quot;anmtDivsName&quot;:&quot;긴급공고&quot;,&quot;anmtName&quot;:&quot;긴급&quot;,&quot;anmtNumb&quot;:&quot;LCF0515&quot;,&quot;lv2Divs&quot;:&quot;1&quot;,&quot;lv1Divs&quot;:&quot;PDB&quot;,&quot;dprtCode&quot;:&quot;LCF&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:&quot;1&quot;,&quot;dmstItnb&quot;:null,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;38821&quot;,&quot;rpstItnm&quot;:&quot;상자, 부속품적재용 등 7항목 생산능력제조(궤도-026)&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-23&quot;,&quot;bidxEndt&quot;:&quot;2025-09-24&quot;,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;B&quot;,&quot;bidxDivs&quot;:&quot;PDB&quot;},{&quot;anmtDivsName&quot;:&quot;정상공고&quot;,&quot;anmtName&quot;:&quot;정상&quot;,&quot;anmtNumb&quot;:&quot;LKT0084&quot;,&quot;lv2Divs&quot;:&quot;1&quot;,&quot;lv1Divs&quot;:&quot;PDB&quot;,&quot;dprtCode&quot;:&quot;LKT&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:&quot;1&quot;,&quot;dmstItnb&quot;:null,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250917&quot;,&quot;dcsnNumb&quot;:&quot;38204&quot;,&quot;rpstItnm&quot;:&quot;25-503차 육성지원예산 개인천막 제조구매&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:&quot;2025-09-25&quot;,&quot;bidxDate&quot;:&quot;2025-09-25&quot;,&quot;orgBidxDate&quot;:&quot;20250925&quot;,&quot;anmtDivs&quot;:&quot;A&quot;,&quot;bidxDivs&quot;:&quot;PDB&quot;}],&quot;psbBidAnnounceList&quot;:[{&quot;anmtDivsName&quot;:&quot;정상공고&quot;,&quot;anmtName&quot;:&quot;정상&quot;,&quot;anmtNumb&quot;:&quot;LCF0514&quot;,&quot;dprtCode&quot;:&quot;LCF&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:&quot;1&quot;,&quot;lv2Divs&quot;:&quot;1&quot;,&quot;dmstItnb&quot;:null,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;38583&quot;,&quot;rpstItnm&quot;:&quot;군 장비정비 및 수리부속 원가계산 용역&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-25&quot;,&quot;bidxEndt&quot;:&quot;2025-09-26&quot;,&quot;bidxDate&quot;:&quot;2025-09-26&quot;,&quot;orgBidxDate&quot;:&quot;20250926&quot;,&quot;anmtDivs&quot;:&quot;A&quot;,&quot;lv1Divs&quot;:&quot;PDB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;LDA0164&quot;,&quot;dprtCode&quot;:&quot;LDA&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:null,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;dmstItnb&quot;:null,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;2025-18192&quot;,&quot;rpstItnm&quot;:&quot;(E049) 00부대 TICN차양대 신축 설계용역&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;-&quot;,&quot;lv1Divs&quot;:&quot;PEB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;LNS0093&quot;,&quot;dprtCode&quot;:&quot;LNS&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:null,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;dmstItnb&quot;:null,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;2025-18274&quot;,&quot;rpstItnm&quot;:&quot;00부대 간부숙소 옹벽 및 배수로 보수(재해예방)&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;-&quot;,&quot;lv1Divs&quot;:&quot;PEB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;LNF0204&quot;,&quot;dprtCode&quot;:&quot;LNF&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:null,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;dmstItnb&quot;:null,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;2025-18250&quot;,&quot;rpstItnm&quot;:&quot;'25년 전기안전관리(대행) 위탁계약&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;-&quot;,&quot;lv1Divs&quot;:&quot;PEB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;LNS0092&quot;,&quot;dprtCode&quot;:&quot;LNS&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:null,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;dmstItnb&quot;:null,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;2025-18273&quot;,&quot;rpstItnm&quot;:&quot;00부대 간부숙소 옹벽 및 배수로 보수(건설폐기물)&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;-&quot;,&quot;lv1Divs&quot;:&quot;PEB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;LNF0205&quot;,&quot;dprtCode&quot;:&quot;LNF&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:null,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;dmstItnb&quot;:null,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;2025-18252&quot;,&quot;rpstItnm&quot;:&quot;'25년 후반기 전진교 정기안전점검&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;-&quot;,&quot;lv1Divs&quot;:&quot;PEB&quot;},{&quot;anmtDivsName&quot;:&quot;긴급공고&quot;,&quot;anmtName&quot;:&quot;긴급&quot;,&quot;anmtNumb&quot;:&quot;UMM0804&quot;,&quot;dprtCode&quot;:&quot;UMM&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:&quot;1&quot;,&quot;lv2Divs&quot;:&quot;1&quot;,&quot;dmstItnb&quot;:null,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;32956&quot;,&quot;rpstItnm&quot;:&quot;(25F156-I)25년보급부대근무분야민간위탁용역(양평)&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-23&quot;,&quot;bidxEndt&quot;:&quot;2025-09-24&quot;,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;B&quot;,&quot;lv1Divs&quot;:&quot;PDB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;LGM0051&quot;,&quot;dprtCode&quot;:&quot;LGM&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;bsicStat&quot;:&quot;1&quot;,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;dmstItnb&quot;:&quot;***&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;38818&quot;,&quot;rpstItnm&quot;:&quot;(25-용역-36) 25년 상용 살수차량 위탁운영 계약&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;-&quot;,&quot;lv1Divs&quot;:&quot;PDB&quot;}],&quot;pebBidAnnounceList&quot;:[{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;LMH0250&quot;,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;dprtCode&quot;:&quot;LMH&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;contMthd&quot;:&quot;E&quot;,&quot;dmstItnb&quot;:null,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;2025-18257&quot;,&quot;rpstItnm&quot;:&quot;[A165] 폐기물보관시설 설치 전기공사&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;B&quot;,&quot;bidxDivs&quot;:&quot;PEB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;SCR0068&quot;,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;dprtCode&quot;:&quot;SCR&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;contMthd&quot;:&quot;E&quot;,&quot;dmstItnb&quot;:null,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;2025-18279&quot;,&quot;rpstItnm&quot;:&quot;25-거-사격장 토양오염복원 본공사(049)&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;B&quot;,&quot;bidxDivs&quot;:&quot;PEB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;MCN0063&quot;,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;dprtCode&quot;:&quot;MCN&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;contMthd&quot;:&quot;E&quot;,&quot;dmstItnb&quot;:null,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;2025-18259&quot;,&quot;rpstItnm&quot;:&quot;보일러 세관 및 보수공사&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;B&quot;,&quot;bidxDivs&quot;:&quot;PEB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;LFC0060&quot;,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;dprtCode&quot;:&quot;LFC&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;contMthd&quot;:&quot;E&quot;,&quot;dmstItnb&quot;:null,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;2025-18254&quot;,&quot;rpstItnm&quot;:&quot;00부대 정신전력 체험관 제2관 보수&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;B&quot;,&quot;bidxDivs&quot;:&quot;PEB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;LDA0165&quot;,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;dprtCode&quot;:&quot;LDA&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;contMthd&quot;:&quot;E&quot;,&quot;dmstItnb&quot;:null,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;2025-18218&quot;,&quot;rpstItnm&quot;:&quot;(D093) 00부대 본청 개선공사&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;B&quot;,&quot;bidxDivs&quot;:&quot;PEB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;LMH0249&quot;,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;dprtCode&quot;:&quot;LMH&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;contMthd&quot;:&quot;E&quot;,&quot;dmstItnb&quot;:null,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;2025-18256&quot;,&quot;rpstItnm&quot;:&quot;[A164] 폐기물보관시설 신축 본공사&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;B&quot;,&quot;bidxDivs&quot;:&quot;PEB&quot;},{&quot;anmtDivsName&quot;:&quot;수의계약&quot;,&quot;anmtName&quot;:&quot;수의&quot;,&quot;anmtNumb&quot;:&quot;LNS0091&quot;,&quot;lv2Divs&quot;:&quot;2&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;dprtCode&quot;:&quot;LNS&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;contMthd&quot;:&quot;E&quot;,&quot;dmstItnb&quot;:null,&quot;anmtDate&quot;:&quot;20250918&quot;,&quot;dcsnNumb&quot;:&quot;2025-18270&quot;,&quot;rpstItnm&quot;:&quot;00부대 간부숙소 옹벽 및 배수로 보수(시설공사)&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-24&quot;,&quot;bidxEndt&quot;:null,&quot;bidxDate&quot;:&quot;2025-09-24&quot;,&quot;orgBidxDate&quot;:&quot;20250924&quot;,&quot;anmtDivs&quot;:&quot;B&quot;,&quot;bidxDivs&quot;:&quot;PEB&quot;},{&quot;anmtDivsName&quot;:&quot;긴급공고&quot;,&quot;anmtName&quot;:&quot;긴급&quot;,&quot;anmtNumb&quot;:&quot;SFH0058&quot;,&quot;lv2Divs&quot;:&quot;1&quot;,&quot;rqstYear&quot;:&quot;2025&quot;,&quot;dprtCode&quot;:&quot;SFH&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;contMthd&quot;:&quot;C&quot;,&quot;dmstItnb&quot;:null,&quot;anmtDate&quot;:&quot;20250917&quot;,&quot;dcsnNumb&quot;:&quot;2025-18191&quot;,&quot;rpstItnm&quot;:&quot;25-B-00수사대 신축공사&quot;,&quot;bidxMthdName&quot;:&quot;총액제&quot;,&quot;bidxCldt&quot;:&quot;2025-09-22&quot;,&quot;bidxEndt&quot;:&quot;2025-09-23&quot;,&quot;bidxDate&quot;:&quot;2025-09-23&quot;,&quot;orgBidxDate&quot;:&quot;20250923&quot;,&quot;anmtDivs&quot;:&quot;B&quot;,&quot;bidxDivs&quot;:&quot;PEB&quot;}],&quot;pcbBidAnnounceList&quot;:[{&quot;anmtDivsName&quot;:&quot;정상공고&quot;,&quot;anmtName&quot;:&quot;정상&quot;,&quot;anmtNumb&quot;:&quot;EWA0009&quot;,&quot;rqstDegr&quot;:1,&quot;anmtDate&quot;:&quot;2025&quot;,&quot;dgNumb&quot;:&quot;PCAW5007-002&quot;,&quot;dcsnNumb&quot;:&quot;PCAW5007&quot;,&quot;rpstItnm&quot;:&quot;PCAW5007-장보고-III BATCH-II 정비대체장비&quot;,&quot;bidxMthdName&quot;:&quot;단가제&quot;,&quot;anmtRqdt&quot;:&quot;2025-09-16&quot;,&quot;bidxEndt&quot;:&quot;20250916&quot;,&quot;bidxDate&quot;:&quot;20251029&quot;,&quot;orgBidxDate&quot;:&quot;20251029&quot;,&quot;anmtDivs&quot;:&quot;A&quot;,&quot;bidxDivs&quot;:&quot;PCB&quot;,&quot;docmIden&quot;:&quot;2025091617230169385&quot;,&quot;dprtCode&quot;:&quot;EWA&quot;,&quot;gropNumb&quot;:&quot;002&quot;},{&quot;anmtDivsName&quot;:&quot;재공고&quot;,&quot;anmtName&quot;:&quot;재공고&quot;,&quot;anmtNumb&quot;:&quot;EU10002&quot;,&quot;rqstDegr&quot;:2,&quot;anmtDate&quot;:&quot;2025&quot;,&quot;dgNumb&quot;:&quot;BAAU5001-001&quot;,&quot;dcsnNumb&quot;:&quot;BAAU5001&quot;,&quot;rpstItnm&quot;:&quot;BAAU5001-특수작전용정찰무인항공기&quot;,&quot;bidxMthdName&quot;:&quot;단가제&quot;,&quot;anmtRqdt&quot;:&quot;2025-09-16&quot;,&quot;bidxEndt&quot;:&quot;20250916&quot;,&quot;bidxDate&quot;:&quot;20251031&quot;,&quot;orgBidxDate&quot;:&quot;20251031&quot;,&quot;anmtDivs&quot;:&quot;A&quot;,&quot;bidxDivs&quot;:&quot;PCB&quot;,&quot;docmIden&quot;:&quot;2025091610273104154&quot;,&quot;dprtCode&quot;:&quot;EU1&quot;,&quot;gropNumb&quot;:&quot;001&quot;},{&quot;anmtDivsName&quot;:&quot;재공고&quot;,&quot;anmtName&quot;:&quot;재공고&quot;,&quot;anmtNumb&quot;:&quot;EHG0025&quot;,&quot;rqstDegr&quot;:2,&quot;anmtDate&quot;:&quot;2025&quot;,&quot;dgNumb&quot;:&quot;DAAH5020-002&quot;,&quot;dcsnNumb&quot;:&quot;DAAH5020&quot;,&quot;rpstItnm&quot;:&quot;DAAH5020-항공기 전자전장비 질소 주입기(N.P.S)&quot;,&quot;bidxMthdName&quot;:&quot;단가제&quot;,&quot;anmtRqdt&quot;:&quot;2025-09-11&quot;,&quot;bidxEndt&quot;:&quot;20250911&quot;,&quot;bidxDate&quot;:&quot;20250923&quot;,&quot;orgBidxDate&quot;:&quot;20250923&quot;,&quot;anmtDivs&quot;:&quot;A&quot;,&quot;bidxDivs&quot;:&quot;PCB&quot;,&quot;docmIden&quot;:&quot;2025091109242941761&quot;,&quot;dprtCode&quot;:&quot;EHG&quot;,&quot;gropNumb&quot;:&quot;002&quot;},{&quot;anmtDivsName&quot;:&quot;정상공고&quot;,&quot;anmtName&quot;:&quot;정상&quot;,&quot;anmtNumb&quot;:&quot;EWA0007&quot;,&quot;rqstDegr&quot;:1,&quot;anmtDate&quot;:&quot;2025&quot;,&quot;dgNumb&quot;:&quot;PCAW5010-002&quot;,&quot;dcsnNumb&quot;:&quot;PCAW5010&quot;,&quot;rpstItnm&quot;:&quot;PCAW5010-장보고-Ⅲ BATCH-Ⅰ정비지원장비(컴퓨터시스템)&quot;,&quot;bidxMthdName&quot;:&quot;단가제&quot;,&quot;anmtRqdt&quot;:&quot;2025-08-29&quot;,&quot;bidxEndt&quot;:&quot;20250829&quot;,&quot;bidxDate&quot;:&quot;20251014&quot;,&quot;orgBidxDate&quot;:&quot;20251014&quot;,&quot;anmtDivs&quot;:&quot;A&quot;,&quot;bidxDivs&quot;:&quot;PCB&quot;,&quot;docmIden&quot;:&quot;2025082914035824829&quot;,&quot;dprtCode&quot;:&quot;EWA&quot;,&quot;gropNumb&quot;:&quot;002&quot;},{&quot;anmtDivsName&quot;:&quot;정상공고&quot;,&quot;anmtName&quot;:&quot;정상&quot;,&quot;anmtNumb&quot;:&quot;EHG0027&quot;,&quot;rqstDegr&quot;:1,&quot;anmtDate&quot;:&quot;2025&quot;,&quot;dgNumb&quot;:&quot;DADH5076-001&quot;,&quot;dcsnNumb&quot;:&quot;DADH5076&quot;,&quot;rpstItnm&quot;:&quot;DADH5076-무인표적기&quot;,&quot;bidxMthdName&quot;:&quot;단가제&quot;,&quot;anmtRqdt&quot;:&quot;2025-08-21&quot;,&quot;bidxEndt&quot;:&quot;20250821&quot;,&quot;bidxDate&quot;:&quot;20251002&quot;,&quot;orgBidxDate&quot;:&quot;20251002&quot;,&quot;anmtDivs&quot;:&quot;A&quot;,&quot;bidxDivs&quot;:&quot;PCB&quot;,&quot;docmIden&quot;:&quot;2025082115221042303&quot;,&quot;dprtCode&quot;:&quot;EHG&quot;,&quot;gropNumb&quot;:&quot;001&quot;},{&quot;anmtDivsName&quot;:&quot;정상공고&quot;,&quot;anmtName&quot;:&quot;정상&quot;,&quot;anmtNumb&quot;:&quot;EHG0026&quot;,&quot;rqstDegr&quot;:1,&quot;anmtDate&quot;:&quot;2025&quot;,&quot;dgNumb&quot;:&quot;BDAH5074-001&quot;,&quot;dcsnNumb&quot;:&quot;BDAH5074&quot;,&quot;rpstItnm&quot;:&quot;BDAH5074-청력보호 헤드세트&quot;,&quot;bidxMthdName&quot;:&quot;단가제&quot;,&quot;anmtRqdt&quot;:&quot;2025-08-20&quot;,&quot;bidxEndt&quot;:&quot;20250820&quot;,&quot;bidxDate&quot;:&quot;20251002&quot;,&quot;orgBidxDate&quot;:&quot;20251002&quot;,&quot;anmtDivs&quot;:&quot;A&quot;,&quot;bidxDivs&quot;:&quot;PCB&quot;,&quot;docmIden&quot;:&quot;2025081923053400091&quot;,&quot;dprtCode&quot;:&quot;EHG&quot;,&quot;gropNumb&quot;:&quot;001&quot;},{&quot;anmtDivsName&quot;:&quot;정상공고&quot;,&quot;anmtName&quot;:&quot;정상&quot;,&quot;anmtNumb&quot;:&quot;EHG0026&quot;,&quot;rqstDegr&quot;:1,&quot;anmtDate&quot;:&quot;2025&quot;,&quot;dgNumb&quot;:&quot;BDAH5075-001&quot;,&quot;dcsnNumb&quot;:&quot;BDAH5075&quot;,&quot;rpstItnm&quot;:&quot;BDAH5075-청력보호 헤드세트&quot;,&quot;bidxMthdName&quot;:&quot;단가제&quot;,&quot;anmtRqdt&quot;:&quot;2025-08-20&quot;,&quot;bidxEndt&quot;:&quot;20250820&quot;,&quot;bidxDate&quot;:&quot;20251002&quot;,&quot;orgBidxDate&quot;:&quot;20251002&quot;,&quot;anmtDivs&quot;:&quot;A&quot;,&quot;bidxDivs&quot;:&quot;PCB&quot;,&quot;docmIden&quot;:&quot;2025081923053400091&quot;,&quot;dprtCode&quot;:&quot;EHG&quot;,&quot;gropNumb&quot;:&quot;001&quot;},{&quot;anmtDivsName&quot;:&quot;정상공고&quot;,&quot;anmtName&quot;:&quot;정상&quot;,&quot;anmtNumb&quot;:&quot;EKA0035&quot;,&quot;rqstDegr&quot;:1,&quot;anmtDate&quot;:&quot;2025&quot;,&quot;dgNumb&quot;:&quot;BGAK5007-002&quot;,&quot;dcsnNumb&quot;:&quot;BGAK5007&quot;,&quot;rpstItnm&quot;:&quot;BGAK5007-7.62MM 수동식 저격소총&quot;,&quot;bidxMthdName&quot;:&quot;단가제&quot;,&quot;anmtRqdt&quot;:&quot;2025-08-12&quot;,&quot;bidxEndt&quot;:&quot;20250812&quot;,&quot;bidxDate&quot;:&quot;20250923&quot;,&quot;orgBidxDate&quot;:&quot;20250923&quot;,&quot;anmtDivs&quot;:&quot;A&quot;,&quot;bidxDivs&quot;:&quot;PCB&quot;,&quot;docmIden&quot;:&quot;2025081214142486553&quot;,&quot;dprtCode&quot;:&quot;EKA&quot;,&quot;gropNumb&quot;:&quot;002&quot;}]}" style="">
+    <!-- <input type="hidden" id="exctDivs" name="exctDivs">
+    <input type="hidden" id="date_from" name="date_from">
+    <input type="hidden" id="date_to" name="date_to">
+    </form>  -->
+    <!-- //search_area -->
+    
+    <div class="m_rig">
+        
+        <button type="button" class="btn_mlog" id="_mLogin">로그인</button>
+        
+        
+        
+        <!-- 사이드 메뉴 -->
+        <div class="rig_menu"> 
+            <strong> 자주 찾는 정보   |   <a href="/techBidAnnounceList.do?key=901">신기술 입찰공고</a></strong>
+            <ul>
+                <li><a href="/pdb/bid/goodsBidAnnounceList.do?key=13">물품 입찰공고</a></li>
+                <li><a href="/psb/bid/serviceBidAnnounceList.do?key=32">용역 입찰공고</a></li>
+                <li><a href="/peb/bid/announceList.do?key=41">공사 입찰공고</a></li>
+                <li><a href="/pcb/bid/todayBidAnnounceList.do?key=50">국외 입찰공고</a></li>
+            </ul>
+            <ul>
+                <li><a href="/pdb/bid/goodsBidResultList.do?key=528">물품 입찰결과</a></li>
+                <li><a href="/psb/bid/serviceBidResultList.do?key=608">용역 입찰결과</a></li>
+                <li><a href="/peb/bid/bidResultList.do?key=545">공사 입찰결과</a></li>
+                <li><a href="/pcb/bid/bidResultList.do?key=171">국외 입찰결과</a></li>
+            </ul>
+        </div>
+        <!-- //사이드 메뉴 -->
+    </div>
+</div>
+
+<!-- 최근 입찰 공고 -->
+<div class="m_bid">
+    <h3>최근 입찰공고</h3>
+    <!-- tab_area -->
+    <div class="tab_wrap">
+        <ul class="tabs type2">
+            <li><a href="#tab_content01" class="tab2 current">물품</a></li>
+            <li><a href="#tab_content02" class="tab2">용역</a></li>
+            <li><a href="#tab_content03" class="tab2">공사</a></li>
+            <li><a href="#tab_content04" class="tab2">국외</a></li>
+        </ul>
+        <button type="button" title="더보기" class="ico_more"></button>
+        <div class="tab_content_wrap">
+            <!-- 물품 -->          
+<!-- index_include start -->
+
+            <div id="tab_content01" class="tab_content type2" style="">
+                <a href="/pdb/bid/goodsBidAnnounceList.do?key=13" title="물품 최근 입찰 공고 더보기" class="ico_more"></a>
+                <input type="hidden" id="pageDivs" name="pageDivs" value="G1" style=""><!-- W3C조치 2017-12-14 -->
+                <input type="hidden" id="bid_divs" name="bid_divs" value="bid" style=""><!-- W3C조치 2017-12-14 -->
+                <ul class="list_dot type2">
+                    
+                        <li>
+                            
+                                
+                                    <a href="#" class="searchView"><span class="fred">[긴급]</span> (일장) 다목적굴착기 절연체,열차단용 6종 구매</a><em>2025-09-18</em><!-- 2019.01.14 bidxCldt(참가등록마감일자)을  anmtDate(공고일자)로 수정-->
+                                
+                                
+                              
+                            <input type="hidden" value="1" style="">
+                            <input type="hidden" id="dprt_code1" value="LDH" style="">
+                            <input type="hidden" id="anmt_divs1" value="B" style="">
+                            <input type="hidden" id="anmt_numb1" value="LDH0770" style="">
+                            <input type="hidden" id="rqst_degr1" value="1" style="">
+                            <input type="hidden" id="dcsn_numb1" value="38661" style="">
+                            <input type="hidden" id="rqst_year1" value="2025" style="">
+                            <input type="hidden" id="bsic_stat1" value="1" style="">
+                            <input type="hidden" id="bidx_date1" value="20250924" style="">
+                            <input type="hidden" id="dmst_itnb1" value="" style="">
+                            <input type="hidden" id="anmt_date1" value="20250918" style="">                        
+                            <input type="hidden" id="lv2Divs11" value="1" style="">
+                        </li>
+                    
+                        <li>
+                            
+                                
+                                   
+                                    <a href="#" class="searchView">[수의] 25년 영상데이터압축장비 설치납품</a><em>2025-09-18</em>
+                                
+                              
+                            <input type="hidden" value="2" style="">
+                            <input type="hidden" id="dprt_code2" value="LHK" style="">
+                            <input type="hidden" id="anmt_divs2" value="-" style="">
+                            <input type="hidden" id="anmt_numb2" value="LHK0062" style="">
+                            <input type="hidden" id="rqst_degr2" value="1" style="">
+                            <input type="hidden" id="dcsn_numb2" value="37194" style="">
+                            <input type="hidden" id="rqst_year2" value="2025" style="">
+                            <input type="hidden" id="bsic_stat2" value="1" style="">
+                            <input type="hidden" id="bidx_date2" value="20250924" style="">
+                            <input type="hidden" id="dmst_itnb2" value="***" style="">
+                            <input type="hidden" id="anmt_date2" value="20250918" style="">                        
+                            <input type="hidden" id="lv2Divs12" value="2" style="">
+                        </li>
+                    
+                        <li>
+                            
+                                
+                                   
+                                    <a href="#" class="searchView">[수의] 25년 차량용 전원공급기 인버터 설치 납품</a><em>2025-09-18</em>
+                                
+                              
+                            <input type="hidden" value="3" style="">
+                            <input type="hidden" id="dprt_code3" value="LHK" style="">
+                            <input type="hidden" id="anmt_divs3" value="-" style="">
+                            <input type="hidden" id="anmt_numb3" value="LHK0061" style="">
+                            <input type="hidden" id="rqst_degr3" value="1" style="">
+                            <input type="hidden" id="dcsn_numb3" value="37540" style="">
+                            <input type="hidden" id="rqst_year3" value="2025" style="">
+                            <input type="hidden" id="bsic_stat3" value="1" style="">
+                            <input type="hidden" id="bidx_date3" value="20250924" style="">
+                            <input type="hidden" id="dmst_itnb3" value="***" style="">
+                            <input type="hidden" id="anmt_date3" value="20250918" style="">                        
+                            <input type="hidden" id="lv2Divs13" value="2" style="">
+                        </li>
+                    
+                        <li>
+                            
+                                
+                                   
+                                    <a href="#" class="searchView">[수의] (긴급) 센서, 주위온도용 등 2종</a><em>2025-09-18</em>
+                                
+                              
+                            <input type="hidden" value="4" style="">
+                            <input type="hidden" id="dprt_code4" value="SCF" style="">
+                            <input type="hidden" id="anmt_divs4" value="-" style="">
+                            <input type="hidden" id="anmt_numb4" value="SCF0784" style="">
+                            <input type="hidden" id="rqst_degr4" value="1" style="">
+                            <input type="hidden" id="dcsn_numb4" value="38381" style="">
+                            <input type="hidden" id="rqst_year4" value="2025" style="">
+                            <input type="hidden" id="bsic_stat4" value="1" style="">
+                            <input type="hidden" id="bidx_date4" value="20250924" style="">
+                            <input type="hidden" id="dmst_itnb4" value="***" style="">
+                            <input type="hidden" id="anmt_date4" value="20250918" style="">                        
+                            <input type="hidden" id="lv2Divs14" value="2" style="">
+                        </li>
+                    
+                        <li>
+                            
+                                
+                                   
+                                    <a href="#" class="searchView">[수의] (긴급) 밸브 유닛조립체, 작동수용 등 2종</a><em>2025-09-18</em>
+                                
+                              
+                            <input type="hidden" value="5" style="">
+                            <input type="hidden" id="dprt_code5" value="SCF" style="">
+                            <input type="hidden" id="anmt_divs5" value="-" style="">
+                            <input type="hidden" id="anmt_numb5" value="SCF0785" style="">
+                            <input type="hidden" id="rqst_degr5" value="1" style="">
+                            <input type="hidden" id="dcsn_numb5" value="38394" style="">
+                            <input type="hidden" id="rqst_year5" value="2025" style="">
+                            <input type="hidden" id="bsic_stat5" value="1" style="">
+                            <input type="hidden" id="bidx_date5" value="20250924" style="">
+                            <input type="hidden" id="dmst_itnb5" value="***" style="">
+                            <input type="hidden" id="anmt_date5" value="20250918" style="">                        
+                            <input type="hidden" id="lv2Divs15" value="2" style="">
+                        </li>
+                    
+                        <li>
+                            
+                                
+                                   
+                                    <a href="#" class="searchView">[수의] 펌프 1품목(232)</a><em>2025-09-18</em>
+                                
+                              
+                            <input type="hidden" value="6" style="">
+                            <input type="hidden" id="dprt_code6" value="HCC" style="">
+                            <input type="hidden" id="anmt_divs6" value="-" style="">
+                            <input type="hidden" id="anmt_numb6" value="HCC0130" style="">
+                            <input type="hidden" id="rqst_degr6" value="1" style="">
+                            <input type="hidden" id="dcsn_numb6" value="38809" style="">
+                            <input type="hidden" id="rqst_year6" value="2025" style="">
+                            <input type="hidden" id="bsic_stat6" value="1" style="">
+                            <input type="hidden" id="bidx_date6" value="20250924" style="">
+                            <input type="hidden" id="dmst_itnb6" value="***" style="">
+                            <input type="hidden" id="anmt_date6" value="20250918" style="">                        
+                            <input type="hidden" id="lv2Divs16" value="2" style="">
+                        </li>
+                    
+                        <li>
+                            
+                                
+                                    <a href="#" class="searchView"><span class="fred">[긴급]</span> 상자, 부속품적재용 등 7항목 생산능력제조(궤도-026)</a><em>2025-09-18</em><!-- 2019.01.14 bidxCldt(참가등록마감일자)을  anmtDate(공고일자)로 수정-->
+                                
+                                
+                              
+                            <input type="hidden" value="7" style="">
+                            <input type="hidden" id="dprt_code7" value="LCF" style="">
+                            <input type="hidden" id="anmt_divs7" value="B" style="">
+                            <input type="hidden" id="anmt_numb7" value="LCF0515" style="">
+                            <input type="hidden" id="rqst_degr7" value="1" style="">
+                            <input type="hidden" id="dcsn_numb7" value="38821" style="">
+                            <input type="hidden" id="rqst_year7" value="2025" style="">
+                            <input type="hidden" id="bsic_stat7" value="1" style="">
+                            <input type="hidden" id="bidx_date7" value="20250924" style="">
+                            <input type="hidden" id="dmst_itnb7" value="" style="">
+                            <input type="hidden" id="anmt_date7" value="20250918" style="">                        
+                            <input type="hidden" id="lv2Divs17" value="1" style="">
+                        </li>
+                    
+                        <li>
+                            
+                                
+                                   
+                                    <a href="#" class="searchView">[정상] 25-503차 육성지원예산 개인천막 제조구매</a><em>2025-09-17</em>
+                                
+                              
+                            <input type="hidden" value="8" style="">
+                            <input type="hidden" id="dprt_code8" value="LKT" style="">
+                            <input type="hidden" id="anmt_divs8" value="A" style="">
+                            <input type="hidden" id="anmt_numb8" value="LKT0084" style="">
+                            <input type="hidden" id="rqst_degr8" value="1" style="">
+                            <input type="hidden" id="dcsn_numb8" value="38204" style="">
+                            <input type="hidden" id="rqst_year8" value="2025" style="">
+                            <input type="hidden" id="bsic_stat8" value="1" style="">
+                            <input type="hidden" id="bidx_date8" value="20250925" style="">
+                            <input type="hidden" id="dmst_itnb8" value="" style="">
+                            <input type="hidden" id="anmt_date8" value="20250917" style="">                        
+                            <input type="hidden" id="lv2Divs18" value="1" style="">
+                        </li>
+                    
+                </ul>           
+            </div>
+            <!--// 물품 -->
+            <!-- 용역 -->
+            <div id="tab_content02" class="tab_content type2" style="display: none;">
+                <a href="/psb/bid/serviceBidAnnounceList.do?key=32" title="용역 최근 입찰 공고 더보기" class="ico_more"></a>
+                <input type="hidden" id="pageDivs2" name="pageDivs" value="S1" style=""><!-- W3C조치 2017-12-14 -->
+                <input type="hidden" id="bid_divs2" name="bid_divs" value="bid" style=""><!-- W3C조치 2017-12-14 -->
+                <ul class="list_dot type2">
+                    
+                       <li>                     
+                            
+                                
+                                   
+                                    <a href="#" class="searchViewPsb">[정상] 군 장비정비 및 수리부속 원가계산 용역</a><em>2025-09-18</em>             
+                                
+                             
+                            <input type="hidden" value="1" style="">
+                            <input type="hidden" id="dprt_code21" value="LCF" style="">
+                            <input type="hidden" id="anmt_divs21" value="A" style="">
+                            <input type="hidden" id="anmt_numb21" value="LCF0514" style="">
+                            <input type="hidden" id="rqst_degr21" value="1" style="">
+                            <input type="hidden" id="dcsn_numb21" value="38583" style="">
+                            <input type="hidden" id="rqst_year21" value="2025" style="">
+                            <input type="hidden" id="bsic_stat21" value="1" style="">
+                            <input type="hidden" id="dmst_itnb21" value="" style="">
+                            <input type="hidden" id="csrt_numb21" value="38583" style="">
+                            <input type="hidden" id="negn_cldt21" value="" style="">
+                            <input type="hidden" id="negn_pldt21" value="20250918" style="">
+                            <input type="hidden" id="bidx_date21" value="20250926" style="">
+                            <input type="hidden" id="ordr_year21" value="2025" style="">
+                            <input type="hidden" id="negn_degr21" value="1" style="">
+                            <input type="hidden" id="lv1Divs1" value="PDB" style="">
+                            <input type="hidden" id="lv2Divs21" value="1" style="">
+                        </li>   
+                    
+                       <li>                     
+                            
+                                
+                                   
+                                    <a href="#" class="searchViewPsb">[수의] (E049) 00부대 TICN차양대 신축 설계용역</a><em>2025-09-18</em>             
+                                
+                             
+                            <input type="hidden" value="2" style="">
+                            <input type="hidden" id="dprt_code22" value="LDA" style="">
+                            <input type="hidden" id="anmt_divs22" value="-" style="">
+                            <input type="hidden" id="anmt_numb22" value="LDA0164" style="">
+                            <input type="hidden" id="rqst_degr22" value="1" style="">
+                            <input type="hidden" id="dcsn_numb22" value="2025-18192" style="">
+                            <input type="hidden" id="rqst_year22" value="2025" style="">
+                            <input type="hidden" id="bsic_stat22" value="" style="">
+                            <input type="hidden" id="dmst_itnb22" value="" style="">
+                            <input type="hidden" id="csrt_numb22" value="2025-18192" style="">
+                            <input type="hidden" id="negn_cldt22" value="" style="">
+                            <input type="hidden" id="negn_pldt22" value="20250918" style="">
+                            <input type="hidden" id="bidx_date22" value="20250924" style="">
+                            <input type="hidden" id="ordr_year22" value="2025" style="">
+                            <input type="hidden" id="negn_degr22" value="1" style="">
+                            <input type="hidden" id="lv1Divs2" value="PEB" style="">
+                            <input type="hidden" id="lv2Divs22" value="2" style="">
+                        </li>   
+                    
+                       <li>                     
+                            
+                                
+                                   
+                                    <a href="#" class="searchViewPsb">[수의] 00부대 간부숙소 옹벽 및 배수로 보수(재해예방)</a><em>2025-09-18</em>             
+                                
+                             
+                            <input type="hidden" value="3" style="">
+                            <input type="hidden" id="dprt_code23" value="LNS" style="">
+                            <input type="hidden" id="anmt_divs23" value="-" style="">
+                            <input type="hidden" id="anmt_numb23" value="LNS0093" style="">
+                            <input type="hidden" id="rqst_degr23" value="1" style="">
+                            <input type="hidden" id="dcsn_numb23" value="2025-18274" style="">
+                            <input type="hidden" id="rqst_year23" value="2025" style="">
+                            <input type="hidden" id="bsic_stat23" value="" style="">
+                            <input type="hidden" id="dmst_itnb23" value="" style="">
+                            <input type="hidden" id="csrt_numb23" value="2025-18274" style="">
+                            <input type="hidden" id="negn_cldt23" value="" style="">
+                            <input type="hidden" id="negn_pldt23" value="20250918" style="">
+                            <input type="hidden" id="bidx_date23" value="20250924" style="">
+                            <input type="hidden" id="ordr_year23" value="2025" style="">
+                            <input type="hidden" id="negn_degr23" value="1" style="">
+                            <input type="hidden" id="lv1Divs3" value="PEB" style="">
+                            <input type="hidden" id="lv2Divs23" value="2" style="">
+                        </li>   
+                    
+                       <li>                     
+                            
+                                
+                                   
+                                    <a href="#" class="searchViewPsb">[수의] '25년 전기안전관리(대행) 위탁계약</a><em>2025-09-18</em>             
+                                
+                             
+                            <input type="hidden" value="4" style="">
+                            <input type="hidden" id="dprt_code24" value="LNF" style="">
+                            <input type="hidden" id="anmt_divs24" value="-" style="">
+                            <input type="hidden" id="anmt_numb24" value="LNF0204" style="">
+                            <input type="hidden" id="rqst_degr24" value="1" style="">
+                            <input type="hidden" id="dcsn_numb24" value="2025-18250" style="">
+                            <input type="hidden" id="rqst_year24" value="2025" style="">
+                            <input type="hidden" id="bsic_stat24" value="" style="">
+                            <input type="hidden" id="dmst_itnb24" value="" style="">
+                            <input type="hidden" id="csrt_numb24" value="2025-18250" style="">
+                            <input type="hidden" id="negn_cldt24" value="" style="">
+                            <input type="hidden" id="negn_pldt24" value="20250918" style="">
+                            <input type="hidden" id="bidx_date24" value="20250924" style="">
+                            <input type="hidden" id="ordr_year24" value="2025" style="">
+                            <input type="hidden" id="negn_degr24" value="1" style="">
+                            <input type="hidden" id="lv1Divs4" value="PEB" style="">
+                            <input type="hidden" id="lv2Divs24" value="2" style="">
+                        </li>   
+                    
+                       <li>                     
+                            
+                                
+                                   
+                                    <a href="#" class="searchViewPsb">[수의] 00부대 간부숙소 옹벽 및 배수로 보수(건설폐기물)</a><em>2025-09-18</em>             
+                                
+                             
+                            <input type="hidden" value="5" style="">
+                            <input type="hidden" id="dprt_code25" value="LNS" style="">
+                            <input type="hidden" id="anmt_divs25" value="-" style="">
+                            <input type="hidden" id="anmt_numb25" value="LNS0092" style="">
+                            <input type="hidden" id="rqst_degr25" value="1" style="">
+                            <input type="hidden" id="dcsn_numb25" value="2025-18273" style="">
+                            <input type="hidden" id="rqst_year25" value="2025" style="">
+                            <input type="hidden" id="bsic_stat25" value="" style="">
+                            <input type="hidden" id="dmst_itnb25" value="" style="">
+                            <input type="hidden" id="csrt_numb25" value="2025-18273" style="">
+                            <input type="hidden" id="negn_cldt25" value="" style="">
+                            <input type="hidden" id="negn_pldt25" value="20250918" style="">
+                            <input type="hidden" id="bidx_date25" value="20250924" style="">
+                            <input type="hidden" id="ordr_year25" value="2025" style="">
+                            <input type="hidden" id="negn_degr25" value="1" style="">
+                            <input type="hidden" id="lv1Divs5" value="PEB" style="">
+                            <input type="hidden" id="lv2Divs25" value="2" style="">
+                        </li>   
+                    
+                       <li>                     
+                            
+                                
+                                   
+                                    <a href="#" class="searchViewPsb">[수의] '25년 후반기 전진교 정기안전점검</a><em>2025-09-18</em>             
+                                
+                             
+                            <input type="hidden" value="6" style="">
+                            <input type="hidden" id="dprt_code26" value="LNF" style="">
+                            <input type="hidden" id="anmt_divs26" value="-" style="">
+                            <input type="hidden" id="anmt_numb26" value="LNF0205" style="">
+                            <input type="hidden" id="rqst_degr26" value="1" style="">
+                            <input type="hidden" id="dcsn_numb26" value="2025-18252" style="">
+                            <input type="hidden" id="rqst_year26" value="2025" style="">
+                            <input type="hidden" id="bsic_stat26" value="" style="">
+                            <input type="hidden" id="dmst_itnb26" value="" style="">
+                            <input type="hidden" id="csrt_numb26" value="2025-18252" style="">
+                            <input type="hidden" id="negn_cldt26" value="" style="">
+                            <input type="hidden" id="negn_pldt26" value="20250918" style="">
+                            <input type="hidden" id="bidx_date26" value="20250924" style="">
+                            <input type="hidden" id="ordr_year26" value="2025" style="">
+                            <input type="hidden" id="negn_degr26" value="1" style="">
+                            <input type="hidden" id="lv1Divs6" value="PEB" style="">
+                            <input type="hidden" id="lv2Divs26" value="2" style="">
+                        </li>   
+                    
+                       <li>                     
+                            
+                                
+                                    <a href="#" class="searchViewPsb"><span class="fred">[긴급]</span> (25F156-I)25년보급부대근무분야민간위탁용역(양평)</a><em>2025-09-18</em>
+                                
+                                
+                             
+                            <input type="hidden" value="7" style="">
+                            <input type="hidden" id="dprt_code27" value="UMM" style="">
+                            <input type="hidden" id="anmt_divs27" value="B" style="">
+                            <input type="hidden" id="anmt_numb27" value="UMM0804" style="">
+                            <input type="hidden" id="rqst_degr27" value="1" style="">
+                            <input type="hidden" id="dcsn_numb27" value="32956" style="">
+                            <input type="hidden" id="rqst_year27" value="2025" style="">
+                            <input type="hidden" id="bsic_stat27" value="1" style="">
+                            <input type="hidden" id="dmst_itnb27" value="" style="">
+                            <input type="hidden" id="csrt_numb27" value="32956" style="">
+                            <input type="hidden" id="negn_cldt27" value="" style="">
+                            <input type="hidden" id="negn_pldt27" value="20250918" style="">
+                            <input type="hidden" id="bidx_date27" value="20250924" style="">
+                            <input type="hidden" id="ordr_year27" value="2025" style="">
+                            <input type="hidden" id="negn_degr27" value="1" style="">
+                            <input type="hidden" id="lv1Divs7" value="PDB" style="">
+                            <input type="hidden" id="lv2Divs27" value="1" style="">
+                        </li>   
+                    
+                       <li>                     
+                            
+                                
+                                   
+                                    <a href="#" class="searchViewPsb">[수의] (25-용역-36) 25년 상용 살수차량 위탁운영 계약</a><em>2025-09-18</em>             
+                                
+                             
+                            <input type="hidden" value="8" style="">
+                            <input type="hidden" id="dprt_code28" value="LGM" style="">
+                            <input type="hidden" id="anmt_divs28" value="-" style="">
+                            <input type="hidden" id="anmt_numb28" value="LGM0051" style="">
+                            <input type="hidden" id="rqst_degr28" value="1" style="">
+                            <input type="hidden" id="dcsn_numb28" value="38818" style="">
+                            <input type="hidden" id="rqst_year28" value="2025" style="">
+                            <input type="hidden" id="bsic_stat28" value="1" style="">
+                            <input type="hidden" id="dmst_itnb28" value="***" style="">
+                            <input type="hidden" id="csrt_numb28" value="38818" style="">
+                            <input type="hidden" id="negn_cldt28" value="" style="">
+                            <input type="hidden" id="negn_pldt28" value="20250918" style="">
+                            <input type="hidden" id="bidx_date28" value="20250924" style="">
+                            <input type="hidden" id="ordr_year28" value="2025" style="">
+                            <input type="hidden" id="negn_degr28" value="1" style="">
+                            <input type="hidden" id="lv1Divs8" value="PDB" style="">
+                            <input type="hidden" id="lv2Divs28" value="2" style="">
+                        </li>   
+                    
+                </ul>
+            </div>
+            <!--// 용역 -->
+            <!-- 공사 -->
+            <div id="tab_content03" class="tab_content type2" style="display: none;">
+                <a href="/peb/bid/announceList.do?key=41" title="공사 최근 입찰 공고 더보기" class="ico_more"></a>
+                <ul class="list_dot type2">
+                    
+                       <li>
+                            
+                                
+                                
+                                    <a href="#" class="searchViewPeb">[수의] [A165] 폐기물보관시설 설치 전기공사</a><em>2025-09-18</em>
+                                
+                             
+                            <input type="hidden" value="1" style="">
+                            <input type="hidden" id="dprt_code31" value="LMH" style="">
+                            <input type="hidden" id="anmt_divs31" value="B" style="">
+                            <input type="hidden" id="anmt_numb31" value="LMH0250" style="">
+                            <input type="hidden" id="rqst_degr31" value="1" style="">
+                            <input type="hidden" id="dcsn_numb31" value="2025-18257" style="">
+                            <input type="hidden" id="rqst_year31" value="2025" style="">
+                            <input type="hidden" id="bsic_stat31" value="" style="">
+                            <input type="hidden" id="dmst_itnb31" value="" style="">
+                            <input type="hidden" id="anmt_date31" value="20250918" style="">
+                            <input type="hidden" id="csrt_numb31" value="2025-18257" style="">
+                            <input type="hidden" id="cont_mthd31" value="E" style="">
+                            <input type="hidden" id="negn_pldt31" value="20250918" style="">
+                            <input type="hidden" id="bidx_date31" value="20250924" style="">
+                            <input type="hidden" id="negn_degr31" value="1" style="">                           
+                            <input type="hidden" id="ordr_year31" value="2025" style="">
+                            <input type="hidden" id="lv2Divs31" value="2" style="">
+                        </li>   
+                    
+                       <li>
+                            
+                                
+                                
+                                    <a href="#" class="searchViewPeb">[수의] 25-거-사격장 토양오염복원 본공사(049)</a><em>2025-09-18</em>
+                                
+                             
+                            <input type="hidden" value="2" style="">
+                            <input type="hidden" id="dprt_code32" value="SCR" style="">
+                            <input type="hidden" id="anmt_divs32" value="B" style="">
+                            <input type="hidden" id="anmt_numb32" value="SCR0068" style="">
+                            <input type="hidden" id="rqst_degr32" value="1" style="">
+                            <input type="hidden" id="dcsn_numb32" value="2025-18279" style="">
+                            <input type="hidden" id="rqst_year32" value="2025" style="">
+                            <input type="hidden" id="bsic_stat32" value="" style="">
+                            <input type="hidden" id="dmst_itnb32" value="" style="">
+                            <input type="hidden" id="anmt_date32" value="20250918" style="">
+                            <input type="hidden" id="csrt_numb32" value="2025-18279" style="">
+                            <input type="hidden" id="cont_mthd32" value="E" style="">
+                            <input type="hidden" id="negn_pldt32" value="20250918" style="">
+                            <input type="hidden" id="bidx_date32" value="20250924" style="">
+                            <input type="hidden" id="negn_degr32" value="1" style="">                           
+                            <input type="hidden" id="ordr_year32" value="2025" style="">
+                            <input type="hidden" id="lv2Divs32" value="2" style="">
+                        </li>   
+                    
+                       <li>
+                            
+                                
+                                
+                                    <a href="#" class="searchViewPeb">[수의] 보일러 세관 및 보수공사</a><em>2025-09-18</em>
+                                
+                             
+                            <input type="hidden" value="3" style="">
+                            <input type="hidden" id="dprt_code33" value="MCN" style="">
+                            <input type="hidden" id="anmt_divs33" value="B" style="">
+                            <input type="hidden" id="anmt_numb33" value="MCN0063" style="">
+                            <input type="hidden" id="rqst_degr33" value="1" style="">
+                            <input type="hidden" id="dcsn_numb33" value="2025-18259" style="">
+                            <input type="hidden" id="rqst_year33" value="2025" style="">
+                            <input type="hidden" id="bsic_stat33" value="" style="">
+                            <input type="hidden" id="dmst_itnb33" value="" style="">
+                            <input type="hidden" id="anmt_date33" value="20250918" style="">
+                            <input type="hidden" id="csrt_numb33" value="2025-18259" style="">
+                            <input type="hidden" id="cont_mthd33" value="E" style="">
+                            <input type="hidden" id="negn_pldt33" value="20250918" style="">
+                            <input type="hidden" id="bidx_date33" value="20250924" style="">
+                            <input type="hidden" id="negn_degr33" value="1" style="">                           
+                            <input type="hidden" id="ordr_year33" value="2025" style="">
+                            <input type="hidden" id="lv2Divs33" value="2" style="">
+                        </li>   
+                    
+                       <li>
+                            
+                                
+                                
+                                    <a href="#" class="searchViewPeb">[수의] 00부대 정신전력 체험관 제2관 보수</a><em>2025-09-18</em>
+                                
+                             
+                            <input type="hidden" value="4" style="">
+                            <input type="hidden" id="dprt_code34" value="LFC" style="">
+                            <input type="hidden" id="anmt_divs34" value="B" style="">
+                            <input type="hidden" id="anmt_numb34" value="LFC0060" style="">
+                            <input type="hidden" id="rqst_degr34" value="1" style="">
+                            <input type="hidden" id="dcsn_numb34" value="2025-18254" style="">
+                            <input type="hidden" id="rqst_year34" value="2025" style="">
+                            <input type="hidden" id="bsic_stat34" value="" style="">
+                            <input type="hidden" id="dmst_itnb34" value="" style="">
+                            <input type="hidden" id="anmt_date34" value="20250918" style="">
+                            <input type="hidden" id="csrt_numb34" value="2025-18254" style="">
+                            <input type="hidden" id="cont_mthd34" value="E" style="">
+                            <input type="hidden" id="negn_pldt34" value="20250918" style="">
+                            <input type="hidden" id="bidx_date34" value="20250924" style="">
+                            <input type="hidden" id="negn_degr34" value="1" style="">                           
+                            <input type="hidden" id="ordr_year34" value="2025" style="">
+                            <input type="hidden" id="lv2Divs34" value="2" style="">
+                        </li>   
+                    
+                       <li>
+                            
+                                
+                                
+                                    <a href="#" class="searchViewPeb">[수의] (D093) 00부대 본청 개선공사</a><em>2025-09-18</em>
+                                
+                             
+                            <input type="hidden" value="5" style="">
+                            <input type="hidden" id="dprt_code35" value="LDA" style="">
+                            <input type="hidden" id="anmt_divs35" value="B" style="">
+                            <input type="hidden" id="anmt_numb35" value="LDA0165" style="">
+                            <input type="hidden" id="rqst_degr35" value="1" style="">
+                            <input type="hidden" id="dcsn_numb35" value="2025-18218" style="">
+                            <input type="hidden" id="rqst_year35" value="2025" style="">
+                            <input type="hidden" id="bsic_stat35" value="" style="">
+                            <input type="hidden" id="dmst_itnb35" value="" style="">
+                            <input type="hidden" id="anmt_date35" value="20250918" style="">
+                            <input type="hidden" id="csrt_numb35" value="2025-18218" style="">
+                            <input type="hidden" id="cont_mthd35" value="E" style="">
+                            <input type="hidden" id="negn_pldt35" value="20250918" style="">
+                            <input type="hidden" id="bidx_date35" value="20250924" style="">
+                            <input type="hidden" id="negn_degr35" value="1" style="">                           
+                            <input type="hidden" id="ordr_year35" value="2025" style="">
+                            <input type="hidden" id="lv2Divs35" value="2" style="">
+                        </li>   
+                    
+                       <li>
+                            
+                                
+                                
+                                    <a href="#" class="searchViewPeb">[수의] [A164] 폐기물보관시설 신축 본공사</a><em>2025-09-18</em>
+                                
+                             
+                            <input type="hidden" value="6" style="">
+                            <input type="hidden" id="dprt_code36" value="LMH" style="">
+                            <input type="hidden" id="anmt_divs36" value="B" style="">
+                            <input type="hidden" id="anmt_numb36" value="LMH0249" style="">
+                            <input type="hidden" id="rqst_degr36" value="1" style="">
+                            <input type="hidden" id="dcsn_numb36" value="2025-18256" style="">
+                            <input type="hidden" id="rqst_year36" value="2025" style="">
+                            <input type="hidden" id="bsic_stat36" value="" style="">
+                            <input type="hidden" id="dmst_itnb36" value="" style="">
+                            <input type="hidden" id="anmt_date36" value="20250918" style="">
+                            <input type="hidden" id="csrt_numb36" value="2025-18256" style="">
+                            <input type="hidden" id="cont_mthd36" value="E" style="">
+                            <input type="hidden" id="negn_pldt36" value="20250918" style="">
+                            <input type="hidden" id="bidx_date36" value="20250924" style="">
+                            <input type="hidden" id="negn_degr36" value="1" style="">                           
+                            <input type="hidden" id="ordr_year36" value="2025" style="">
+                            <input type="hidden" id="lv2Divs36" value="2" style="">
+                        </li>   
+                    
+                       <li>
+                            
+                                
+                                
+                                    <a href="#" class="searchViewPeb">[수의] 00부대 간부숙소 옹벽 및 배수로 보수(시설공사)</a><em>2025-09-18</em>
+                                
+                             
+                            <input type="hidden" value="7" style="">
+                            <input type="hidden" id="dprt_code37" value="LNS" style="">
+                            <input type="hidden" id="anmt_divs37" value="B" style="">
+                            <input type="hidden" id="anmt_numb37" value="LNS0091" style="">
+                            <input type="hidden" id="rqst_degr37" value="1" style="">
+                            <input type="hidden" id="dcsn_numb37" value="2025-18270" style="">
+                            <input type="hidden" id="rqst_year37" value="2025" style="">
+                            <input type="hidden" id="bsic_stat37" value="" style="">
+                            <input type="hidden" id="dmst_itnb37" value="" style="">
+                            <input type="hidden" id="anmt_date37" value="20250918" style="">
+                            <input type="hidden" id="csrt_numb37" value="2025-18270" style="">
+                            <input type="hidden" id="cont_mthd37" value="E" style="">
+                            <input type="hidden" id="negn_pldt37" value="20250918" style="">
+                            <input type="hidden" id="bidx_date37" value="20250924" style="">
+                            <input type="hidden" id="negn_degr37" value="1" style="">                           
+                            <input type="hidden" id="ordr_year37" value="2025" style="">
+                            <input type="hidden" id="lv2Divs37" value="2" style="">
+                        </li>   
+                    
+                       <li>
+                            
+                                
+                                    <a href="#" class="searchViewPeb"><span class="fred">[긴급]</span> 25-B-00수사대 신축공사</a><em>2025-09-17</em><!-- 2019.01.14 bidxDate(개찰일자)을  anmtDate(공고일자)로 수정-->
+                                
+                                
+                             
+                            <input type="hidden" value="8" style="">
+                            <input type="hidden" id="dprt_code38" value="SFH" style="">
+                            <input type="hidden" id="anmt_divs38" value="B" style="">
+                            <input type="hidden" id="anmt_numb38" value="SFH0058" style="">
+                            <input type="hidden" id="rqst_degr38" value="1" style="">
+                            <input type="hidden" id="dcsn_numb38" value="2025-18191" style="">
+                            <input type="hidden" id="rqst_year38" value="2025" style="">
+                            <input type="hidden" id="bsic_stat38" value="" style="">
+                            <input type="hidden" id="dmst_itnb38" value="" style="">
+                            <input type="hidden" id="anmt_date38" value="20250917" style="">
+                            <input type="hidden" id="csrt_numb38" value="2025-18191" style="">
+                            <input type="hidden" id="cont_mthd38" value="C" style="">
+                            <input type="hidden" id="negn_pldt38" value="20250917" style="">
+                            <input type="hidden" id="bidx_date38" value="20250923" style="">
+                            <input type="hidden" id="negn_degr38" value="1" style="">                           
+                            <input type="hidden" id="ordr_year38" value="2025" style="">
+                            <input type="hidden" id="lv2Divs38" value="1" style="">
+                        </li>   
+                    
+                </ul>
+            </div>
+            <!--// 공사 -->
+            <!-- 국외 -->
+            <div id="tab_content04" class="tab_content type2" style="display: none;">              
+                <a href="/pcb/bid/todayBidAnnounceList.do" title="국외 최근 입찰 공고 더보기" class="ico_more"></a>
+                <ul class="list_dot type2">
+                    
+                    <li>
+                        <a href="#" class="searchViewPcb">[정상] PCAW5007-장보고-III BATCH-II 정비대체장비</a><em>2025-09-16</em>
+                        <input type="hidden" value="1" style="">
+                        <input type="hidden" id="anmt_year41" value="2025" style="">
+                        <input type="hidden" id="bidx_date41" value="20251029" style="">
+                        <input type="hidden" id="anmt_numb41" value="EWA0009" style="">
+                        <input type="hidden" id="dgNumb41" value="PCAW5007-002" style="">
+                        <input type="hidden" id="anmt_rqst41" value="1" style="">
+                        <input type="hidden" id="docm_iden41" value="2025091617230169385" style="">
+                        <input type="hidden" id="dprt_code41" value="EWA" style="">
+                        <input type="hidden" id="dcsn_numb41" value="PCAW5007" style="">
+                        <input type="hidden" id="grop_numb41" value="002" style="">
+                    </li>
+                    
+                    <li>
+                        <a href="#" class="searchViewPcb">[재공고] BAAU5001-특수작전용정찰무인항공기</a><em>2025-09-16</em>
+                        <input type="hidden" value="2" style="">
+                        <input type="hidden" id="anmt_year42" value="2025" style="">
+                        <input type="hidden" id="bidx_date42" value="20251031" style="">
+                        <input type="hidden" id="anmt_numb42" value="EU10002" style="">
+                        <input type="hidden" id="dgNumb42" value="BAAU5001-001" style="">
+                        <input type="hidden" id="anmt_rqst42" value="2" style="">
+                        <input type="hidden" id="docm_iden42" value="2025091610273104154" style="">
+                        <input type="hidden" id="dprt_code42" value="EU1" style="">
+                        <input type="hidden" id="dcsn_numb42" value="BAAU5001" style="">
+                        <input type="hidden" id="grop_numb42" value="001" style="">
+                    </li>
+                    
+                    <li>
+                        <a href="#" class="searchViewPcb">[재공고] DAAH5020-항공기 전자전장비 질소 주입기(N.P.S)</a><em>2025-09-11</em>
+                        <input type="hidden" value="3" style="">
+                        <input type="hidden" id="anmt_year43" value="2025" style="">
+                        <input type="hidden" id="bidx_date43" value="20250923" style="">
+                        <input type="hidden" id="anmt_numb43" value="EHG0025" style="">
+                        <input type="hidden" id="dgNumb43" value="DAAH5020-002" style="">
+                        <input type="hidden" id="anmt_rqst43" value="2" style="">
+                        <input type="hidden" id="docm_iden43" value="2025091109242941761" style="">
+                        <input type="hidden" id="dprt_code43" value="EHG" style="">
+                        <input type="hidden" id="dcsn_numb43" value="DAAH5020" style="">
+                        <input type="hidden" id="grop_numb43" value="002" style="">
+                    </li>
+                    
+                    <li>
+                        <a href="#" class="searchViewPcb">[정상] PCAW5010-장보고-Ⅲ BATCH-Ⅰ정비지원장비(컴퓨터시스템)</a><em>2025-08-29</em>
+                        <input type="hidden" value="4" style="">
+                        <input type="hidden" id="anmt_year44" value="2025" style="">
+                        <input type="hidden" id="bidx_date44" value="20251014" style="">
+                        <input type="hidden" id="anmt_numb44" value="EWA0007" style="">
+                        <input type="hidden" id="dgNumb44" value="PCAW5010-002" style="">
+                        <input type="hidden" id="anmt_rqst44" value="1" style="">
+                        <input type="hidden" id="docm_iden44" value="2025082914035824829" style="">
+                        <input type="hidden" id="dprt_code44" value="EWA" style="">
+                        <input type="hidden" id="dcsn_numb44" value="PCAW5010" style="">
+                        <input type="hidden" id="grop_numb44" value="002" style="">
+                    </li>
+                    
+                    <li>
+                        <a href="#" class="searchViewPcb">[정상] DADH5076-무인표적기</a><em>2025-08-21</em>
+                        <input type="hidden" value="5" style="">
+                        <input type="hidden" id="anmt_year45" value="2025" style="">
+                        <input type="hidden" id="bidx_date45" value="20251002" style="">
+                        <input type="hidden" id="anmt_numb45" value="EHG0027" style="">
+                        <input type="hidden" id="dgNumb45" value="DADH5076-001" style="">
+                        <input type="hidden" id="anmt_rqst45" value="1" style="">
+                        <input type="hidden" id="docm_iden45" value="2025082115221042303" style="">
+                        <input type="hidden" id="dprt_code45" value="EHG" style="">
+                        <input type="hidden" id="dcsn_numb45" value="DADH5076" style="">
+                        <input type="hidden" id="grop_numb45" value="001" style="">
+                    </li>
+                    
+                    <li>
+                        <a href="#" class="searchViewPcb">[정상] BDAH5074-청력보호 헤드세트</a><em>2025-08-20</em>
+                        <input type="hidden" value="6" style="">
+                        <input type="hidden" id="anmt_year46" value="2025" style="">
+                        <input type="hidden" id="bidx_date46" value="20251002" style="">
+                        <input type="hidden" id="anmt_numb46" value="EHG0026" style="">
+                        <input type="hidden" id="dgNumb46" value="BDAH5074-001" style="">
+                        <input type="hidden" id="anmt_rqst46" value="1" style="">
+                        <input type="hidden" id="docm_iden46" value="2025081923053400091" style="">
+                        <input type="hidden" id="dprt_code46" value="EHG" style="">
+                        <input type="hidden" id="dcsn_numb46" value="BDAH5074" style="">
+                        <input type="hidden" id="grop_numb46" value="001" style="">
+                    </li>
+                    
+                    <li>
+                        <a href="#" class="searchViewPcb">[정상] BDAH5075-청력보호 헤드세트</a><em>2025-08-20</em>
+                        <input type="hidden" value="7" style="">
+                        <input type="hidden" id="anmt_year47" value="2025" style="">
+                        <input type="hidden" id="bidx_date47" value="20251002" style="">
+                        <input type="hidden" id="anmt_numb47" value="EHG0026" style="">
+                        <input type="hidden" id="dgNumb47" value="BDAH5075-001" style="">
+                        <input type="hidden" id="anmt_rqst47" value="1" style="">
+                        <input type="hidden" id="docm_iden47" value="2025081923053400091" style="">
+                        <input type="hidden" id="dprt_code47" value="EHG" style="">
+                        <input type="hidden" id="dcsn_numb47" value="BDAH5075" style="">
+                        <input type="hidden" id="grop_numb47" value="001" style="">
+                    </li>
+                    
+                    <li>
+                        <a href="#" class="searchViewPcb">[정상] BGAK5007-7.62MM 수동식 저격소총</a><em>2025-08-12</em>
+                        <input type="hidden" value="8" style="">
+                        <input type="hidden" id="anmt_year48" value="2025" style="">
+                        <input type="hidden" id="bidx_date48" value="20250923" style="">
+                        <input type="hidden" id="anmt_numb48" value="EKA0035" style="">
+                        <input type="hidden" id="dgNumb48" value="BGAK5007-002" style="">
+                        <input type="hidden" id="anmt_rqst48" value="1" style="">
+                        <input type="hidden" id="docm_iden48" value="2025081214142486553" style="">
+                        <input type="hidden" id="dprt_code48" value="EKA" style="">
+                        <input type="hidden" id="dcsn_numb48" value="BGAK5007" style="">
+                        <input type="hidden" id="grop_numb48" value="002" style="">
+                    </li>
+                    
+                </ul>               
+            </div>  
+                 
+<!-- index_include end -->          
+            <!--// 국외 -->
+            <!--%@ include file="/index_include.jsp" %>  -->
+        </div>
+        
+    </div>
+    <!--//tab_area -->
+</div>
+<!-- 최근 입찰 공고 -->
+<!-- 공지사항 -->
+<div class="m_notice">
+    <h3>공지사항</h3>
+    <!-- tab_area -->
+    <div class="tab_wrap">
+        <ul class="tabs type2">
+            <li><a href="#tab_content05" class="tab2 current">일반(시스템)</a></li>
+            <li><a href="#tab_content06" class="tab2">방위사업청</a></li>
+            <li><a href="#tab_content07" class="tab2">수요부대</a></li>
+        </ul>
+        <div class="tab_content_wrap">
+            <!--// 일반 -->
+            <div id="tab_content05" class="tab_content type2" style="">
+                <a href="/board/notice/getNoticeList.do?key=91" title="일반 공지사항 더보기" class="ico_more"></a>
+                <ul class="list_dot type2"> 
+                    
+                    
+                    
+                        
+                        
+                        <li><a href="/board/notice/getNoticeView.do?key=91&amp;bbsId=&amp;contentId=6008">[안내]보이스 피싱 예방</a><em>2025-08-19</em></li>
+                        
+                    
+                    
+                    
+                    
+                        
+                        
+                        <li><a href="/board/notice/getNoticeView.do?key=91&amp;bbsId=&amp;contentId=5747">[안내]입찰담합 사전예방을 위한 입찰담합유형 안내</a><em>2024-06-05</em></li>
+                        
+                    
+                    
+                    
+                    
+                        
+                        
+                        <li><a href="/board/notice/getNoticeView.do?key=91&amp;bbsId=&amp;contentId=5284">[안내]국방전자조달 고객지원(콜센터) 상담분야 개편 안내</a><em>2023-02-14</em></li>
+                        
+                    
+                    
+                    
+                    
+                        
+                        
+                        <li><a href="/board/notice/getNoticeView.do?key=91&amp;bbsId=&amp;contentId=5215">[안내]국방전자조달시스템 접속 차단 시 안내</a><em>2022-10-17</em></li>
+                        
+                    
+                    
+                    
+                    
+                        
+                        
+                        <li><a href="/board/notice/getNoticeView.do?key=91&amp;bbsId=&amp;contentId=5114">[안내]국방전자조달시스템 SMS(알림톡) 신청 안내</a><em>2022-06-16</em></li>
+                        
+                    
+                    
+                    
+                    
+                        
+                        <li><a href="/board/notice/getNoticeView.do?key=91&amp;bbsId=&amp;contentId=4915"><span class="fred">[중요]국방전자조달시스템 이용 시 멀티 브라우저 사용방법 안내(크롬, 엣지 등)</span></a><em>2021-07-22</em></li>
+                        
+                        
+                    
+                    
+                    
+                    
+                        
+                        
+                        <li><a href="/board/notice/getNoticeView.do?key=91&amp;bbsId=&amp;contentId=4796">[안내]국방전자조달 동가 낙찰자 선정방식 변경 안내</a><em>2021-04-05</em></li>
+                        
+                    
+                    
+                    
+                    
+                        
+                        
+                        <li><a href="/board/notice/getNoticeView.do?key=91&amp;bbsId=&amp;contentId=1892">중복/이중투찰 방지를 위한 시스템 개선 안내</a><em>2012-05-14</em></li>
+                        
+                    
+                    
+                </ul>
+            </div>
+            <!-- 방위사업청 -->
+            <div id="tab_content06" class="tab_content type2" style="display:none;">
+                <a href="/board/notice/demandNoticeList.do?bbsId=NEWS03" title="방위사업청 공지사항 더보기" class="ico_more"></a>
+                <ul class="list_dot type2">
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=357&amp;bbsId=NEWS03&amp;contentId=6031">「레이저대공무기(Block-I)용 상호통화기세트」에 대한 생산능력확인 관련 사전 공고(안내)_연장</a><em>2025-09-17</em></li>
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=357&amp;bbsId=NEWS03&amp;contentId=6030">2025년 국외조달 수리부속 전자협상 관련 안내</a><em>2025-09-15</em></li>
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=357&amp;bbsId=NEWS03&amp;contentId=6019">'레이저대공무기(Block-I)용 상호통화기세트' 생산능력확인 관련 사전 공고(안내)</a><em>2025-09-04</em></li>
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=357&amp;bbsId=NEWS03&amp;contentId=6018">'육군합성전장훈련체계 전력화지원장비' 구매요구서 사전공개</a><em>2025-09-04</em></li>
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=357&amp;bbsId=NEWS03&amp;contentId=6017">KF-16 성능개량 항공기 헬멧장착 시현장치 (HMD) 국외 상업구매 "입찰공고 취소 후 신규 입찰공고" 안내 </a><em>2025-09-01</em></li>
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=357&amp;bbsId=NEWS03&amp;contentId=6016">2025년 함정 패키지탄약 국외조달 탄약 구매요구서 사전공개 및 설명회 개최 계획 공지(127mm 단장약 등 7개 품목)</a><em>2025-09-01</em></li>
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=357&amp;bbsId=NEWS03&amp;contentId=6014">2025년 국외조달 수리부속 전자협상 관련 안내</a><em>2025-08-29</em></li>
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=357&amp;bbsId=NEWS03&amp;contentId=6012">9mm 소형권총(9mm Concealable Pistol) 구매요구서 사전공개</a><em>2025-08-26</em></li>
+                    
+                </ul>
+            </div>
+            <!--// 방위사업청 -->
+            <!-- 수요부대 -->
+            <div id="tab_content07" class="tab_content type2" style="display:none;">
+                <a href="/board/notice/demandNoticeList.do?bbsId=NEWS02" title="수요부대 공지사항 더보기" class="ico_more"></a>
+                <ul class="list_dot type2">
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=92&amp;bbsId=NEWS02&amp;contentId=6032">입찰건(8비 작전지휘부 신축 선행연구 용역) 관련 제안서 평가결과</a><em>2025-09-17</em></li>
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=92&amp;bbsId=NEWS02&amp;contentId=6029">25-A-00부대 시설공사(1267) 균형가격공지</a><em>2025-09-11</em></li>
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=92&amp;bbsId=NEWS02&amp;contentId=6028">25-F-Y-지역 본공사(4046) 균형가격 공지</a><em>2025-09-11</em></li>
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=92&amp;bbsId=NEWS02&amp;contentId=6027">25-U-00부대 항공전자시설 시설공사(5004) 균형가격 공지</a><em>2025-09-11</em></li>
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=92&amp;bbsId=NEWS02&amp;contentId=6026">25-A-00부대 시설공사(1278) 균형가격 공지</a><em>2025-09-11</em></li>
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=92&amp;bbsId=NEWS02&amp;contentId=6025">육군 여성필수시설(GOP 개선형) 규격화 공고</a><em>2025-09-10</em></li>
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=92&amp;bbsId=NEWS02&amp;contentId=6024">25-A-00부대 시설공사(1199) 균형가격 공지</a><em>2025-09-09</em></li>
+                    
+                    <li><a href="/board/notice/demandNoticeView.do?key=92&amp;bbsId=NEWS02&amp;contentId=6023">25-A-00부대 시설공사(1239) 균형가격 공지</a><em>2025-09-09</em></li>
+                    
+                </ul>
+            </div>
+            <!--// 수요부대 -->
+        </div>
+    </div>
+    <!--//tab_area -->
+</div>
+<!-- 공지사항 -->
+
+<!-- 하단 퀵메뉴 -->
+<div class="m_quickmenu">
+    <div>
+        <div class="qm_1">
+            
+            
+            <span>국방전자조달 고객지원</span>
+            <strong>1577-1118 <em>(①번)</em></strong>
+            <span>평일 : 09:00 ~ 18:00</span>
+            
+        </div>
+        <div class="qm_2">
+            <ul>
+                <li><a href="/mp/uim/userSmsServiceReq.do?key=382" class="ico_qm01">SMS서비스<br>신청</a></li>
+                
+                <li><a href="#none" onclick="javascript:alert('로그인 후 이용하세요');" class="ico_qm02">국내 조달원<br>확인서 발급</a></li>
+                
+                
+                
+                <li><a href="#" onclick="javascript:alert('로그인 후 이용하세요');" class="ico_qm03">실적증명서<br>발급신청</a></li>
+                
+                
+                
+                
+                
+                
+                <li><a href="http://help.dapa.go.kr/" rel="external" onclick="javascript:alert('원격서비스 요청의뢰를 받으신 경우에 원격서비스가 접수됩니다.\n\n문의전화)1577-1118,  이용가능시간)평일 09:00~18:00');" class="ico_qm08" target="_blank">원격서비스<br>신청</a></li>
+                             
+                
+                <li><a href="#" onclick="javascript:alert('로그인 후 이용하세요');" class="ico_qm09">국외 조달원<br>등록증 신청</a></li>
+                
+                
+                <li><a href="#none" onclick="javascript:onlineEduWindowOpen();" class="ico_qm10" title="전자입찰 온라인교육">전자입찰<br>온라인교육</a></li>
+            </ul>
+        </div>
+        
+    </div>
+    <div>
+        <div class="qm_3">
+            <ul>
+                <li><a href="/contents/info/domestic01.do?key=515" class="ico_qm04">국내조달<br>이용안내</a></li>
+                <li><a href="/contents/info/foreign01.do?key=518" class="ico_qm05">국외조달<br>이용안내</a></li>
+                <li class="bdl_no"><a href="/download/main/규격자료신청절차.pdf" class="ico_qm11">규격자료<br>신청절차</a></li>
+                <li><a href="#none" class="ico_qm12" onclick="window.open('/download/pop_manual.html','','width=700,height=620');" title="사용자 메뉴얼 새창열림">사용자<br>메뉴얼</a></li><!-- //window.open('/download/pop_manual.html','','width=700,height=700'); -->
+            </ul>
+        </div>
+        <div class="qm_5">
+            <ul>
+                <li><a href="#none" onclick="javascript:wordDicWindowOpen();" class="ico_qm06" title="국방조달 용어사전 새창열림">국방조달<br>용어사전</a></li>
+                <li><a href="/sym/item/itemTreeList.do?key=923" class="ico_dm30" title="사업구조별 품목">사업구조별<br>품목</a></li>
+                <li><a href="/contents/info/ordinance.do?key=525" class="ico_qm07">법령조회</a></li>
+                <li><a href="#none" onclick="javascript:mockBidWindowOpen();" class="ico_qm13" title="모의입찰 새창열림">모의입찰</a></li>
+                <li><a href="/sym/item/localizationList.do?key=924" class="ico_dm31">국산화<br>개발품목</a></li>
+                <li><a href="/contents/info/setting01.do?key=522" class="ico_qm06" title="PC사양 및 환경설정">PC사양 및<br>환경설정</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- // 하단 퀵메뉴 -->
+<!-- 배너존 -->
+<div class="m_bnrZone">
+    <ul>
+        <li class="ver2"><a class="line2" href="/openapi/yearProcurePlanList.do?key=387">조달정보<br>공개/개방</a></li>
+        <li class="ver2"><a class="line2" href="https://kdsis.dapa.go.kr/cs/ctlgSpprtMgt/cagecd9250Mgt/cagecd9250Popup.do?tabIdx=0&amp;importIdx=0" target="_blank" onclick="javascript:alert('국방 규격/목록 관련 업무(생산자부호 신청 포함)은[방위사업관리규정]에 따라[국방표준종합정보시스템]에서 업무를 처리하도록 되어 있으므로 해당 업무는[국방표준종합정보시스템]을 이용해주시기 바랍니다.\n\n[국방전자조달시스템]에서는 이용자 편의를 위해 [국방표준종합정보시스템]의 [생산자부호 신청 및 조회] 화면 바로가기만 제공합니다.\n\n[확인]을 누르시면 해당 화면으로 이동합니다.\n\n');">
+                         생산자부호<br>신청 및 조회<img src="/images/common/btn_link_g.png" align="center" alt="새창열림"></a></li>
+        <li class="ver2"><a class="line2" href="https://kdsis.dapa.go.kr/cs/ctlgSpprtMgt/cagecd9250Mgt/gukminPopup.do?tabIdx=0&amp;popYn=Y" target="_blank">
+                         국방 규격<br>재고번호 검색<img src="/images/common/btn_link_g.png" align="center" alt="새창열림"></a></li>
+        <li class="ver2"><a class="line2" href="https://quicksearch.dla.mil" target="_blank">
+                         미국방부 규격검색<br>(MIL-SPEC)<img src="/images/common/btn_link_g.png" align="center" alt="새창열림"></a></li>
+        <li class="ver2"><a class="line2" href="https://www.ftc.go.kr/www/contents.do?key=314" target="_blank">하도급대금 불공정<br>거래 신고방<img src="/images/common/btn_link_g.png" align="center" alt="새창열림"></a></li>                 
+<!--         <li class="ver2"><a class="line2" href="#" style="cursor: pointer;" onclick="window.open('http://www.g2b.go.kr:8070/um/injustice/injusticeBizerList.do?whereAreYouFrom=ALL','','width=830,height=800,scrollbars=yes'); return false"  target="_blank">
+                         나라장터 부정당<br>제재정보공개</a></li>
+                 
+        <li class="ver2"><a class="line2" href="/board/faq/faqList.do?key=97">자주묻는<br>질문(FAQ)</a></li>
+        <li class="ver2"><a href="/board/pds/getPdsList.do?key=94">자료실</a></li> -->
+    </ul>
+    <ul>
+        <li class="m_bnr5" id="_layerPop2"><a href="#none">국방표준종합<img src="/images/common/btn_link_g.png" align="center" alt="새창열림"></a></li>
+        <li class="m_bnr6" id="_layerPop1"><a href="#none">국방통합원가<img src="/images/common/btn_link_g.png" align="center" alt="새창열림"></a></li>
+        <li class="m_bnr7"><a href="/fbis/" target="_blank">Foreign Purchase<img src="/images/common/btn_link_g.png" align="center" alt="새창열림"></a></li>
+    </ul>
+</div>
+<div class="m_bnrZone">
+		   <ul> 
+                <li class="ver2" id="goG2b"><a class="line2" href="#none">나라장터 부정당<br>제재정보공개<img src="/images/common/btn_link_g.png" align="center" alt="새창열림"></a></li>
+		        <li class="ver2"><a class="line2" href="/board/faq/faqList.do?key=97">자주묻는<br>질문(FAQ)</a></li>
+                <li class="ver2"><a href="/board/pds/getPdsList.do?key=94">자료실</a></li>
+		        <!-- <li class="ver2"><a class="line2" href="https://blog.naver.com/dapapr" target="_blank">국내계약 가이드<br/>(방사청 블로그)</a></li> -->
+		        <li class="ver2"><a class="line2" href="https://blog.naver.com/PostList.nhn?blogId=dapapr&amp;categoryNo=165" target="_blank">국내계약 가이드<br>(방사청 블로그)<img src="/images/common/btn_link_g.png" align="center" alt="새창열림"></a></li>
+		   </ul> 
+</div>
+
+<!-- // 배너존 -->
+
+
+<div id="pop_wrap1" class="pop_layer w800 h600" style="background-color:#fff;display:none">
+    <div class="pop_header">
+        <p>국방통합원가</p>
+    </div>
+    <div class="pop_container" style="background-color:#fff">
+        <div class="pop_content">
+            <div class="pop_post">
+                <p>
+                    방위사업청 인증 정책에 따라 국방통합원가시스템 접속을 위해 아래와 같이 인증절차를 거쳐야 하오니 이용에 착오가 없으시길 바랍니다.
+                </p>
+                <strong class="stit_org mt20">국방통합원가시스템접속을 위한 필수 인증 신청 절차 안내</strong>
+                <strong class="stit_arwB">국방전자조달 사용자 등록</strong>
+                <div class="cnt_boxB">
+                    <ul class="list_dotO">
+                        <li>초기화면 상단 왼쪽의 [사용자 등록]버튼을 클릭하여 안내에 따라 등록</li>
+                        <li>국방전자조달 &gt; SMS서비스 신청 화면에서 통합원가의 SMS수신 허용을 설정하시면 국방통합원가시스템의 중요 공지사항 등을 SMS로 받아보실 수 있습니다.</li>
+                    </ul>
+                </div>
+                <strong class="stit_arwB">국방통합원가시스템 VPN Login ID 신청</strong>
+                <div class="cnt_boxB">
+                    <ul class="list_dotO">
+                        <li>VPN ID신청은 하단 [VPN ID신청 바로가기] 버튼을 클릭하여 안내에 따라 등록</li>
+                    </ul>
+                </div>
+                <strong class="stit_org">국방통합원가시스템 외부(대민) 포털 접근 안내</strong>
+                <div class="cnt_boxB">
+                    <ul class="list_dotO">
+                        <li>국방통합원가시스템 로그인 ID/PW는 전자조달 ID/PW와 동일합니다.</li>
+                    </ul>
+                </div>
+                <div class="vpn_proc">
+                    <ul>
+                        <li>하단바로가기 선택</li>
+                        <li class="proc2">VPN 로그인<span>(초기PW는 <em>1+ VPN신청서의 E-Mail</em>)</span></li>
+                        <li class="proc3">국방통합원가시스템<br>로그인<span>(전자조달등록 <em>사용자 ID/PW</em>)</span></li>
+                        <li class="proc4">인증서<br>로그인<span>(전자조달등록 <em>인증서</em>)</span></li>
+                    </ul>
+                </div>
+                <strong class="stit_org mt20">국방통합원가시스템 접속 장애시 해결방법</strong>
+                <div class="cnt_boxB">
+                    <ul class="list_dotO">
+                        <li>
+                            국방통합원가시스템 접속 장애시 해결방법 : 
+                            <a href="/download/main/solution.zip" class="fsu">장애해결방법</a><a href="/download/main/LoginVer2_dics.zip" class="fsu ml20 mr20">로그인 방법</a><a href="/download/main/IEOptionVer2_dics.zip" class="fsu">인터넷 옵션설정</a>
+                        </li>
+                    </ul>
+                </div>
+                <p class="mt8">문의사항은 국방통합원가시스템 (1577-1118 ②번)으로 연락 바랍니다.</p>
+            </div>  
+        </div>
+    </div>
+    <div class="pop_footer">
+        
+            
+            
+                <button type="button" class="btn_lGray" id="vpnId" title="새창열림">VPN ID 신청 바로가기</button>
+            
+        
+        <button type="button" class="btn_lGray" id="goVpn" title="새창열림">국방통합원가시스템 바로가기</button>
+    </div>
+    <button type="button" title="창 닫기" class="ico_lpx" id="_layerPopClose1"></button>
+</div>
+
+<div id="pop_wrap2" class="pop_layer w800 h600" style="background-color:#fff;display:none">
+    <div class="bg"></div>
+    <div class="pop_header">
+        <p>국방표준종합정보시스템</p>
+    </div>
+    <div class="pop_container" style="background-color:#fff">
+        <div class="pop_content">
+            <div class="pop_post">
+                <strong class="stit_org mt_no">국방표준종합정보시스템을 사용하기 위한 기본 절차</strong>
+                <p>
+                    국방표준종합정보시스템은 규격, 목록에 관련된 많은 자료를 철하고 관리합니다.<br>
+                    이 중에는 관계자 이외에는 열람하거나 내려받지 않아야 하는 자료들도 많고 보안문제도 따르고 있어 부득이하게 VPN 신청 및 권한신청을 게시판 신청과 함께 공문으로 접수하고 있습니다.<br>
+                    번거우시더라도 아래와 같은 절차대로 신청해 주시기 바랍니다.
+                </p>
+                <strong class="stit_arwB">시스템 사용 환경</strong>
+                <div class="cnt_boxB">
+                    <ul class="list_dotO">
+                        <li>표준종합시스템은 Edge , Chrome 환경에 최적화 되어 있습니다.
+                        </li>
+                        <li>
+                            표준종합시스템 바로가기 클릭 시 빈 화면만 보이는 경우
+                            <ul class="list_dash">
+                                <li>표준종합시스템 바로가기 클릭 시 빈 화면만 보이는 경우 다음파일을 다운받아 압축해제 후 사용방법에 따라 조치바랍니다. <br><a class="fsu" href="/download/main/hostschange.zip" target="_blank">[다운로드]</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <strong class="stit_arwB">VPN 신청</strong>
+                <div class="cnt_boxB">
+                    <ul class="list_dotO">
+                        <li>우측상단  [VPN 신청]  버튼 클릭 &gt; 팝업화면 'VPN 신청안내' 확인 후 [신청하기] 클릭</li>
+                        <li>
+                            VPN 신청 정보 입력 및 공문 첨부
+                            <ul class="list_dash">
+                                <li>신청정보 입력</li>
+                                <li>
+                                    아래의 양식으로 공문첨부
+                                    <ul>
+                                        <li>* 제목 : 국방표준종합정보시스템 사용을 위한 VPN 신청 및 사용자 권한신청</li>
+                                        <li>* 서식 : 업체 자체 문서양식 (직인필수)</li>
+                                        <li>* 필수내용 : 국방전자조달 사용자 이름, 국방전자조달 ID, VPN 신청ID</li>
+                                        <li>* 공문 수신처 : 방위사업청 표준기획과</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>정보 확인 후 [신청]버튼을 클릭합니다</li>
+                        <li>
+                            공문 수신 및 내용 확인하고 1일 후 처리해 드립니다.
+                            <p>* 비밀번호는 국방전자조달(www.d2b.go.kr) 로그인 ID/PW와 동일하게 사용하시면 됩니다.</p>
+                        </li>
+                    </ul>
+                </div>
+                <strong class="stit_arwB">권한신청</strong>
+                <div class="cnt_boxB">
+                    <ul class="list_dotO">
+                        <li>VPN 로그인 후 표준종합 정보시스템 로그인 합니다. (www.d2b.go.kr 로그인 ID/PW와 동일)</li>
+                        <li>최초 접속한 업체는 '기본사용자' 권한을 가집니다.</li>
+                        <li>                            
+                            권한부여 절차 - 국방표준종합정보시스템 메인화면 좌측하단 '권한신청 ' 클릭
+                            <ul class="list_dash">
+                                <li>팝업화면에 신청권한 등 정보 입력</li>
+                                <li>
+                                    사용자 권한신청 공문을 첨부 (VPN 신청에 첨부한 공문을 첨부 가능)
+                                    <ul>
+                                        <li>* 제목 : 국방표준종합정보시스템 사용을 위한 사용자 권한신청 </li>
+                                        <li>* 서식 : 업체 자체 문서양식 (직인 필수)</li>
+                                        <li>* 필수내용 : 국방전자조달 사용자 이름, 국방전자조달 ID, VPN 신청 ID </li>
+                                        <li>* 공문 수신처 : 방위사업청 표준기획과</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <ul class="txt_imp">
+                                <li>공문 필수(공문 미첨부시 처리 지연)</li>
+                                <li>공문 및 권한신청 사항을 확인 후 권한 부여(1~2일 소요)<p class="stit_hand">권한 신청 메뉴에서 처리상태 확인 가능</p></li>
+                                <li>VPN 로그인 하시면 기본 사용자 권한(단순 조회)은 부여되나 규격/목록 업무 처리를 위해서는 권한신청을 하여야 함</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                <p class="mt8">시스템 관련 문의: 1577-1118 ②번</p>
+            </div>  
+            <div class="post"></div>
+        </div>
+    </div>
+    <div class="pop_footer">
+        <!-- <button type="button" class="btn_lGray" id="vpnId2" target="_blank">VPN ID 신청 바로가기</button> -->
+        <button type="button" class="btn_lGray" id="goKdis" title="새창열림">국방표준종합정보시스템 바로가기</button>
+        <button type="button" class="btn_lGray" id="goKdisVpn" title="새창열림">VPN 로그인 화면 바로가기</button>
+    </div>
+    <button type="button" title="창 닫기" class="ico_lpx" id="_layerPopClose2"></button>
+</div>
+<!--  -->
+<input type="hidden" id="dprtCode" name="dprtCode" value="" style="">
+<input type="hidden" id="blngDivs" name="blngDivs" value="" style="">
+<script src="/js/index.js?v=20210113"></script>
+<script>
+//방위사업청 콜센터 한시적 대체 전화번호 안내 팝업
+/* if(getCookie("20241106") != "done") {
+	var notice1 = window.open('/popup/popup_notice_241106.html','notice_241106','top=0px,left=0px,width=404px,height=295px,scrollbars=no');
+	notice1.focus();
+} */
+//20241129~20241228	팝업
+/* if(GITIS.util.checkDate('yyyyMMdd').isLessThenToday('20241128') && GITIS.util.checkDate('yyyyMMdd').isGreatThenToday('20241228')){
+	//집중 지출심사 기간
+	if(getCookie("20241129") != "done") {
+		var notice1 = window.open('/popup/popup_notice_241129.html','notice_241129','top=100px,left=100px,width=771px,height=678px,scrollbars=no');//1100,1109
+		if(!f_isEmpty(notice1)) {//focus()가 엣지 브라우저 팝업창 차단여부에 따라 window.open의 반환객체가 null이 반환되는 경우가 있어 오류발생.
+			notice1.focus();
+		}		    	
+	}
+} */
+</script>
+<script>/* CLICKZONE SCRIPT V.V.4 *//*X*//* COPYRIGHT 2002-2017 BIZSPRING INC. *//*X*//* DO NOT MODIFY THIS SCRIPT. *//*X*/
+var _CZN="2"
+</script>
+<!-- <script src="http://125.61.29.169/InsightTrk/js/InsightClickZone.js" defer></script> -->
+		</div>
+	</div>
+</div>
+
+<div id="footer_wrap">
+	
+
+
+<div id="footer">
+	<h2>하단메뉴</h2>
+	<div class="foot_menu">
+		<a href="/contents/guide/introduce.do?key=503">국방전자조달 소개</a><a href="http://www.dapa.go.kr/dapa/sub.do?menuId=469" target="_blank">개인정보 처리방침</a><a href="http://www.dapa.go.kr/dapa/emp/empSearch/empSearchView.do?menuId=374" target="_blank">전화번호 안내</a><a href="/contents/info/site.do?key=527">관련사이트</a><a href="/contents/info/mobile.do?key=607">모바일앱서비스</a>
+	</div>
+	<p>
+		<a href="http://www.dapa.go.kr" class="footer_logo" target="_blank" title="방위사업청 새창열림"></a>
+		(35222) 대전광역시 서구 월평중로 21 방위사업청<br>
+		(13809) 경기도 과천시 관문로 47 정부과천청사 3동, 4동<span>대표전화 : 1577-1118</span><span>팩스 : 02-773-7587</span><br> 
+		Copyright(C) Defense Acquisition Program Administration. All Rights Reserved.  <em style="color:#fff;">68</em>
+	</p>
+	<div class="foot_link">
+		<a href="#">관련사이트 바로가기</a>
+		<ul>
+			<li><a href="http://www.share.go.kr/" target="_blank">행정정보이용센터</a></li>
+			<li><a href="http://kdsis.dapa.go.kr/" target="_blank">국방표준종합정보시스템</a></li>
+			<li><a href="https://vpn.dapa.go.kr/" target="_blank">국방통합원가시스템</a></li>
+			<li><a href="https://www.d4b.go.kr/" target="_blank">방산수출입지원시스템</a></li>
+			<li><a href="http://www.g2b.go.kr/" target="_blank">조달청 나라장터</a></li>
+			<li><a href="http://www.dapa.go.kr/" target="_blank">방위사업청 홈페이지</a></li>
+		</ul>
+	</div>
+</div>
+
+
+</div>
+
+
+<div id="ui-datepicker-div" class="ui-datepicker ui-widget ui-widget-content ui-helper-clearfix ui-corner-all"></div></body></html>

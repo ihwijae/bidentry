@@ -1,0 +1,15 @@
+{
+  "name": "bid-automation",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "automation-engine",
+    "electron-app"
+  ],
+  "scripts": {
+    "dev": "npm --prefix electron-app run dev",
+    "app:dev": "npm --prefix electron-app run dev",
+    "engine:demo": "node automation-engine/src/cli.js --demo",
+    "bootstrap": "npm --prefix electron-app install"
+  }
+}

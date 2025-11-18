@@ -1,0 +1,16 @@
+{
+  "name": "automation-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "bin": {
+    "automation-engine": "src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/cli.js --help",
+    "dev": "node src/cli.js --demo"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
+  }
+}

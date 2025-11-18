@@ -1,0 +1,9 @@
+{
+  "site": "kepco",
+  "url": "https://example.com/bid",
+  "bidId": "공고ID 또는 URL",
+  "company": { "name": "샘플회사", "bizNo": "000-00-00000", "representative": "홍길동" },
+  "auth": { "id": "sampleId", "pw": "samplePw" },
+  "cert": { "provider": "한국전자인증", "path": "", "pin": "" },
+  "options": { "headless": false, "timeoutSec": 300 }
+}

@@ -1,0 +1,304 @@
+<!DOCTYPE html><html lang="ko" class="x-viewport"><head>
+<meta charset="UTF-8"> 
+<title>한국전력 전자조달 시스템</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="google" content="notranslate">
+<meta name="_csrf_parameter" content="_csrf"><meta name="_csrf_header" content="X-CSRF-TOKEN"><meta name="_csrf" content="88c309ed-2c51-4512-8bd0-4a94bf354ce0">
+
+<link rel="stylesheet" href="themes/mdi/resources/kepco-theme-all.css" type="text/css"><link rel="stylesheet" href="themes/default/5.0.1.1255/resources/etnajs-theme-kepco-all.css" type="text/css"><link rel="stylesheet" href="themes/portal/resources/portal-theme-standard-all.css" type="text/css">
+
+<link rel="stylesheet" href="stylesheets.css?bust=1607648146082" type="text/css">
+<!-- <x-compile> -->
+<!-- <x-bootstrap> -->
+<!-- </x-bootstrap> -->
+<script async="" charset="utf-8" src="https://kepco-ep.kepco.co.kr/INIT/JS/static/79887/install.js?ver=1758067200000"></script><script type="text/javascript">var KepcoContextPath = '';var KepcoSSO = '';var isAuthentication = 'false';</script>
+<script type="text/javascript" src="resources/cmmn/js/simpleBrowser.js"></script>
+
+<script type="text/javascript" src="resources/cmmn/js/weblog.js"></script>
+<script language="JavaScript"> 
+
+
+ function isAllowedBrowser() {
+ 		var isAllowedBrowser = false
+ 		   ,isIE = SimpleBrowser.isChrome
+ 		   ,isChrome = SimpleBrowser.isIE
+		   ,ieVersion = SimpleBrowser.ieVersion
+		   ,chromeVersion = SimpleBrowser.chromeVersion
+ 		   ,browserName = SimpleBrowser.browser.name;
+
+ 		if(isChrome || isIE) {
+ 			isAllowedBrowser = ieVersion >= 11 || chromeVersion >= 43 || false;
+ 		}else if( browserName == "Firefox"){
+ 			isAllowedBrowser = true;
+ 		}
+
+ 		return isAllowedBrowser;
+ 	}
+ if(!isAllowedBrowser()) {
+ 	parent.location.replace('underSploin.do');
+ }
+	
+    document.onkeydown = processKey;
+
+    function processKey()
+    {	
+        // F5( 새로고침 ) 키를 누르지 못하도록 하기위해서
+        // 뒤로가기 키를 누르지 못하도록 하기위해서
+    	if(event.keyCode == 116){//F5, BackSpace
+            event.keyCode = 0;
+            event.cancelBubble = true;
+            event.returnValue = false;
+            event.preventDefault();
+        }
+        /*
+        if(event.keyCode == 116 || event.keyCode == 8 || event.keyCode == 123 || event.keyCode == 122){//F5, BackSpace, F12, F11
+            event.keyCode = 0;
+            event.cancelBubble = true;
+            event.returnValue = false;
+            event.preventDefault();
+        }else if(event.ctrlKey == true && event.shiftKey){//ctrl + shift
+        	event.keyCode = 0;
+            event.cancelBubble = true;
+            event.returnValue = false;
+            event.preventDefault();
+        }else if(event.ctrlKey == true && event.keyCode == 83){//ctrl + S
+        	event.keyCode = 0;
+            event.cancelBubble = true;
+            event.returnValue = false;
+            event.preventDefault();
+        }else if(event.ctrlKey == true && event.keyCode == 78){//ctrl + N
+        	event.keyCode = 0;
+            event.cancelBubble = true;
+            event.returnValue = false;
+            event.preventDefault();
+        }
+        */
+    }
+    
+    document.oncontextmenu = function(e){
+    	if(e){
+    		e.preventDefault();
+    	}else{
+    		event.keyCode = 0;
+    		event.cancelBubble = true;
+            event.returnValue = false;
+    	}
+    }
+</script>
+
+
+<!-- 엠로 기술연구소 메모리 모니터링 파일 import -->
+<!--   <script type="text/javascript" src="/extjs/swfobject.js"></script> -->
+
+<script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="require-module" src="./require-module.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="resources/jsoneditor-2.3.3/jsoneditor-min" src="./resources/jsoneditor-2.3.3/jsoneditor-min.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="resources/sencha-chart/sencha-charts" src="./resources/sencha-chart/sencha-charts.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="extjs/etc" src="./extjs/etc.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="extjs/define" src="./extjs/define.js"></script><link type="text/css" rel="stylesheet" href="https://srm.kepco.net/resources/jsoneditor-2.3.3/jsoneditor-min.css"></head>
+<body style="background:url('login/images/mdi_loading.gif') no-repeat fixed center;" id="ext-element-1" class="x-body x-webkit x-chrome x-border-layout-ct x-border-box x-container x-container-default"><div class="x-container  mdi-top x-border-item x-box-item x-container-default" style="padding: 0px; width: 1280px; margin: 0px; right: auto; left: 0px; top: 0px;" id="mditop-1012"><div id="mditop-1012-outerCt" data-ref="outerCt" class="x-autocontainer-outerCt" role="presentation" style="width: 100%; table-layout: fixed;"><div id="mditop-1012-innerCt" data-ref="innerCt" style="padding:0px 0px 6px 0px" class="x-autocontainer-innerCt" role="presentation"><div class="x-container  x-container-mdi-top x-box-layout-ct" style="border-bottom: none; height: 45px; width: 1280px;" id="container-1013" tabindex="1" componentid="container-1013"><div id="container-1013-innerCt" data-ref="innerCt" role="presentation" class="x-box-inner" style="width: 1280px; height: 60px;"><div id="container-1013-targetEl" data-ref="targetEl" class="x-box-target" role="presentation" style="width: 1280px;"><a class="x-btn  skip-button x-unselectable x-box-item x-btn-default-small" style="right: auto; margin: 0px; z-index: 100; position: fixed !important; left: 3px !important; display: none;" role="button" id="button-1014" tabindex="0" componentid="button-1014"><span id="button-1014-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-default-small "><span id="button-1014-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="" class="x-btn-button x-btn-button-default-small x-btn-text    x-btn-button-center "><span id="button-1014-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-default-small  " style=""></span><span id="button-1014-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-default-small">본문 바로가기</span></span></span></a><a class="x-btn  mdi-top-logo x-unselectable x-box-item x-btn-plain-small" style="margin: 0px; width: 300px; height: 18px; right: auto; left: 10px; top: 21px;" role="button" id="kepco-mdi-logo-button" tabindex="0" title="KEPCO | 전달조달시스템 메인화면 이동" componentid="kepco-mdi-logo-button"><span id="kepco-mdi-logo-button-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="table-layout:fixed;" class="x-btn-wrap x-btn-wrap-plain-small "><span id="kepco-mdi-logo-button-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="height:auto;" class="x-btn-button x-btn-button-plain-small  x-btn-no-text   x-btn-button-center "><span id="kepco-mdi-logo-button-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-plain-small  " style=""></span><span id="kepco-mdi-logo-button-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-plain-small">&nbsp;</span></span></span></a><a class="x-btn  mdi-top-logo_buyer x-unselectable x-box-item x-btn-plain-small" style="margin: 0px; width: 62px; height: 18px; display: none;" role="button" id="kepco-mdi-logo-button2" tabindex="0" title="KEPCO | 전달조달시스템 메인화면 이동" componentid="kepco-mdi-logo-button2"><span id="kepco-mdi-logo-button2-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="table-layout:fixed;" class="x-btn-wrap x-btn-wrap-plain-small "><span id="kepco-mdi-logo-button2-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="height:auto;" class="x-btn-button x-btn-button-plain-small  x-btn-no-text   x-btn-button-center "><span id="kepco-mdi-logo-button2-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-plain-small  " style=""></span><span id="kepco-mdi-logo-button2-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-plain-small">&nbsp;</span></span></span></a><label class="x-component  x-box-item x-component-default" style="font-size: 15px; display: none;" id="label-1015" for="">업무안내(대표전화) : 061-345-1247,9</label><div class="x-toolbar-spacer  x-box-item x-toolbar-spacer-default" style="width: 20px; margin: 0px; right: auto; left: 310px; top: 30px;" id="tbspacer-1016"></div><div class="x-component  x-box-item x-component-default" id="tbfill-1017" style="margin: 0px; right: auto; left: 330px; width: 111px; top: 30px;"></div><div class="x-field  x-form-item x-form-item-default x-form-type-text x-box-item x-field-default x-hbox-form-item" style="width: 420px; right: auto; left: 441px; margin: 0px; top: 11px;" id="textfield-1018"><label id="textfield-1018-labelEl" data-ref="labelEl" class="x-form-item-label x-form-item-label-default  x-unselectable" style="padding-right:5px;width:105px;" for="textfield-1018-inputEl"><span class="x-form-item-label-inner x-form-item-label-inner-default" style="width:100px">통합검색</span></label><div id="textfield-1018-bodyEl" data-ref="bodyEl" class="x-form-item-body x-form-item-body-default x-form-text-field-body x-form-text-field-body-default  "><div id="textfield-1018-triggerWrap" data-ref="triggerWrap" class="x-form-trigger-wrap x-form-trigger-wrap-default"><div id="textfield-1018-inputWrap" data-ref="inputWrap" class="x-form-text-wrap x-form-text-wrap-default"><input id="textfield-1018-inputEl" data-ref="inputEl" type="text" role="textbox" size="1" name="textfield-1018-inputEl" class="x-form-field x-form-text x-form-text-default  " autocomplete="off" title="통합검색" componentid="textfield-1018" style=""></div><a tabindex="0" title="통합검색의 검색 버튼" id="textfield-1018-trigger-mytrigger" class="x-form-trigger x-form-trigger-default trigger-search trigger-search-default  "></a></div></div></div><div class="x-component  x-box-item x-component-default" id="tbfill-1019" style="right: auto; left: 861px; margin: 0px; width: 112px; top: 30px;"></div><a class="x-btn  x-unselectable x-box-item x-btn-mdi-status-quick-button-small" role="button" id="button-1020" tabindex="0" title="페이지 이동" componentid="button-1020" style="right: auto; left: 845px; margin: 0px; top: 17px; display: none;"><span id="button-1020-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-status-quick-button-small "><span id="button-1020-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="" class="x-btn-button x-btn-button-mdi-status-quick-button-small x-btn-text    x-btn-button-center "><span id="button-1020-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-status-quick-button-small  " style=""></span><span id="button-1020-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-status-quick-button-small">로그아웃</span></span></span></a><div class="x-component  mdi-functionbar-separator x-box-item x-component-default" id="box-1021" style="right: auto; left: 950px; margin: 0px; top: 25px; display: none;"></div><a class="x-btn  mdi-quick-button-lock x-unselectable x-box-item x-btn-mdi-status-quick-button-small" role="button" id="button-1022" tabindex="0" title="팝업 열림" componentid="button-1022" style="right: auto; left: 973px; margin: 0px; top: 19px;"><span id="button-1022-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-status-quick-button-small "><span id="button-1022-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="" class="x-btn-button x-btn-button-mdi-status-quick-button-small x-btn-text    x-btn-button-center "><span id="button-1022-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-status-quick-button-small  " style=""></span><span id="button-1022-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-status-quick-button-small">로그인</span></span></span></a><div class="x-component  mdi-functionbar-separator x-box-item x-component-default" id="box-1023" style="right: auto; left: 1027px; margin: 0px; top: 25px;"></div><a class="x-btn  x-unselectable x-box-item x-btn-mdi-status-quick-button-small" role="button" id="button-1024" tabindex="0" title="페이지 이동" componentid="button-1024" style="right: auto; left: 1028px; margin: 0px; top: 18px;"><span id="button-1024-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-status-quick-button-small "><span id="button-1024-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="" class="x-btn-button x-btn-button-mdi-status-quick-button-small x-btn-text    x-btn-button-center "><span id="button-1024-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-status-quick-button-small  " style=""></span><span id="button-1024-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-status-quick-button-small">ID/비밀번호찾기</span></span></span></a><div class="x-component  mdi-functionbar-separator x-box-item x-component-default" id="box-1025" style="right: auto; left: 1133px; margin: 0px; top: 25px;"></div><a class="x-btn  x-unselectable x-box-item x-btn-mdi-status-quick-button-small" role="button" id="button-1026" tabindex="0" title="페이지 이동" componentid="button-1026" style="right: auto; left: 1134px; margin: 0px; top: 18px;"><span id="button-1026-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-status-quick-button-small "><span id="button-1026-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="" class="x-btn-button x-btn-button-mdi-status-quick-button-small x-btn-text    x-btn-button-center "><span id="button-1026-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-status-quick-button-small  " style=""></span><span id="button-1026-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-status-quick-button-small">회원가입</span></span></span></a><a class="x-btn  x-unselectable x-box-item x-btn-mdi-status-quick-button-small" role="button" id="button-1027" tabindex="0" title="페이지 이동" componentid="button-1027" style="pointer-events: none; right: auto; left: 1178px; margin: 0px; top: 18px; display: none;"><span id="button-1027-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-status-quick-button-small "><span id="button-1027-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="" class="x-btn-button x-btn-button-mdi-status-quick-button-small  x-btn-no-text   x-btn-button-center "><span id="button-1027-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-status-quick-button-small  " style=""></span><span id="button-1027-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-status-quick-button-small">&nbsp;</span></span></span></a><div class="x-component  mdi-functionbar-separator x-box-item x-component-default" id="box-1028" style="right: auto; left: 1199px; margin: 0px; top: 25px; display: none;"></div><a class="x-btn  x-unselectable x-box-item x-btn-mdi-status-quick-button-small" role="button" id="button-1029" tabindex="0" title="Personal Setup" componentid="button-1029" style="display: none;"><span id="button-1029-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-status-quick-button-small "><span id="button-1029-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="" class="x-btn-button x-btn-button-mdi-status-quick-button-small x-btn-text  x-btn-icon x-btn-icon-right x-btn-button-center "><span id="button-1029-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-status-quick-button-small">설정</span><span id="button-1029-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-status-quick-button-small mdi-quick-button-settings-icon " style="">&nbsp;</span></span></span></a><div class="x-toolbar-spacer  x-box-item x-toolbar-spacer-default" style="width: 20px; right: auto; left: 1200px; margin: 0px; top: 30px;" id="tbspacer-1033"></div><a class="x-btn  mdi-quick-button-lock-user-manual x-unselectable x-box-item x-btn-mdi-status-quick-button-small" style="font-weight: bold; right: auto; left: 1220px; margin: 0px; top: 0px;" role="button" id="button-1034" tabindex="0" title="페이지 이동" componentid="button-1034"><span id="button-1034-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-status-quick-button-small "><span id="button-1034-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="" class="x-btn-button x-btn-button-mdi-status-quick-button-small  x-btn-no-text   x-btn-button-center "><span id="button-1034-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-status-quick-button-small  " style=""></span><span id="button-1034-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-status-quick-button-small">&nbsp;</span></span></span></a></div></div></div><div class="x-toolbar  mdi-top-menu x-toolbar-mdi-top-menubar x-box-layout-ct" style="padding: 0px; border-width: 0px; height: 60px; width: 1280px;" id="toolbar-1036"><div role="presentation" id="toolbar-1036-before-scroller" class="x-box-scroller x-box-scroller-left x-box-scroller-toolbar x-box-scroller-toolbar-mdi-top-menubar x-unselectable" style="display:none"></div><div id="toolbar-1036-innerCt" data-ref="innerCt" role="presentation" class="x-box-inner x-box-scroller-body-horizontal" style="width: 1280px; height: 60px;"><div id="toolbar-1036-targetEl" data-ref="targetEl" class="x-box-target" role="presentation" style="width: 1280px;"><a class="x-btn x-unselectable x-box-item x-toolbar-item x-btn-mdi-top-menu-button-small" style="height: 60px; right: auto; left: 0px; top: 0px; margin: 0px;" role="button" id="button-1098" tabindex="0" componentid="button-1098"><span id="button-1098-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-top-menu-button-small "><span id="button-1098-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="height:auto;" class="x-btn-button x-btn-button-mdi-top-menu-button-small x-btn-text    x-btn-button-center "><span id="button-1098-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-top-menu-button-small  " style=""></span><span id="button-1098-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-top-menu-button-small">계약체결현황</span></span></span></a><a class="x-btn  x-unselectable x-box-item x-toolbar-item x-btn-mdi-top-menu-button-small" style="height: 60px; display: none;" role="button" id="button-1101" tabindex="0" componentid="button-1101"><span id="button-1101-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-top-menu-button-small "><span id="button-1101-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="height:auto;" class="x-btn-button x-btn-button-mdi-top-menu-button-small x-btn-text    x-btn-button-center "><span id="button-1101-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-top-menu-button-small  " style=""></span><span id="button-1101-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-top-menu-button-small">통합검색</span></span></span></a><a class="x-btn  x-unselectable x-box-item x-toolbar-item x-btn-mdi-top-menu-button-small" style="height: 60px; right: auto; left: 131px; top: 0px; margin: 0px;" role="button" id="button-1103" tabindex="0" componentid="button-1103"><span id="button-1103-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-top-menu-button-small "><span id="button-1103-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="height:auto;" class="x-btn-button x-btn-button-mdi-top-menu-button-small x-btn-text    x-btn-button-center "><span id="button-1103-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-top-menu-button-small  " style=""></span><span id="button-1103-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-top-menu-button-small">정보공개</span></span></span></a><a class="x-btn  x-unselectable x-box-item x-toolbar-item x-btn-mdi-top-menu-button-small" style="height: 60px; right: auto; left: 235px; top: 0px; margin: 0px;" role="button" id="button-1120" tabindex="0" componentid="button-1120"><span id="button-1120-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-top-menu-button-small "><span id="button-1120-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="height:auto;" class="x-btn-button x-btn-button-mdi-top-menu-button-small x-btn-text    x-btn-button-center "><span id="button-1120-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-top-menu-button-small  " style=""></span><span id="button-1120-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-top-menu-button-small">공급자종합정보</span></span></span></a><a class="x-btn  x-unselectable x-box-item x-toolbar-item x-btn-mdi-top-menu-button-small" style="height: 60px; right: auto; left: 379px; top: 0px; margin: 0px;" role="button" id="button-1124" tabindex="0" componentid="button-1124"><span id="button-1124-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-top-menu-button-small "><span id="button-1124-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="height:auto;" class="x-btn-button x-btn-button-mdi-top-menu-button-small x-btn-text    x-btn-button-center "><span id="button-1124-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-top-menu-button-small  " style=""></span><span id="button-1124-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-top-menu-button-small">공개견적</span></span></span></a><a class="x-btn  x-unselectable x-box-item x-toolbar-item x-btn-mdi-top-menu-button-small" style="height: 60px; right: auto; left: 483px; top: 0px; margin: 0px;" role="button" id="button-1127" tabindex="0" componentid="button-1127"><span id="button-1127-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-top-menu-button-small "><span id="button-1127-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="height:auto;" class="x-btn-button x-btn-button-mdi-top-menu-button-small x-btn-text    x-btn-button-center "><span id="button-1127-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-top-menu-button-small  " style=""></span><span id="button-1127-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-top-menu-button-small">업무지원</span></span></span></a><a class="x-btn  x-unselectable x-box-item x-toolbar-item x-btn-mdi-top-menu-button-small" style="height: 60px; right: auto; left: 587px; top: 0px; margin: 0px;" role="button" id="button-1139" tabindex="0" componentid="button-1139"><span id="button-1139-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-top-menu-button-small "><span id="button-1139-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="height:auto;" class="x-btn-button x-btn-button-mdi-top-menu-button-small x-btn-text    x-btn-button-center "><span id="button-1139-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-top-menu-button-small  " style=""></span><span id="button-1139-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-top-menu-button-small">회원관리</span></span></span></a><a class="x-btn  x-unselectable x-box-item x-toolbar-item x-btn-mdi-top-menu-button-small" style="height: 60px; right: auto; left: 691px; top: 0px; margin: 0px;" role="button" id="button-1144" tabindex="0" componentid="button-1144"><span id="button-1144-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-top-menu-button-small "><span id="button-1144-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="height:auto;" class="x-btn-button x-btn-button-mdi-top-menu-button-small x-btn-text    x-btn-button-center "><span id="button-1144-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-top-menu-button-small  " style=""></span><span id="button-1144-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-top-menu-button-small">도움말</span></span></span></a></div></div><div role="presentation" id="toolbar-1036-after-scroller" class="x-box-scroller x-box-scroller-right x-box-scroller-toolbar x-box-scroller-toolbar-mdi-top-menubar x-unselectable" style="display:none"></div></div><div class="x-toolbar  x-toolbar-mdi-status x-box-layout-ct" style="border-width: 0px 0px 1px; height: 28px; display: none;" id="toolbar-1037"><div id="toolbar-1037-innerCt" data-ref="innerCt" role="presentation" class="x-box-inner"><div id="toolbar-1037-targetEl" data-ref="targetEl" class="x-box-target" role="presentation"><div class="x-container  mdi-homebar x-box-item x-toolbar-item x-container-default x-box-layout-ct" id="container-1038"><div id="container-1038-innerCt" data-ref="innerCt" role="presentation" class="x-box-inner"><div id="container-1038-targetEl" data-ref="targetEl" class="x-box-target" role="presentation"><a class="x-btn  x-unselectable x-box-item x-btn-mdi-status-quick-button-small" style="padding:3px 10px 3px 15px;" role="button" id="button-1039" tabindex="0" title="홈 탭으로 이동 버튼" componentid="button-1039"><span id="button-1039-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-status-quick-button-small "><span id="button-1039-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="" class="x-btn-button x-btn-button-mdi-status-quick-button-small  x-btn-no-text x-btn-icon x-btn-icon-left x-btn-button-center "><span id="button-1039-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-status-quick-button-small mdi-topmenu-openhome " style="">&nbsp;</span><span id="button-1039-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-status-quick-button-small">&nbsp;</span></span></span></a><div class="x-breadcrumb  mdi-breadcrumb x-breadcrumb-default x-box-item x-box-layout-ct" id="breadcrumb-1040" tabindex="0"><div id="breadcrumb-1040-innerCt" data-ref="innerCt" role="presentation" class="x-box-inner"><div id="breadcrumb-1040-targetEl" data-ref="targetEl" class="x-box-target" role="presentation"></div></div></div></div></div></div><a class="x-btn  x-unselectable x-box-item x-toolbar-item x-btn-mdistatus-togglebutton-small" style="margin:0px 0px 0px 0px;width:28px;height:28px;" role="button" id="button-1041" tabindex="0" title="상단 메뉴 접기" componentid="button-1041"><span id="button-1041-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="table-layout:fixed;" class="x-btn-wrap x-btn-wrap-mdistatus-togglebutton-small "><span id="button-1041-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="height:auto;" class="x-btn-button x-btn-button-mdistatus-togglebutton-small  x-btn-no-text x-btn-icon x-btn-icon-left x-btn-button-center "><span id="button-1041-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdistatus-togglebutton-small mdi-top-toggle-icon " style="">&nbsp;</span><span id="button-1041-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdistatus-togglebutton-small">&nbsp;</span></span></span></a></div></div></div></div></div></div><div class="x-panel  x-grid-header-hidden x-border-item x-box-item x-panel-mdi-left x-tree-panel x-tree-no-lines x-grid" style="width: 200px; height: 250px; display: none;" id="mdileft-1042"><div class="x-panel-header  mdi-left-menu-header x-header x-header-noborder x-docked x-unselectable x-panel-header-mdi-left x-horizontal x-panel-header-horizontal x-panel-header-mdi-left-horizontal x-top x-panel-header-top x-panel-header-mdi-left-top x-docked-top x-panel-header-docked-top x-panel-header-mdi-left-docked-top x-box-layout-ct" id="mdileft-1042_header"><div class="mdi-left-menu-header-left" tabindex="0"></div><div id="mdileft-1042_header-innerCt" data-ref="innerCt" role="presentation" class="x-box-inner"><div id="mdileft-1042_header-targetEl" data-ref="targetEl" class="x-box-target" role="presentation"><div class="x-title  x-panel-header-title x-panel-header-title-mdi-left x-box-item x-title-mdi-left x-title-rotate-none x-title-align-left" unselectable="on" id="ext-comp-1092"><div id="ext-comp-1092-iconWrapEl" data-ref="iconWrapEl" role="presentation" class="x-title-icon-wrap x-title-icon-wrap-mdi-left x-title-icon-left x-title-item"><div id="ext-comp-1092-iconEl" data-ref="iconEl" role="presentation" unselectable="on" class="x-title-icon x-title-icon-mdi-left mdi-left-title-icon " style="">&nbsp;</div></div><h3 id="ext-comp-1092-textEl" data-ref="textEl" class="x-title-text x-title-text-mdi-left x-title-item" unselectable="on">&nbsp;</h3></div><div class="x-tool  x-box-item x-tool-default" id="ext-comp-1091"><img id="ext-comp-1091-toolEl" data-ref="toolEl" src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" class="x-tool-img x-tool-collapse-left" role="presentation" alt="사이드 메뉴 접기"></div></div></div></div><div class="x-grid-header-ct  x-grid-header-ct-hidden x-docked x-grid-header-ct-default x-docked-top x-grid-header-ct-docked-top x-grid-header-ct-default-docked-top x-box-layout-ct" style="border-width:1px;height:0px;" id="headercontainer-1043"><div id="headercontainer-1043-innerCt" data-ref="innerCt" role="presentation" class="x-box-inner"><div id="headercontainer-1043-targetEl" data-ref="targetEl" class="x-box-target" role="presentation"><div class="x-column-header  x-column-header-align-center x-box-item x-column-header-default x-unselectable" style="border-width:1px;" id="ext-comp-1044" tabindex="-1" componentid="ext-comp-1044"><div id="ext-comp-1044-titleEl" data-ref="titleEl" class="x-column-header-inner x-column-header-inner-empty"><span id="ext-comp-1044-textEl" data-ref="textEl" class="x-column-header-text">&nbsp;</span><div id="ext-comp-1044-triggerEl" data-ref="triggerEl" role="presentation" class="x-column-header-trigger" style="" title="&amp;#160;의 컨텍스트 버튼"></div></div></div></div></div></div><div id="mdileft-1042-body" data-ref="body" class="x-panel-body x-grid-no-row-lines x-grid-body x-panel-body-mdi-left x-layout-fit x-panel-body-mdi-left" role="presentation"><div class="x-tree-view  x-fit-item x-tree-view-default x-unselectable" style="border-width: 0px 1px 0px 0px; overflow: auto;" id="treeview-1045" tabindex="0" componentid="mdileft-1042"></div></div></div><div class="x-splitter  mdi-left-menu-splitter mdi-left-menu-collapsed x-border-item x-box-item x-splitter-default x-splitter-vertical x-unselectable" style="width: 0px; height: 100%; display: none;" id="mdileft-1042-splitter"><div id="mdileft-1042-splitter-collapseEl" data-ref="collapseEl" role="presentation" class="x-collapse-el x-layout-split-left">&nbsp;</div></div><div class="x-panel  nbr x-border-item x-box-item x-panel-default" id="tabpanel-1046" style="display: none;"><div class="x-tab-bar  x-docked x-tab-bar-mdi-tabbar x-horizontal x-tab-bar-horizontal x-tab-bar-mdi-tabbar-horizontal x-top x-tab-bar-top x-tab-bar-mdi-tabbar-top x-docked-top x-tab-bar-docked-top x-tab-bar-mdi-tabbar-docked-top" id="tabbar-1047" tabindex="0"><div id="tabbar-1047-body" data-ref="body" role="presentation" class="x-tab-bar-body x-tab-bar-body-mdi-tabbar  x-box-layout-ct"><div role="presentation" id="tabbar-1047-before-scroller" class="x-box-scroller x-box-scroller-left x-box-scroller-tab-bar x-box-scroller-tab-bar-mdi-tabbar" style="display:none"></div><div id="tabbar-1047-innerCt" data-ref="innerCt" role="presentation" class="x-box-inner x-box-scroller-body-horizontal"><div id="tabbar-1047-targetEl" data-ref="targetEl" class="x-box-target" role="presentation"></div></div><div role="presentation" id="tabbar-1047-after-scroller" class="x-box-scroller x-box-scroller-right x-box-scroller-tab-bar x-box-scroller-tab-bar-mdi-tabbar" style="display:none"></div></div><div class="mdi-tools-container" id="ext-element-6"><div class="x-toolbar  x-toolbar-mdi-tools x-box-layout-ct x-border-box" style="background: transparent; z-index: 9999; width: 75px;" id="mditools-1048"><div id="mditools-1048-innerCt" data-ref="innerCt" role="presentation" class="x-box-inner" style="width: 74px; height: 0px;"><div id="mditools-1048-targetEl" data-ref="targetEl" class="x-box-target" role="presentation" style="width: 74px;"><a class="x-btn  x-unselectable x-box-item x-toolbar-item x-btn-mdi-tools-button-small" role="button" id="button-1049" tabindex="0" title="사이드 메뉴 펼치기" componentid="button-1049" style="right: auto; left: 0px; top: 0px; margin: 0px;"><span id="button-1049-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-tools-button-small "><span id="button-1049-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="" class="x-btn-button x-btn-button-mdi-tools-button-small  x-btn-no-text x-btn-icon x-btn-icon-left x-btn-button-center "><span id="button-1049-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-tools-button-small mdi-tools-leftmenu " style="">&nbsp;</span><span id="button-1049-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-tools-button-small">&nbsp;</span></span></span></a><a class="x-btn  x-unselectable x-box-item x-toolbar-item x-btn-mdi-tools-button-small" role="button" id="button-1050" tabindex="0" title="사이드 메뉴 접기" componentid="button-1050" style="right: auto; left: 1px; top: 0px; margin: 0px;"><span id="button-1050-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-tools-button-small "><span id="button-1050-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="" class="x-btn-button x-btn-button-mdi-tools-button-small  x-btn-no-text x-btn-icon x-btn-icon-left x-btn-button-center "><span id="button-1050-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-tools-button-small mdi-tools-topmenu " style="">&nbsp;</span><span id="button-1050-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-tools-button-small">&nbsp;</span></span></span></a><a class="x-btn  x-unselectable x-box-item x-toolbar-item x-btn-mdi-tools-button-small" role="button" id="button-1051" tabindex="0" title="모든 화면 닫기" componentid="button-1051" style="right: auto; left: 2px; top: 0px; margin: 0px;"><span id="button-1051-btnWrap" data-ref="btnWrap" role="presentation" unselectable="on" style="" class="x-btn-wrap x-btn-wrap-mdi-tools-button-small "><span id="button-1051-btnEl" data-ref="btnEl" role="presentation" unselectable="on" style="" class="x-btn-button x-btn-button-mdi-tools-button-small  x-btn-no-text x-btn-icon x-btn-icon-left x-btn-button-center "><span id="button-1051-btnIconEl" data-ref="btnIconEl" role="presentation" unselectable="on" class="x-btn-icon-el x-btn-icon-el-mdi-tools-button-small mdi-tools-closeall " style="">&nbsp;</span><span id="button-1051-btnInnerEl" data-ref="btnInnerEl" unselectable="on" class="x-btn-inner x-btn-inner-mdi-tools-button-small">&nbsp;</span></span></span></a></div></div></div></div><div id="tabbar-1047-strip" data-ref="strip" role="presentation" class="x-tab-bar-strip x-tab-bar-strip-mdi-tabbar"></div></div><div id="tabpanel-1046-body" data-ref="body" class="x-panel-body mdi-tabpanel-body x-panel-body-default x-layout-fit x-panel-body-default" role="presentation" style="padding:3px 3px 3px 3px;"></div><div class="x-mask" style="display:none" id="ext-element-5"></div><div class="x-component  x-mask-msg mdi-tab-progressbar x-component-default" id="loadmask-1094" style="display: none;"><div id="loadmask-1094-msgEl" data-ref="msgEl" role="presentation" class="progressbar x-mask-msg-inner "><span></span></div><div id="loadmask-1094-msgTextEl" data-ref="msgTextEl" class="x-mask-msg-text">Data 로딩중...</div></div></div><div class="x-container  mdi-footer-container x-border-item x-box-item x-container-default x-box-layout-ct" id="container-1089" style="display: none;"><div id="container-1089-innerCt" data-ref="innerCt" role="presentation" class="x-box-inner"><div id="container-1089-targetEl" data-ref="targetEl" class="x-box-target" role="presentation"><div class="x-component  mdi-footer x-box-item x-component-default" id="box-1090"></div></div></div></div>
+<script type="text/javascript" src="resources/es6-promise-2.0.0.min.js?bust=1607648146082"></script><script type="text/javascript" src="ext-all.js?bust=1607648146082"></script><script type="text/javascript" src="etnajs.js?bust=1607648146082"></script><script type="text/javascript" src="etnajs-cmmn.js?bust=1607648146082"></script><script type="text/javascript" src="extjs/override.js?bust=1607648146082"></script><script type="text/javascript" src="extjs/profile-override.js?bust=1607648146082"></script><script type="text/javascript" src="extjs/serviceBidScheduler.js?bust=1607648146082"></script><script type="text/javascript" src="stateful.js?bust=1607648146082"></script><script type="text/javascript" src="require.js?bust=1607648146082"></script><script type="text/javascript" src="MessageSource-production.js?bust=1607648146082"></script><script type="text/javascript" src="login/js/jquery-1.11.2.min.js?bust=1607648146082"></script><script type="text/javascript" src="Mdi-production.js?bust=1607648146082"></script><script type="text/javascript" src="api.js?bust=1607648146082"></script><script type="text/javascript" src="ext-bootstrap.js?bust=1607648146082"></script><script type="text/javascript" src="extjs/messagesource-override.js?bust=1607648146082"></script>
+
+<script type="text/javascript" src="extjs/locale/etna-lang-ko.js"></script>
+
+
+<!-- 엠로 기술연구소 안성욱 CacheBuster 반영 Ext Boot Inject-->
+
+<script type="text/javascript">
+    
+	var bust = 1607648146082;
+	var requireConfig = {
+		urlArgs : "bust=" + bust
+	};
+    //extjs 5.0.1
+    Ext.Boot.$create = Ext.Boot.create;
+    Ext.Boot.create = function(url, key, cfg) {
+		var config = cfg || {};
+        config.buster = Ext.Boot.getConfig('disableCachingParam') + '=' + bust;
+    	return Ext.Boot.$create(url, key, config);
+    };
+</script>
+	
+
+<script type="text/javascript">
+	//모듈의 contextPath 설정
+	(function() {
+		var contextPath = '';
+		if(!contextPath) {
+			contextPath = ' ';
+		}
+		Ext.data.Connection.templates = {
+			contextPath : contextPath
+		};
+	}());
+	
+	//IE11 또는 크롬 43 버전 이상인지 체크
+	/* if(!isAllowedBrowser()) {
+		parent.location.replace('underSploin.do');
+	}
+	function isAllowedBrowser() {
+		var isAllowedBrowser = false
+		   ,isIE = Ext.isChrome
+		   ,isChrome = Ext.isIE
+		   ,ieVersion = Ext.ieVersion
+		   ,chromeVersion = Ext.chromeVersion;
+		if(isChrome || isIE) {
+			isAllowedBrowser = ieVersion >= 11 || chromeVersion >= 43 || false;
+		}
+		return isAllowedBrowser;
+	}
+	 */
+	
+	var checkChangeUnload = true;
+	var beforeUnloadHandler = function(e){
+		// 메인페이지에서 로그인을 안했을 경우에는 '새로고침 하시겠습니까?' 메시지 안띄우기
+		if(MdiManager.spmain && !Cmmn.User.data) return; 
+		
+		if(checkChangeUnload){
+			e.event.returnValue = ' ';
+			disableUnloadFlag();
+		}
+	};
+	
+	function disableUnloadFlag(){
+		checkChangeUnload = false;
+		Ext.defer(function(){
+			checkChangeUnload = true;
+		}, 200);
+	}
+	
+	
+	function start(){
+		Ext.application({
+			requires : [ 'Mdi.view.mdi.Viewport' ],
+			name : 'App',
+			launch : function()
+			{	
+				//페이지 새로고침 시 확인메세지 출력
+				Ext.getWin().on('beforeunload', beforeUnloadHandler); 
+				if(isAuthentication === 'false') {
+					MdiManager.toggleSpMain();
+				}
+				Mdi.model.Setting.set('authenticatable', true); 
+		    	Mdi.model.Setting.set('authenticatorClass', 'Mdi.view.mdi.authenticator.Standard');
+		    	Ext.state.Manager.setProvider(new Stateful.state.Provider());
+		    	Mdi.model.Setting.set('kind','Disclosed');
+				MdiManager.logout = function(){
+					//로그아웃시 beforeunload 이벤트 제거
+					Ext.getWin().addBeforeListener('beforeunload', function(e){
+						return false;
+					},window, {
+						single : true
+					});
+					logoutForm.submit();
+				}
+				Ext.direct.Manager.addProvider(Ext.app.REMOTING_API);
+				
+				
+				// 엠로 기술연구소 메모리 모니터링 용 오버라이드 
+				/*
+				Ext.define('MemoryCheck.controller.Manager',{
+					override : 'Mdi.controller.Manager',
+					addView : function(className, config, requireClasses, callback){
+						var me = this;
+						me.callParent([className, config, requireClasses, callback]);
+						if(Ext.isIE){
+							Ext.defer(function(){
+								try{
+								
+									document.getElementById('MemoryCheckSWF').getPrivateMemory();
+								}catch(e){};
+							
+							}, 1000);
+						
+						}
+					
+					}
+				
+				});
+				*/
+				
+				Ext.defer(function() {
+					Ext.create('Mdi.view.mdi.Viewport');		
+				}, isAuthentication === 'true' ? 0 : 300);
+				
+				/* 하단의 내용들은 외자프로젝트를 위한 임시소스 나중에 지워야함 20151026 옥승한 */
+				/*
+				var announceNo = "";
+				if(announceNo){
+					var pageInfo = {
+							classpath : 'Spt_Sp_CustomerSupport.view.AnnounceComment',
+							name : '공지사항',
+							authKey : 'CUS31100',
+							initPageLoading : true,
+							announceNo : announceNo
+						}
+					if (MdiManager.hasView(pageInfo.classpath)) {
+						var view = MdiManager.mdiTab.down(Ext.String.format('>[classpath='+pageInfo.classpath+']'));
+						MdiManager.mdiTab.remove(view,true);                  
+					}
+					MdiManager.addView(pageInfo.classpath, {title: pageInfo.name, authKey: pageInfo.authKey, initPageInfo: pageInfo}, pageInfo.classpath);
+				}
+				*/
+				/* 임시내용 끝 */
+				
+			}
+		});
+		Ext.create('Site.override.SessionExpiredCheck').init();
+	}
+	start();
+	require( ["require-module"] );
+	//require(['Mdi'], start, start);
+	
+</script>
+
+<!-- </x-compile> -->
+
+  <form id="logoutForm" action="logoutProcess.do" method="post" style="width:0px;height:0px;">
+  <input type="hidden" name="_csrf" value="88c309ed-2c51-4512-8bd0-4a94bf354ce0" style="">
+</form>
+
+<!-- <iframe id="ssoIframe" src="" style="width:0px;height:0px;"></iframe> 미사용 iframe 주석-->
+
+
+<!-- 엠로 기술연구소 메모리 모니터링 SWF파일 설정 -->
+<!-- 
+<div id="MemoryCheckSWF"></div>
+<script type="text/javascript">
+swfobject.embedSWF("/extjs/MemoryCheck.swf", "MemoryCheckSWF", "0", "0", "10.0.0", "expressInstall.swf", null,{wmode : "transparent"},null,
+function(e){
+	if(e.success != true){
+	
+	}
+}
+);
+
+var LIMIT_COUNT = 4;
+var LIMIT_MEMORY = 1200;
+var count = localStorage.getItem('checkCount') ? localStorage.getItem('checkCount') : 0;
+
+function returnMemory(_privateMemory){
+	if((count >= LIMIT_COUNT) && (_privateMemory >= LIMIT_MEMORY)){
+		Ext.Msg.confirm('\#{주의}','\#{메모리가 일정량이상 증가하여 안정적이지 않을 수 있습니다. 새탭으로 여시겠습니까?(현재 탭은 종료 됩니다.)}', 
+		function(btn){
+			if(btn == 'yes'){
+				localStorage.clear();
+				var win = Ext.getWin();
+			    var callback = function(e) {
+			        if(win) {
+			            win.removeBeforeListener('beforeunload', arguments.callee);
+			        }
+			        win = undefined;
+			        return false;
+			    };
+			    win.addBeforeListener('beforeunload', callback);
+				var newWindow = window.open(location.href,'_blank');
+				Ext.defer(function(){
+					window.open('about:blank','_self').close();
+				},500);
+			}
+		}
+		)
+	}else{
+		localStorage.setItem('checkCount', ++count);
+	}
+}
+</script> 
+-->
+
+<div class="x-tip  x-layer x-tip-default x-border-box" id="ext-quicktips-tip" style="display: none;"><div class="x-tip-header  x-header x-docked x-unselectable x-tip-header-default x-horizontal x-tip-header-horizontal x-tip-header-default-horizontal x-top x-tip-header-top x-tip-header-default-top x-box-layout-ct" id="ext-quicktips-tip_header"><div id="ext-quicktips-tip_header-innerCt" data-ref="innerCt" role="presentation" class="x-box-inner"><div id="ext-quicktips-tip_header-targetEl" data-ref="targetEl" class="x-box-target" role="presentation"><div class="x-title  x-tip-header-title x-tip-header-title-default x-box-item x-title-default x-title-rotate-none x-title-align-left" unselectable="on" id="ext-comp-1009"><h4 id="ext-comp-1009-textEl" data-ref="textEl" class="x-title-text x-title-text-default x-title-item" unselectable="on">&amp;amp;#160;</h4></div></div></div></div><div id="ext-quicktips-tip-body" data-ref="body" class="x-tip-body x-tip-body-default x-tip-body-default" role="presentation"><div id="ext-quicktips-tip-outerCt" data-ref="outerCt" class="x-autocontainer-outerCt" role="presentation"><div id="ext-quicktips-tip-innerCt" data-ref="innerCt" style="" class="x-autocontainer-innerCt" role="presentation"></div></div></div><div role="presentation" class="x-tip-anchor x-tip-anchor-top" id="ext-element-2"></div></div><div class="x-component  spmain x-layer x-component-default x-border-box" style="width: 100%; height: calc(100% - 120px); left: 0px; top: 120px; right: auto; z-index: 19000;" id="mdiiframe-1010"><iframe src="main/splogin.jsp" id="mdiiframe-1010-iframeEl" data-ref="iframeEl" name="mdiiframe-1010-frame" width="100%" height="100%" frameborder="0" title="메인화면"></iframe></div><div id="etnadownloader" data-ref="downloadFrameEl" tabindex="-1" style="display:none;width:0px;height:0px;"><iframe id="etnadownloader-iframeEl" data-ref="iframeEl" tabindex="-1" frameborder="0" title="다운로더"> <html><body></body></html></iframe></div><div class="x-tip  x-layer x-tip-default x-border-box" id="tooltip-1093" style="display: none;"><div id="tooltip-1093-body" data-ref="body" class="x-tip-body x-tip-body-default x-tip-body-default" role="presentation"><div id="tooltip-1093-outerCt" data-ref="outerCt" class="x-autocontainer-outerCt" role="presentation"><div id="tooltip-1093-innerCt" data-ref="innerCt" style="" class="x-autocontainer-innerCt" role="presentation"></div></div></div><div role="presentation" class="x-tip-anchor x-tip-anchor-top" id="ext-element-3"></div></div><form action="popup/KepcoListPopup.jsp" method="POST" target="noticeList"><input type="hidden" name="noticeTable" value="&lt;caption&gt;공지사항 - 번호,공지대상,제목,업무구분,게시기간으로 구성&lt;/caption&gt;&lt;thead&gt;&lt;tr&gt;&lt;th class=&quot;first&quot; style=&quot;width:5%&quot;&gt;번호&lt;/th&gt;&lt;th style=&quot;width:12.5%&quot;&gt;공지대상&lt;/th&gt;&lt;th style=&quot;width:52.5%&quot;&gt;제    목&lt;/th&gt;&lt;th class=&quot;last&quot; style=&quot;width:12.5%&quot;&gt;업무구분&lt;/th&gt;&lt;th class=&quot;last&quot; style=&quot;width:17.5%&quot;&gt;게시기간&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3732&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;전체&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3732);&quot;&gt;▶ 조달청 입찰대리인 등록 유의사항 안내 ◀&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;시스템&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;25.1.8~10.31&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3722&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;전체&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3722);&quot;&gt;견적요청 메세지 발송용 인덱스 설정 안내&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;시스템&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;25.1.2~12.31&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3669&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;전체&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3669);&quot;&gt;입찰서 제출 시 유의사항 안내&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;시스템&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;24.10.25~25.11.13&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3534&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;실무자&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3534);&quot;&gt;공고등록 및 개찰업무시 키관리 모듈 재설치 안내&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;시스템&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;24.5.16~25.12.31&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3026&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;업체회원&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3026);&quot;&gt;241219 업데이트신뢰품목 유자격등록 신규갱신...&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;일반안내&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;22.5.19~55.1.1&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3018&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;업체회원&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3018);&quot;&gt;[SRM 신청시 제작규격 제출서류 안내 및 양식]&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;일반안내&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;22.5.12~55.1.1&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3847&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;업체회원&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3847);&quot;&gt;AMI용 스마트미터 게이트웨이 C형LTE 등록요건 ...&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;일반안내&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;25.6.12~26.6.19&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3844&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;전체&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3844);&quot;&gt;「2025년 상반기 전력기자재 조달 정책공유회」...&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;시스템&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;25.6.5~12.31&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3827&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;업체회원&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3827);&quot;&gt;전자식 전력량계 구매규격 개정 관련 유자격자 ...&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;일반안내&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;25.5.9~26.5.16&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3825&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;업체회원&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3825);&quot;&gt;[한전 신뢰품목 공급자 등록]실무 담당자 업무...&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;일반안내&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;25.5.8~26.5.15&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3805&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;업체회원&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3805);&quot;&gt;전자식 전력량계 핵심부품 추가 관련 유자격자 ...&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;일반안내&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;25.4.9~26.4.16&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3799&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;업체회원&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3799);&quot;&gt;ESG 자가진단 시행결과 미제출 기업에 대한 안내&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;일반안내&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;25.4.1~26.3.31&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3790&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;업체회원&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3790);&quot;&gt;전력기자재 신뢰품목 신규지정 알림2025년 1차&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;일반안내&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;25.3.24~26.3.31&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3775&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;업체회원&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3775);&quot;&gt;AMIGO 품목 SW변경 시 규격변경 업무절차 개선 ...&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;일반안내&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;25.2.27~28.2.26&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3756&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;업체회원&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3756);&quot;&gt;[한전 신뢰품목 공급자 등록]실무 담당자 업무...&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;일반안내&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;25.2.3~26.3.31&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3746&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;업체회원&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3746);&quot;&gt;2025년 기자재 공급자 관리지침 개정 31차 알림&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;일반안내&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;25.1.14~26.1.14&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;3712&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;업체회원&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(3712);&quot;&gt;전력기자재 신뢰품목 신규지정 및 지정취소 알림&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;일반안내&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;24.12.20~25.12.1&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;2449&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;실무자&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;a href=&quot;javascript:pageMove(2449);&quot;&gt;★공인인증서 사례별 사용 안내&lt;/a&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;시스템&lt;/span&gt;&lt;/td&gt;&lt;td style=&quot;text-align:center&quot;&gt;&lt;span&gt;20.4.24~55.1.1&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;"><input type="hidden" name="_csrf" value="88c309ed-2c51-4512-8bd0-4a94bf354ce0"></form></body></html>

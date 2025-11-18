@@ -1,0 +1,8 @@
+node_modules/
+dist/
+out/
+*.log
+*.tmp
+electron-app/dist/
+electron-app/out/
+*.asar
