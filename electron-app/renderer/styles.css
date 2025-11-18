@@ -19,6 +19,7 @@ button{ border:1px solid var(--border); background:#f3f4f6; color:#111827; paddi
 button.primary{ border-color:transparent; background:var(--accent); color:#fff; }
 button.danger{ border-color:transparent; background:var(--danger); color:#fff; }
 button:disabled{ opacity:0.6; cursor:not-allowed; }
+button.secondary{ background:#eef2ff; border-color:#c7d2fe; color:#1d4ed8; }
 .log{ font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:#f9fafb; border:1px solid var(--border); border-radius:8px; padding:10px; height:240px; overflow:auto; white-space:pre-wrap; color:#111827; }
 .hint{ color:var(--muted); font-size:12px; margin-top:8px; }
 .footer{ text-align:center; color:var(--muted); padding:12px; border-top:1px solid var(--border); background:#fff; }
@@ -33,6 +34,16 @@ button:disabled{ opacity:0.6; cursor:not-allowed; }
 .company-item .meta .name{ font-weight:600; }
 .company-item .meta .sub{ color:#6b7280; font-size:12px; }
 .company-item button{ background:#fef2f2; color:#991b1b; border-color:#fecaca; }
+
+/* Bid list */
+.bid-list{ display:flex; flex-direction:column; gap:8px; margin-bottom:8px; }
+.bid-block{ grid-column:1 / -1; display:flex; flex-direction:column; gap:8px; padding:8px 0; }
+.bid-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.bid-header label{ margin:0; }
+.bid-item{ display:flex; align-items:center; gap:8px; }
+.bid-item input{ flex:1; }
+.bid-item button{ padding:8px 10px; }
+#addBidBtn{ width:auto; }
 
 /* Progress & steps */
 .summary{ display:flex; flex-direction:column; gap:4px; margin:6px 0 10px; color:#374151; }
