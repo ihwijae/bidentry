@@ -38,7 +38,7 @@ async function loginKepco(page, emit, auth = {}) {
         }
       }
       // Give modal animations a brief moment
-      await targetPage.waitForTimeout(200).catch(()=>{});
+      await targetPage.waitForTimeout(80).catch(()=>{});
       continue;
     }
     try {
@@ -122,17 +122,15 @@ async function loginKepco(page, emit, auth = {}) {
 
       // Wait briefly for modal inputs to mount
       let idField = (idLoc ? await idLoc.elementHandle().catch(()=>null) : null) || await findInFrames(idCandidates);
-      if (!idField) { try { await loginPage.waitForSelector(idCandidates.join(', '), { timeout: 1500 }); idField = await findInFrames(idCandidates); } catch {} }
+      if (!idField) { try { await loginPage.waitForSelector(idCandidates.join(', '), { timeout: 900 }); idField = await findInFrames(idCandidates); } catch {} }
       let pwField = (pwLoc ? await pwLoc.elementHandle().catch(()=>null) : null) || await findInFrames(pwCandidates);
-      if (!pwField) { try { await loginPage.waitForSelector(pwCandidates.join(', '), { timeout: 1500 }); pwField = await findInFrames(pwCandidates); } catch {} }
+      if (!pwField) { try { await loginPage.waitForSelector(pwCandidates.join(', '), { timeout: 900 }); pwField = await findInFrames(pwCandidates); } catch {} }
 
       if (idField && pwField) {
         try { await idField.focus(); } catch {}
-        await idField.fill('');
-        await idField.type(String(auth.id), { delay: 50 }).catch(()=>idField.fill(String(auth.id)));
+        await idField.fill(String(auth.id));
         try { await pwField.focus(); } catch {}
-        await pwField.fill('');
-        await pwField.type(String(auth.pw), { delay: 50 }).catch(()=>pwField.fill(String(auth.pw)));
+        await pwField.fill(String(auth.pw));
         // Verify values set; if not, force via DOM
         const ok = await loginPage.evaluate((i, p) => {
           const get = (h) => h && (h.value ?? '');
@@ -211,7 +209,7 @@ async function closeKepcoPostLoginModals(page, emit){
     'input[type="checkbox"][name*="today" i]',
     'input[type="checkbox"][id*="today" i]'
   ];
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 2; attempt++) {
     let closed = false;
     for (const ctx of contexts()) {
       for (const chkSel of checkSelectors) {
@@ -235,7 +233,7 @@ async function closeKepcoPostLoginModals(page, emit){
       }
     }
     if (!closed) break;
-    await page.waitForTimeout(200).catch(()=>{});
+    await page.waitForTimeout(120).catch(()=>{});
   }
 }
 

@@ -15,15 +15,15 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
 
 
   const fastMode = extra?.fastMode === true;
-  const pollDelay = fastMode ? 80 : 200;
-  const mediaDelay = fastMode ? 80 : 150;
-  const confirmDelay = fastMode ? 150 : 300;
-  const identityDelay = fastMode ? 120 : 250;
-  const passwordDelay = fastMode ? 100 : 200;
-  const postCloseDelay = fastMode ? 250 : 500;
-  const retryBaseDelay = fastMode ? 60 : 120;
-  const retryStepDelay = fastMode ? 40 : 80;
-  const selectionAttempts = fastMode ? 2 : 4;
+  const pollDelay = fastMode ? 50 : 200;
+  const mediaDelay = fastMode ? 60 : 150;
+  const confirmDelay = fastMode ? 100 : 300;
+  const identityDelay = fastMode ? 80 : 250;
+  const passwordDelay = fastMode ? 70 : 200;
+  const postCloseDelay = fastMode ? 150 : 500;
+  const retryBaseDelay = fastMode ? 40 : 120;
+  const retryStepDelay = fastMode ? 25 : 80;
+  const selectionAttempts = fastMode ? 1 : 4;
   const defaultSelectors = [
     '#browser-guide-added-wrapper #nx-cert-select',
     '#nx-cert-select',
