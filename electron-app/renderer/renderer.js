@@ -373,7 +373,18 @@ runBtn.addEventListener('click', async () => {
         pin: cc.pin || ''
       };
     })(),
-    options: { headless: false, timeoutSec: 300, certTimeoutSec: Number(s.options?.certTimeoutSec || 60), debug: false, pauseAfterSuccessMs: 12000, pauseOnErrorMs: 12000, keepBrowserOnError: true, keepBrowserOnSuccess: true, useCertPath: true }
+    options: {
+      headless: false,
+      timeoutSec: 300,
+      certTimeoutSec: Number(s.options?.certTimeoutSec || 60),
+      debug: false,
+      pauseAfterSuccessMs: 12000,
+      pauseOnErrorMs: 12000,
+      keepBrowserOnError: true,
+      keepBrowserOnSuccess: true,
+      useCertPath: true,
+      reuseEdgeProfile: siteEl.value !== 'mnd'
+    }
   };
   // Reset UI
   lastErrorToastMessage = '';
@@ -533,7 +544,6 @@ function updateSummary(job){
   document.getElementById('summaryBizNo').textContent = job.company?.bizNo || '-';
   document.getElementById('summaryRep').textContent = job.company?.representative || '-';
 }
-
 
 
 
