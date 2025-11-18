@@ -178,6 +178,37 @@ async function loginKepco(page, emit, auth = {}) {
 async function handleKepcoCertificate(page, emit, cert = {}, extra = {}) {
   return handleNxCertificate('KEPCO', page, emit, cert, extra);
 }
+async function closeKepcoPostLoginModals(page, emit){
+  const selectors = [
+    '.x-tool-close',
+    '.x-window .x-tool-close',
+    'button:has-text("닫기")',
+    'a:has-text("닫기")',
+    'button:has-text("확인")',
+    'a:has-text("확인")',
+    '.popup-close',
+    '.btn-close'
+  ];
+  const contexts = () => [page, ...(page.frames?.() || [])];
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let closed = false;
+    for (const ctx of contexts()) {
+      for (const sel of selectors) {
+        try {
+          const btn = await ctx.$(sel);
+          if (btn) {
+            await btn.click({ force: true }).catch(()=>{});
+            closed = true;
+            emit && emit({ type:'log', level:'info', msg:`[KEPCO] 공지/모달 닫기: ${sel}` });
+          }
+        } catch {}
+      }
+    }
+    if (!closed) break;
+    await page.waitForTimeout(200).catch(()=>{});
+  }
+}
+
 async function goToBidApplyAndSearch(page, emit, bidId){
   const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
   const log = (level, msg) => emit && emit({ type:'log', level, msg });
@@ -186,10 +217,12 @@ async function goToBidApplyAndSearch(page, emit, bidId){
   const BID_INPUT_SELECTORS = [
     'input[placeholder*="\uC785\uCC30" i]',
     'input[title*="\uACF5\uACE0" i]',
+    'input[title*="\uACF5\uACE0\uBC88\uD638" i]',
     'input[name*="bid" i]',
     'input[id*="bid" i]',
     'input[name*="gonggo" i]',
-    'input[id*="gonggo" i]'
+    'input[id*="gonggo" i]',
+    'input[id*="textfield" i]'
   ];
   const SEARCH_BUTTON_TEXT = '\uC870\uD68C';
 
@@ -278,6 +311,7 @@ async function goToBidApplyAndSearch(page, emit, bidId){
     return null;
   }
 
+  await closeKepcoPostLoginModals(page, emit);
   await navigateToApplication(page, emit);
 
   if (!bidId){
@@ -831,4 +865,3 @@ module.exports = {
   applyAfterSearch,
   navigateToApplication,
 };
-
