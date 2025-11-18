@@ -919,6 +919,24 @@ async function navigateToApplication(page, emit) {
   const log = (level, msg) => emit && emit({ type: 'log', level, msg });
   const contexts = () => [page, ...(page.frames?.() || [])];
 
+  async function dumpContextInfo(reason) {
+    try {
+      const infos = [];
+      const push = (label, ctx) => {
+        if (!ctx) return;
+        try {
+          const url = ctx.url?.() || '';
+          infos.push(`${label}:${url}`);
+        } catch {}
+      };
+      push('main', page);
+      for (const [idx, fr] of (page.frames?.() || []).entries()) {
+        push(`frame${idx}`, fr);
+      }
+      log('debug', `[KEPCO] Context snapshot (${reason}): ${infos.join(' | ')}`);
+    } catch {}
+  }
+
   async function findLocator(selectors) {
     for (const ctx of contexts()) {
       for (const sel of selectors) {
@@ -1071,6 +1089,7 @@ async function navigateToApplication(page, emit) {
     topClicked = extClick;
   }
   if (!topClicked) {
+    await dumpContextInfo('top-menu-miss');
     log('error', '[KEPCO] Unable to locate top menu "' + TEXT_BID_CONTRACT + '".');
     throw new Error('Failed to locate the bid/contract top menu button.');
   }
