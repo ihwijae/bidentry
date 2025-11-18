@@ -91,6 +91,8 @@ async function run(job, emit) {
     }
     if (!usedWebCert) {
       // Build initial cert options
+      const allowCertPath = job?.options?.useCertPath !== false;
+      const requestedCertPath = allowCertPath ? String(job?.cert?.path || '').trim() : '';
       const certOpts = {
         provider: job?.cert?.provider || 'KICA',
         media: job?.cert?.media || '',
@@ -98,8 +100,7 @@ async function run(job, emit) {
         issuerMatch: job?.cert?.issuerMatch || job?.cert?.provider || '',
         serialMatch: job?.cert?.serialMatch || '',
         pin: job?.cert?.pin || '',
-        // Path matching is disabled per request; rely on Subject/Issuer/Serial only
-        path: '',
+        path: requestedCertPath,
         timeoutSec: Number(job?.options?.certTimeoutSec) || 30,
         outDir,
         labels: {
@@ -112,8 +113,16 @@ async function run(job, emit) {
         }
       };
 
+      if (requestedCertPath) {
+        if (allowCertPath) {
+          emit && emit({ type:'log', level:'info', msg:`[CERT] using path hint: ${requestedCertPath}` });
+        } else {
+          emit && emit({ type:'log', level:'info', msg:'[CERT] path hint provided but disabled via options.useCertPath=false' });
+        }
+      }
+
       // If explicit path is present but missing subject/issuer/serial, try enrich from scan
-      if (false && certOpts.path) {
+      if (certOpts.path) {
         const scan = await scanLocalCerts();
         if (scan.ok && scan.items?.length) {
           const found = scan.items.find(it => (it.cnDir || '').toLowerCase() === String(certOpts.path).toLowerCase());
@@ -202,8 +211,6 @@ async function run(job, emit) {
 }
 
 module.exports = { run };
-
-
 
 
 

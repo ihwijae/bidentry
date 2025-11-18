@@ -369,11 +369,11 @@ runBtn.addEventListener('click', async () => {
         issuerMatch: (cc.issuerMatch || ''),
         serialMatch: (cc.serialMatch || ''),
         media: cc.media || 'hdd',
-        path: '',
+        path: cc.path || '',
         pin: cc.pin || ''
       };
     })(),
-    options: { headless: false, timeoutSec: 300, certTimeoutSec: Number(s.options?.certTimeoutSec || 60), debug: false, pauseAfterSuccessMs: 12000, pauseOnErrorMs: 12000, keepBrowserOnError: true, keepBrowserOnSuccess: true }
+    options: { headless: false, timeoutSec: 300, certTimeoutSec: Number(s.options?.certTimeoutSec || 60), debug: false, pauseAfterSuccessMs: 12000, pauseOnErrorMs: 12000, keepBrowserOnError: true, keepBrowserOnSuccess: true, useCertPath: true }
   };
   // Reset UI
   lastErrorToastMessage = '';
@@ -533,7 +533,6 @@ function updateSummary(job){
   document.getElementById('summaryBizNo').textContent = job.company?.bizNo || '-';
   document.getElementById('summaryRep').textContent = job.company?.representative || '-';
 }
-
 
 
 

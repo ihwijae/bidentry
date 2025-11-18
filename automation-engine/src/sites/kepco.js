@@ -180,123 +180,138 @@ async function handleKepcoCertificate(page, emit, cert = {}, extra = {}) {
 }
 async function goToBidApplyAndSearch(page, emit, bidId){
   const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+  const log = (level, msg) => emit && emit({ type:'log', level, msg });
+  const contexts = () => [page, ...(page.frames?.() || [])];
+  const BID_LABELS = [/\uC785\uCC30\uACF5\uACE0\uBC88\uD638/i, /\uACF5\uACE0\uBC88\uD638/i, /\uC785\uCC30\uBC88\uD638/i];
+  const BID_INPUT_SELECTORS = [
+    'input[placeholder*="\uC785\uCC30" i]',
+    'input[title*="\uACF5\uACE0" i]',
+    'input[name*="bid" i]',
+    'input[id*="bid" i]',
+    'input[name*="gonggo" i]',
+    'input[id*="gonggo" i]'
+  ];
+  const SEARCH_BUTTON_TEXT = '\uC870\uD68C';
+
   async function inFrames(run){
-    const ctxs = [page, ...page.frames?.() || []];
-    for (const ctx of ctxs){
-      try { const res = await run(ctx); if (res) return res; } catch {}
+    for (const ctx of contexts()){
+      try {
+        const res = await run(ctx);
+        if (res) return res;
+      } catch {}
     }
     return null;
   }
-  async function tryExtTreeClick(ctx, text){
-    try {
-      return await ctx.evaluate((t)=>{
-        try {
-          if (window.Ext && Ext.ComponentQuery){
-            const trees = Ext.ComponentQuery.query('treepanel');
-            for (let i=0;i<trees.length;i++){
-              const tp = trees[i];
-              const root = tp.getRootNode && tp.getRootNode();
-              if (!root) continue;
-              root.cascadeBy && root.cascadeBy(function(n){ try { n.expand && n.expand(); } catch(e){} });
-              let found = null;
-              const rx = new RegExp(t);
-              root.cascadeBy && root.cascadeBy(function(n){ if (!found && rx.test((n.get && n.get('text'))||'')) { found = n; } });
-              if (found){
-                try { tp.getSelectionModel && tp.getSelectionModel().select(found); } catch(e){}
-                try { tp.fireEvent && tp.fireEvent('itemclick', tp.getView && tp.getView(), found); } catch(e){}
-                try { const el = tp.getView && tp.getView().getNode(found); el && el.querySelector('a') && el.querySelector('a').click(); } catch(e){}
-                return true;
-              }
-            }
-          }
-        } catch(e){}
-        return false;
-      }, text);
-    } catch { return false; }
-  }
-  async function waitInFrames(predicate, timeoutMs=8000){
+
+  async function waitForCondition(predicate, timeoutMs = 6000){
     const start = Date.now();
-    while(Date.now() - start < timeoutMs){
-      const hit = await inFrames(predicate);
+    while (Date.now() - start < timeoutMs){
+      const hit = await predicate();
       if (hit) return hit;
       await sleep(200);
     }
     return null;
   }
-  async function frameHasText(re){
-    return await inFrames(async (ctx)=>{
-      try { const ok = await ctx.evaluate(r=> new RegExp(r).test(document.body.innerText), re.source).catch(()=>false); if (ok) return ctx; } catch {}
-      try { const any = await ctx.$(`text=${re.source}`); if (any) return ctx; } catch {}
-      return null;
-    });
+
+  async function waitForNoMask(timeoutMs = 8000){
+    return await waitForCondition(async () => {
+      const masked = await inFrames(async (ctx)=>{
+        try { return await ctx.$('.x-mask, .ext-el-mask, .x-loading-mask'); } catch { return null; }
+      });
+      return masked ? null : true;
+    }, timeoutMs);
   }
-  await inFrames(async (ctx)=>{
-    const loc = ctx.getByRole?.('link', { name: /\uC785\uCC30\/?\uACC4\uC57D/i }) || null;
-    if (loc && await loc.count().catch(()=>0)) { await loc.first().click().catch(()=>{}); return true; }
-    const alt = await ctx.$('a:has-text("/")').catch(()=>null) || await ctx.$('text=/\/?/i').catch(()=>null);
-    if (alt) { await alt.click().catch(()=>{}); return true; }
-    return false;
-  });
-  await sleep(400);
-  let moved = false;
-  for (let i=0;i<3 && !moved;i++){
-    await inFrames(async (ctx)=>{
-      const a = await ctx.$('.x-panel a:has-text("û")').catch(()=>null) || await ctx.$('a:has-text("û")').catch(()=>null);
-      if (a) {
-        try { await a.click({ force:true }).catch(()=>{}); } catch {}
-        try { await ctx.evaluate(el => { el.click(); el.dispatchEvent(new MouseEvent('click', { bubbles:true })); }, a).catch(()=>{}); } catch {}
-        moved = true; return true;
-      }
-      const ok = await tryExtTreeClick(ctx, 'û');
-      if (ok) { moved = true; return true; }
-      return false;
-    });
-    await sleep(250);
+
+  async function waitForGrid(timeoutMs = 8000){
+    return await waitForCondition(async () => inFrames(async (ctx)=>{
+      try { return await ctx.$('.x-grid-row, tr.x-grid-row'); } catch { return null; }
+    }), timeoutMs);
   }
-  const contentCtx = await waitInFrames(async (ctx)=>{
-    try {
-      const el = await ctx.$('xpath=(//label[contains(normalize-space(.),"ȣ")]/following::input)[1]')
-                || await ctx.$('input[aria-label*="ȣ" i]')
-                || await ctx.$('input[title*="ȣ" i]')
-                || await ctx.$('input[placeholder*="ȣ" i]');
-      return el ? { ctx, el } : null;
-    } catch { return null; }
-  }, 8000);
-  emit && emit({ type:'log', level: (moved && contentCtx)?'info':'warn', msg:`[KEPCO]  'û' ̵ ${(moved && contentCtx)?'ok':'pending'}` });
-  if (bidId) {
-    let filled = null;
-    if (contentCtx?.el) {
-      filled = contentCtx;
-      try { await contentCtx.el.fill(String(bidId)); } catch {}
-    } else {
-      filled = await waitInFrames(async (ctx)=>{
+
+  async function findInputHandle(){
+    const tryLabels = async (ctx) => {
+      if (!ctx.getByLabel) return null;
+      for (const label of BID_LABELS){
         try {
-          const lab = ctx.getByLabel?.(/ȣ/i);
-          if (lab && await lab.count().catch(()=>0)) { await lab.first().fill(String(bidId)); return { ctx, el: await lab.first().elementHandle() }; }
+          const loc = ctx.getByLabel(label);
+          if (loc && await loc.count().catch(()=>0)) {
+            const handle = await loc.first().elementHandle();
+            if (handle) return handle;
+          }
         } catch {}
-        const xp = await ctx.$('xpath=(//label[contains(normalize-space(.),"ȣ")]/following::input)[1]').catch(()=>null)
-                  || await ctx.$('input[name*="ȣ" i]').catch(()=>null)
-                  || await ctx.$('input[title*="" i]').catch(()=>null)
-                  || await ctx.$('input[placeholder*="" i]').catch(()=>null);
-        if (xp) { await xp.fill(String(bidId)); return { ctx, el: xp }; }
-        return null;
-      }, 8000);
+      }
+      return null;
+    };
+    const trySelectors = async (ctx) => {
+      for (const sel of BID_INPUT_SELECTORS){
+        try {
+          const el = await ctx.$(sel);
+          if (el) return el;
+        } catch {}
+      }
+      return null;
+    };
+    for (const ctx of contexts()){
+      const byLabel = await tryLabels(ctx);
+      if (byLabel) return byLabel;
+      const bySelector = await trySelectors(ctx);
+      if (bySelector) return bySelector;
     }
-    if (filled) {
-      const clicked = await waitInFrames(async (ctx)=>{
-        const btn = await ctx.$('button:has-text("ȸ")').catch(()=>null)
-                  || await ctx.$('input[type="button"][value*="ȸ"][value!="ȸ"]').catch(()=>null)
-                  || await ctx.$('a:has-text("ȸ")').catch(()=>null);
-        if (btn) { await btn.click().catch(()=>{}); return true; }
-        return false;
-      }, 3000);
-      if (!clicked) { try { await filled.el.press('Enter'); } catch {} }
-      emit && emit({ type:'log', level:'info', msg:`[KEPCO] ȣ ȸ õ: ${bidId}` });
-      await sleep(400);
-    } else {
-      emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ȣ Է ʵ ã ' });
-    }
+    return null;
   }
+
+  async function findSearchButton(){
+    const selectors = [
+      `button:has-text("${SEARCH_BUTTON_TEXT}")`,
+      `a:has-text("${SEARCH_BUTTON_TEXT}")`,
+      `span.x-btn-inner:has-text("${SEARCH_BUTTON_TEXT}")`,
+      'input[type="button"][value*="\uC870\uD68C"]'
+    ];
+    for (const ctx of contexts()){
+      for (const sel of selectors){
+        try {
+          const el = await ctx.$(sel);
+          if (el) return el;
+        } catch {}
+      }
+    }
+    return null;
+  }
+
+  await navigateToApplication(page, emit);
+
+  if (!bidId){
+    log('warn', '[KEPCO] \uC785\uCC30\uACF5\uACE0\uBC88\uD638(bidId)\uAC00 \uBE44\uC5B4 \uC788\uC5B4 \uAC80\uC0C9 \uB2E8\uACC4\uB97C \uAC74\uB108\uB731\uB2C8\uB2E4.');
+    return;
+  }
+
+  const input = await waitForCondition(findInputHandle, 8000);
+  if (!input){
+    log('warn', '[KEPCO] \uC785\uCC30\uACF5\uACE0\uBC88\uD638 \uC785\uB825\uCC3D\uC744 \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.');
+    return;
+  }
+  try {
+    await input.scrollIntoViewIfNeeded?.().catch(()=>{});
+    await input.fill('');
+    await input.type(String(bidId), { delay: 40 }).catch(()=>input.fill(String(bidId)));
+  } catch {
+    log('warn', '[KEPCO] \uC785\uCC30\uACF5\uACE0\uBC88\uD638 \uC785\uB825\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.');
+  }
+  log('info', `[KEPCO] \uC785\uCC30\uACF5\uACE0\uBC88\uD638 \uC785\uB825 \uC644\uB8CC: ${bidId}`);
+
+  const searchBtn = await waitForCondition(findSearchButton, 5000);
+  if (searchBtn){
+    try {
+      await searchBtn.scrollIntoViewIfNeeded?.().catch(()=>{});
+      await searchBtn.click({ force:true }).catch(()=>searchBtn.click());
+    } catch {}
+  } else {
+      log('warn', '[KEPCO] "\uC870\uD68C" \uBC84\uD2BC\uC744 \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4. Enter \uD0A4\uB85C \uB300\uCCB4 \uC2DC\uB3C4.');
+    try { await input.press('Enter'); } catch {}
+  }
+
+  await waitForNoMask(8000);
+  await waitForGrid(8000);
 }
 
 async function applyAfterSearch(page, emit){
@@ -330,8 +345,8 @@ async function applyAfterSearch(page, emit){
     return false;
   }
 
-  // 1) Grid checkbox + apply button fast-path
-  // Fast path heuristic: same grid panel checkbox + 'û' button
+  // 1) Grid checkbox + "입찰참가신청" 버튼 빠른 경로
+  // Fast path heuristic: checkbox + "입찰참가신청" button inside same panel
   async function fastPath() {
     const ctx = await inFrames(async (f)=>{
       try {
@@ -369,7 +384,7 @@ async function applyAfterSearch(page, emit){
         } catch {}
         await target.scrollIntoViewIfNeeded?.().catch(()=>{});
         await target.click({ force:true }).catch(()=>{});
-        emit && emit({ type:'log', level:'info', msg:'[KEPCO] fastPath: "û"  Ŭ' });
+        emit && emit({ type:'log', level:'info', msg:'[KEPCO] fastPath: "\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD" \uBC84\uD2BC \uD074\uB9AD' });
         return true;
       }
     } catch {}
@@ -420,7 +435,7 @@ async function applyAfterSearch(page, emit){
     emit && emit({ type:'log', level:'warn', msg:'[KEPCO] Failed to locate grid checkbox' });
   }
 
-  // 2) Click "û" button
+  // 2) Click "입찰참가신청" button
   const btn = await waitInFrames(async (ctx)=>{
     try {
       const handle = await ctx.evaluateHandle((text) => {
@@ -587,7 +602,7 @@ async function applyAfterSearch(page, emit){
     }, btn.el, APPLY_BUTTON_TEXT).catch(()=>{}); } catch {}
     // Keyboard fallback (focus toolbar then press Enter/Space)
     try { await btn.el.focus?.().catch(()=>{}); await btn.el.press?.('Enter').catch(()=>{}); await btn.el.press?.(' ').catch(()=>{}); } catch {}
-    emit && emit({ type:'log', level:'info', msg:'[KEPCO] "\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD" ư Ŭ' });
+    emit && emit({ type:'log', level:'info', msg:'[KEPCO] "\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD" \uBC84\uD2BC \uD074\uB9AD \uC644\uB8CC' });
     // Wait briefly for modal to appear
     const modal = await waitInFrames(async (ctx)=>{ try { return await ctx.$('.x-window'); } catch { return null; } }, 1500);
     if (!modal) {
@@ -595,10 +610,10 @@ async function applyAfterSearch(page, emit){
     }
     await sleep(300);
   } else {
-    emit && emit({ type:'log', level:'warn', msg:'[KEPCO] "\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD" ư ã ߽ϴ' });
+    emit && emit({ type:'log', level:'warn', msg:'[KEPCO] "\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD" \uBC84\uD2BC\uC744 \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.' });
   }
 
-  // 3) Handle ȳ modal/popups (agreement, notices, etc.)
+  // 3) Handle 안내/동의 모달 및 팝업
   // 3-1) Capture popup if spawned
   let modalPage = null;
   try {
@@ -816,10 +831,5 @@ module.exports = {
   applyAfterSearch,
   navigateToApplication,
 };
-
-
-
-
-
 
 
