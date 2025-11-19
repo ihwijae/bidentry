@@ -446,11 +446,13 @@ async function goToBidApplyAndSearch(page, emit, bidId){
     'input[placeholder*="\uC785\uCC30" i]',
     'input[title*="\uACF5\uACE0" i]',
     'input[title*="\uACF5\uACE0\uBC88\uD638" i]',
+    'input[title*="\uC785\uCC30\uACF5\uACE0" i]',
     'input[name*="bid" i]',
     'input[id*="bid" i]',
     'input[name*="gonggo" i]',
     'input[id*="gonggo" i]',
-    'input[id*="textfield" i]'
+    'input[id*="textfield" i]',
+    'input[componentid*="textfield" i]'
   ];
   const SEARCH_BUTTON_TEXT = '\uC870\uD68C';
 
@@ -489,6 +491,23 @@ async function goToBidApplyAndSearch(page, emit, bidId){
     }), timeoutMs);
   }
 
+  async function isUsableInput(handle){
+    if (!handle) return false;
+    try {
+      const usable = await handle.evaluate((el) => {
+        if (!el) return false;
+        const rect = el.getBoundingClientRect();
+        const style = window.getComputedStyle(el);
+        const hidden = style.visibility === 'hidden' || style.display === 'none';
+        const disabled = el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true';
+        return rect.width > 3 && rect.height > 3 && !hidden && !disabled;
+      });
+      return !!usable;
+    } catch {
+      return false;
+    }
+  }
+
   async function findInputHandle(){
     const tryLabels = async (ctx) => {
       if (!ctx.getByLabel) return null;
@@ -497,7 +516,7 @@ async function goToBidApplyAndSearch(page, emit, bidId){
           const loc = ctx.getByLabel(label);
           if (loc && await loc.count().catch(()=>0)) {
             const handle = await loc.first().elementHandle();
-            if (handle) return handle;
+            if (handle && await isUsableInput(handle)) return handle;
           }
         } catch {}
       }
@@ -507,7 +526,7 @@ async function goToBidApplyAndSearch(page, emit, bidId){
       for (const sel of BID_INPUT_SELECTORS){
         try {
           const el = await ctx.$(sel);
-          if (el) return el;
+          if (el && await isUsableInput(el)) return el;
         } catch {}
       }
       return null;
@@ -554,8 +573,14 @@ async function goToBidApplyAndSearch(page, emit, bidId){
   }
   try {
     await input.scrollIntoViewIfNeeded?.().catch(()=>{});
-    await input.fill('');
+    await input.click({ force:true }).catch(()=>{});
+    await input.evaluate(el => { if (el && typeof el.value === 'string') el.value = ''; });
     await input.type(String(bidId), { delay: 40 }).catch(()=>input.fill(String(bidId)));
+    await input.dispatchEvent('change').catch(()=>{});
+    const applied = await input.evaluate(el => (el && typeof el.value === 'string') ? el.value.trim() : '');
+    if (!applied || applied.replace(/\D/g,'') !== String(bidId).replace(/\D/g,'')) {
+      log('warn', `[KEPCO] 입력 필드 값이 일치하지 않을 수 있습니다 (현재='${applied}')`);
+    }
   } catch {
     log('warn', '[KEPCO] \uC785\uCC30\uACF5\uACE0\uBC88\uD638 \uC785\uB825\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.');
   }
