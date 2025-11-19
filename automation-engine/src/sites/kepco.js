@@ -1,8 +1,25 @@
 "use strict"
 
+const fs = require('fs');
+const path = require('path');
 const { handleNxCertificate } = require('./nxCertificate');
 
 const KEPCO_POPUP_URL_PATTERNS = [/\/popup\//i, /NoticeFishingPopup/i, /Kepco.*Popup/i];
+
+async function dumpKepcoHtml(page, emit, tag){
+  if (!page) return;
+  try {
+    const html = await page.content();
+    const stamp = new Date().toISOString().replace(/[:.]/g,'-');
+    const dir = path.join(process.cwd(), 'engine_runs');
+    fs.mkdirSync(dir, { recursive: true });
+    const file = path.join(dir, `${stamp}_${tag || 'kepco'}.html`);
+    fs.writeFileSync(file, html, 'utf-8');
+    emit && emit({ type:'log', level:'info', msg:`[KEPCO] HTML 덤프 저장: ${file}` });
+  } catch (err) {
+    emit && emit({ type:'log', level:'warn', msg:`[KEPCO] HTML 덤프 실패: ${(err && err.message) || err}` });
+  }
+}
 async function loginKepco(page, emit, auth = {}) {
   // Query across all frames (main first)
   async function $(selector) {
@@ -590,6 +607,7 @@ async function goToBidApplyAndSearch(page, emit, bidId){
   const input = await waitForCondition(findInputHandle, 8000);
   if (!input){
     log('warn', '[KEPCO] \uC785\uCC30\uACF5\uACE0\uBC88\uD638 \uC785\uB825\uCC3D\uC744 \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.');
+    await dumpKepcoHtml(page, emit, 'bid_input_missing');
     return;
   }
   const desiredDigits = String(bidId).replace(/\D/g,'');
@@ -626,6 +644,7 @@ async function goToBidApplyAndSearch(page, emit, bidId){
   if (!appliedOk) {
     const finalValue = await input.evaluate(el => (el && typeof el.value === 'string') ? el.value : '').catch(()=> '');
     log('warn', `[KEPCO] 공고번호 입력 검증 실패 (현재='${finalValue}')`);
+    await dumpKepcoHtml(page, emit, 'bid_input_failed');
     return;
   }
   await page.waitForTimeout(120).catch(()=>{});
