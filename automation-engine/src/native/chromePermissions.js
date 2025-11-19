@@ -20,11 +20,12 @@ param(
 )
 
 Add-Type -AssemblyName UIAutomationClient
+Add-Type -AssemblyName System.Windows.Forms
 
 function Split-CSV([string]$s){ if([string]::IsNullOrWhiteSpace($s)){ return @() } else { return ($s -split '\\|') } }
 $Buttons = Split-CSV $ButtonCSV
 $Windows = Split-CSV $WindowCSV
-if($Buttons.Count -eq 0){ $Buttons = @('허용','Allow') }
+if($Buttons.Count -eq 0){ $Buttons = @('허용','Allow','허용(&A)','허용(A)','허용 (A)') }
 if($Windows.Count -eq 0){ $Windows = @('Chrome','SRM','KEPCO') }
 
 $deadline = (Get-Date).AddSeconds($TimeoutSec)
@@ -52,6 +53,10 @@ function Click-Permission{
       if($btn -ne $null){
         try {
           ($btn.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern)).Invoke()
+          Start-Sleep -Milliseconds 200
+          [System.Windows.Forms.SendKeys]::SendWait('{ENTER}')
+          Start-Sleep -Milliseconds 150
+          [System.Windows.Forms.SendKeys]::SendWait(' ')
           return $true
         } catch {}
       }
