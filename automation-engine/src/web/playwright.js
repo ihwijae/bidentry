@@ -14,6 +14,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { attachPopupAutoCloser, dismissCommonOverlays } = require('./popups');
+const { clickChromePermissionPopup } = require('../native/chromePermissions');
 
 function chromeTimestamp(){
   const unixMillis = BigInt(Date.now());
@@ -72,6 +73,7 @@ function allowLocalNetworkPermission(profileDir, origins, emit){
   if (!profileDir || !Array.isArray(origins) || origins.length === 0) return;
   const prefPath = path.join(profileDir, 'Preferences');
   let data = {};
+  let modified = false;
   if (fs.existsSync(prefPath)) {
     try {
       data = JSON.parse(fs.readFileSync(prefPath, 'utf-8'));
@@ -83,11 +85,15 @@ function allowLocalNetworkPermission(profileDir, origins, emit){
   if (!data || typeof data !== 'object') data = {};
   data.profile = data.profile || {};
   const profile = data.profile;
+  profile.default_content_settings = profile.default_content_settings || {};
+  if (profile.default_content_settings.local_network !== 1) {
+    profile.default_content_settings.local_network = 1;
+    modified = true;
+  }
   profile.content_settings = profile.content_settings || {};
   profile.content_settings.exceptions = profile.content_settings.exceptions || {};
   const bucket = profile.content_settings.exceptions.local_network
     || (profile.content_settings.exceptions.local_network = {});
-  let modified = false;
   const ts = chromeTimestamp();
   for (const origin of origins) {
     if (!origin) continue;
@@ -251,6 +257,31 @@ async function openAndPrepareLogin(job, emit, outDir){
       emit && emit({ type:'log', level:'warn', msg:`[browser] 권한 부여 실패: ${(err && err.message) || err}` });
     }
   }
+  const startPermissionWatcher = () => {
+    if (browserLabel !== 'Chrome') return null;
+    if (job?.options?.autoClickLocalNetworkPermission === false) return null;
+    const timeoutSec = Number(job?.options?.localNetworkTimeoutSec || 90);
+    const btnLabels = (job?.options?.localNetworkButtonLabels || ['허용','Allow']).filter(Boolean);
+    const defaultWindows = [targetOrigin, job?.company?.name || '', 'Chrome'].filter(Boolean);
+    const windowKeywords = (job?.options?.localNetworkWindowKeywords || defaultWindows).filter(Boolean);
+    const promise = clickChromePermissionPopup({
+      buttonLabels: btnLabels,
+      windowKeywords,
+      timeoutSec
+    }, emit).then(res => {
+      if (res?.ok) {
+        emit && emit({ type:'log', level:'info', msg:'[browser] Chrome 권한 팝업 자동 허용 완료' });
+      } else if (res) {
+        emit && emit({ type:'log', level:'warn', msg:`[browser] Chrome 권한 팝업 처리 실패 (${res.error || 'unknown'})` });
+      }
+    }).catch(err => {
+      emit && emit({ type:'log', level:'warn', msg:`[browser] Chrome 권한 팝업 스크립트 오류: ${(err && err.message) || err}` });
+    });
+    return promise;
+  };
+
+  const permissionWatcher = startPermissionWatcher();
+
   await page.goto(url, { waitUntil: 'load', timeout: 60000 });
   emit && emit({ type:'log', level:'info', msg:`페이지 접속: ${await page.title().catch(()=>url)} (${page.url()})` });
   await dismissCommonOverlays(page, emit);
