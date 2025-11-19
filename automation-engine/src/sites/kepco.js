@@ -649,12 +649,10 @@ async function goToBidApplyAndSearch(page, emit, bidId){
 async function applyAfterSearch(page, emit){
   const APPLY_BUTTON_TEXT = '\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD';
   const APPLY_BUTTON_SELECTORS = [
-    '#button-1416',
-    '[componentid="button-1416"]',
-    '#button-1416-btnInnerEl',
-    '#button-1416-btnEl',
-    '#button-1416-btnWrap',
-    'a.x-btn[role="button"]:has(#button-1416-btnInnerEl)'
+    '.x-toolbar-docked-bottom a.x-btn:has(.btn-request)',
+    '.x-toolbar-docked-bottom .btn-request',
+    '.x-toolbar-docked-bottom a.x-btn',
+    '.x-toolbar-docked-bottom button'
   ];
   const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
   async function inFrames(run){
@@ -686,10 +684,19 @@ async function applyAfterSearch(page, emit){
   }
 
   const findApplyButton = async (ctx) => {
+    const isCancelButton = async (el) => {
+      if (!el) return false;
+      try {
+        const parent = await el.evaluateHandle(node => node.closest('a.x-btn, button, .x-btn') || node);
+        const text = parent && (await parent.asElement()?.textContent()?.catch(()=>'')) || '';
+        return /\uCDE8\uC18C/.test(text);
+      } catch { return false; }
+    };
+
     for (const sel of APPLY_BUTTON_SELECTORS) {
       try {
         const el = await ctx.$(sel);
-        if (el) return el;
+        if (el && !(await isCancelButton(el))) return el;
       } catch {}
     }
     const fallback = [
@@ -700,7 +707,7 @@ async function applyAfterSearch(page, emit){
     for (const sel of fallback) {
       try {
         const el = await ctx.$(sel);
-        if (el) return el;
+        if (el && !(await isCancelButton(el))) return el;
       } catch {}
     }
     return null;
@@ -800,7 +807,9 @@ async function applyAfterSearch(page, emit){
           if (!node) return null;
           const content = (node.textContent || '').replace(/\s+/g,'').trim();
           if (content.indexOf(text) === -1) return null;
-          return node.closest('a.x-btn, button, .x-btn') || node;
+          const btn = node.closest('a.x-btn, button, .x-btn');
+          if (btn && btn.textContent && btn.textContent.indexOf('\uCDE8\uC18C') !== -1) return null;
+          return btn || node;
         };
         const findIn = (root) => {
           if (!root) return null;
@@ -816,7 +825,8 @@ async function applyAfterSearch(page, emit){
           const requestBtn = root.querySelector('.x-toolbar-docked-bottom .btn-request');
           return matches(requestBtn);
         };
-        const direct = document.getElementById('button-1416-btnInnerEl');
+        const direct = document.querySelector('.x-toolbar-docked-bottom .btn-request')
+          || document.querySelector('.x-toolbar-docked-bottom a.x-btn');
         if (matches(direct)) return direct.closest('a.x-btn, button, .x-btn') || direct;
         const selected = document.querySelector('.x-grid-row-selected, tr.x-grid-row-selected');
         const base = selected ? selected.closest('.x-panel') : document.querySelector('.x-panel');
@@ -910,7 +920,7 @@ async function applyAfterSearch(page, emit){
       const matchText = (node)=>!!(node && (node.textContent || '').indexOf(text) > -1);
       const root = e.closest ? e.closest('a.x-btn, button, .x-btn') || e : e;
       let inner = null;
-      const direct = document.getElementById('button-1416-btnInnerEl');
+      const direct = document.querySelector('.x-toolbar-docked-bottom .btn-request');
       if (!inner && matchText(direct)) inner = direct;
       if (root && root.querySelector){
         const found = Array.from(root.querySelectorAll('.x-btn-inner, span')).find(matchText);
