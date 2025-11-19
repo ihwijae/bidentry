@@ -15,6 +15,42 @@ const os = require('os');
 const path = require('path');
 const { attachPopupAutoCloser, dismissCommonOverlays } = require('./popups');
 
+function ensureCleanChromeExitFlags(profileDir, emit){
+  if (!profileDir) return;
+  const patchFile = (fileName) => {
+    const target = path.join(profileDir, fileName);
+    let data = {};
+    let dirty = false;
+    if (fs.existsSync(target)) {
+      try {
+        const raw = fs.readFileSync(target, 'utf-8');
+        data = JSON.parse(raw);
+      } catch (err) {
+        emit && emit({ type:'log', level:'warn', msg:`[browser] ${fileName} 파싱 실패, 새로 생성합니다: ${(err && err.message) || err}` });
+        data = {};
+      }
+    }
+    if (!data || typeof data !== 'object') data = {};
+    const profile = (typeof data.profile === 'object' && data.profile) || {};
+    if (profile.exit_type !== 'None') { profile.exit_type = 'None'; dirty = true; }
+    if (profile.exited_cleanly !== true) { profile.exited_cleanly = true; dirty = true; }
+    data.profile = profile;
+    if (data.exit_type && data.exit_type !== 'None') { data.exit_type = 'None'; dirty = true; }
+    if (data.exited_cleanly !== undefined && data.exited_cleanly !== true) { data.exited_cleanly = true; dirty = true; }
+    if (!fs.existsSync(target)) dirty = true;
+    if (dirty) {
+      try {
+        fs.writeFileSync(target, JSON.stringify(data, null, 2));
+        emit && emit({ type:'log', level:'debug', msg:`[browser] ${fileName}에 clean-exit 플래그 설정` });
+      } catch (err) {
+        emit && emit({ type:'log', level:'warn', msg:`[browser] ${fileName} 쓰기 실패: ${(err && err.message) || err}` });
+      }
+    }
+  };
+  patchFile('Preferences');
+  patchFile('Local State');
+}
+
 async function openAndPrepareLogin(job, emit, outDir){
   pw = requirePlaywright(emit);
   const debug = job?.options?.debug === true;
@@ -97,6 +133,7 @@ async function openAndPrepareLogin(job, emit, outDir){
     } catch (err) {
       emit && emit({ type:'log', level:'warn', msg:`[browser] 프로필 디렉터리 생성 실패(${automationProfileDir}): ${(err && err.message) || err}` });
     }
+    ensureCleanChromeExitFlags(automationProfileDir, emit);
     try {
       ctx = await pw.chromium.launchPersistentContext(automationProfileDir, persistentOpts(browserChannel));
     } catch (err) {
@@ -233,4 +270,3 @@ async function fillCommonCredentials(page, auth, emit){
 }
 
 module.exports = { openAndPrepareLogin };
-
