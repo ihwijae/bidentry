@@ -156,39 +156,60 @@ async function loginKepco(page, emit, auth = {}) {
         return null;
       };
 
-      async function locateFields(timeoutMs = 6500) {
+      async function locateFields(timeoutMs = 5000) {
         const deadline = Date.now() + timeoutMs;
         const located = { id: null, pw: null };
-        const scopedTargets = scope ? [scope] : [];
+        const preferScopes = scope ? [scope] : [];
+
+        const buildContexts = () => {
+          const list = [];
+          const seen = new Set();
+          const push = (ctx) => { if (ctx && !seen.has(ctx)) { seen.add(ctx); list.push(ctx); } };
+          preferScopes.forEach(push);
+          gatherContexts().forEach(push);
+          return list;
+        };
+
+        const searchSelectors = async (ctxs, selectors) => {
+          for (const sel of selectors) {
+            for (const ctx of ctxs) {
+              try {
+                const el = await ctx.$(sel);
+                if (el) return el;
+              } catch {}
+            }
+          }
+          return null;
+        };
+
+        const searchLabels = async (ctxs, labels) => {
+          for (const ctx of ctxs) {
+            if (!ctx?.getByLabel) continue;
+            for (const lbl of labels) {
+              try {
+                const locator = ctx.getByLabel(lbl);
+                if (locator && await locator.count().catch(()=>0)) {
+                  const handle = await locator.first().elementHandle().catch(()=>null);
+                  if (handle) return handle;
+                }
+              } catch {}
+            }
+          }
+          return null;
+        };
 
         while (Date.now() < deadline && (!located.id || !located.pw)) {
-          const contexts = gatherContexts();
+          const ctxs = buildContexts();
           for (const key of ['id','pw']) {
             if (located[key]) continue;
             const cfg = loginFieldConfig[key];
-            // label search on page/frame contexts
-            for (const ctx of contexts) {
-              for (const lbl of cfg.labels) {
-                try {
-                  const locator = ctx.getByLabel ? ctx.getByLabel(lbl) : null;
-                  if (locator && await locator.count().catch(()=>0)) {
-                    located[key] = await locator.first().elementHandle().catch(()=>null);
-                    if (located[key]) break;
-                  }
-                } catch {}
-              }
-              if (located[key]) break;
+            located[key] = await searchSelectors(ctxs, cfg.selectors);
+            if (!located[key]) {
+              located[key] = await searchLabels(ctxs, cfg.labels);
             }
-            if (located[key]) continue;
-            // scoped selectors inside modal container first
-            if (scopedTargets.length) {
-              located[key] = await queryInTargets(scopedTargets, cfg.selectors);
-            }
-            if (located[key]) continue;
-            located[key] = await queryInTargets(contexts, cfg.selectors);
           }
           if (located.id && located.pw) break;
-          await loginPage.waitForTimeout(100).catch(()=>{});
+          await loginPage.waitForTimeout(80).catch(()=>{});
         }
         return located;
       }
@@ -603,6 +624,14 @@ async function goToBidApplyAndSearch(page, emit, bidId){
 
 async function applyAfterSearch(page, emit){
   const APPLY_BUTTON_TEXT = '\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD';
+  const APPLY_BUTTON_SELECTORS = [
+    '#button-1416',
+    '[componentid="button-1416"]',
+    '#button-1416-btnInnerEl',
+    '#button-1416-btnEl',
+    '#button-1416-btnWrap',
+    'a.x-btn[role="button"]:has(#button-1416-btnInnerEl)'
+  ];
   const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
   async function inFrames(run){
     const ctxs = [page, ...page.frames?.() || []];
@@ -632,15 +661,34 @@ async function applyAfterSearch(page, emit){
     return false;
   }
 
+  const findApplyButton = async (ctx) => {
+    for (const sel of APPLY_BUTTON_SELECTORS) {
+      try {
+        const el = await ctx.$(sel);
+        if (el) return el;
+      } catch {}
+    }
+    const fallback = [
+      `a.x-btn:has-text("${APPLY_BUTTON_TEXT}")`,
+      `button:has-text("${APPLY_BUTTON_TEXT}")`,
+      `span.x-btn-inner:has-text("${APPLY_BUTTON_TEXT}")`
+    ];
+    for (const sel of fallback) {
+      try {
+        const el = await ctx.$(sel);
+        if (el) return el;
+      } catch {}
+    }
+    return null;
+  };
+
   // 1) Grid checkbox + "입찰참가신청" 버튼 빠른 경로
   // Fast path heuristic: checkbox + "입찰참가신청" button inside same panel
   async function fastPath() {
     const ctx = await inFrames(async (f)=>{
       try {
         const hasChk = await f.$('.x-grid-row-checker');
-        const hasBtn = await f.$(`button:has-text("${APPLY_BUTTON_TEXT}")`).catch(()=>null)
-                    || await f.$(`a:has-text("${APPLY_BUTTON_TEXT}")`).catch(()=>null)
-                    || await f.$(`span.x-btn-inner:has-text("${APPLY_BUTTON_TEXT}")`).catch(()=>null);
+        const hasBtn = await findApplyButton(f);
         return (hasChk && hasBtn) ? f : null;
       } catch { return null; }
     });
@@ -660,10 +708,7 @@ async function applyAfterSearch(page, emit){
         selected = await ctx.$('.x-grid-row-selected, tr.x-grid-row-selected').catch(()=>null);
       }
       // 2) Find clickable button (resolve wrapper element)
-      let target = await ctx.$(`button:has-text("${APPLY_BUTTON_TEXT}")`).catch(()=>null)
-                 || await ctx.$(`a:has-text("${APPLY_BUTTON_TEXT}")`).catch(()=>null)
-                 || await ctx.$(`span.x-btn-inner:has-text("${APPLY_BUTTON_TEXT}")`).catch(()=>null)
-                 || await ctx.$('#button-1416-btnInnerEl').catch(()=>null);
+      let target = await findApplyButton(ctx);
       if (target) {
         try {
           const clickableHandle = await target.evaluateHandle((node)=> (node.closest('a.x-btn, button, .x-btn') || node));
