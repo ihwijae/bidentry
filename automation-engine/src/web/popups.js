@@ -12,6 +12,11 @@ const DEFAULT_POPUP_KEYWORDS = [
 const DEFAULT_POPUP_SKIP = [
   /\uC778\uC99D/i, // 인증
   /\uACF5\uB3D9/i, // 공동
+  /\uC785\uCC30/i,
+  /\uC785\uCC30\uCC38\uAC00/i,
+  /\uC785\uCC30\uB3D9\uC758/i,
+  /\uC785\uCC30\uB2F9\uD589/i,
+  /\uC785\uCC30\uB2F9\uC5F0/i,
   /cert/i,
   /certificate/i
 ];
