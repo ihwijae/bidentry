@@ -597,14 +597,23 @@ async function goToBidApplyAndSearch(page, emit, bidId){
     await input.scrollIntoViewIfNeeded?.().catch(()=>{});
     await input.click({ force:true }).catch(()=>{});
     await input.evaluate(el => { if (el && typeof el.value === 'string') el.value = ''; });
-    await input.type(String(bidId), { delay: 25 }).catch(()=>input.fill(String(bidId)));
+    await input.type(String(bidId), { delay: 20 }).catch(()=>input.fill(String(bidId)));
     await input.dispatchEvent('input').catch(()=>{});
     await input.dispatchEvent('change').catch(()=>{});
     const matches = await input.evaluate((el, digits) => {
       if (!el || typeof el.value !== 'string') return '';
       return el.value.replace(/\D/g,'');
     }, desiredDigits).catch(()=> '');
-    return matches === desiredDigits;
+    if (matches !== desiredDigits) return false;
+    const extState = await page.evaluate((digits) => {
+      if (!(window.Ext && Ext.ComponentQuery)) return false;
+      const comp = Ext.ComponentQuery.query('textfield[title*=\uACF5\uACE0][isVisible()]')[0]
+        || Ext.ComponentQuery.query('textfield[name*=bid], textfield[id*=bid]')[0];
+      if (!comp) return true;
+      const val = (comp.getValue && comp.getValue()) || comp.value || '';
+      return String(val).replace(/\D/g,'') === digits;
+    }, desiredDigits).catch(()=> true);
+    return extState === true;
   };
 
   let appliedOk = false;
