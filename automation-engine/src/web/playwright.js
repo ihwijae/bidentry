@@ -14,17 +14,8 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const { attachPopupAutoCloser, dismissCommonOverlays } = require('./popups');
-const { clickChromePermissionPopup } = require('../native/chromePermissions');
-const { ensureChromeLocalNetworkPolicy } = require('../native/chromePolicy');
 
-function chromeTimestamp(){
-  const unixMillis = BigInt(Date.now());
-  const unixMicros = unixMillis * 1000n;
-  const epochOffset = 11644473600000000n; // Windows epoch (1601) in microseconds
-  return (unixMicros + epochOffset).toString();
-}
-
-function ensureCleanChromeExitFlags(profileDir, emit){
+function ensureCleanProfileExitFlags(profileDir, emit){
   if (!profileDir) return;
   const patchFile = (fileName) => {
     const target = path.join(profileDir, fileName);
@@ -70,50 +61,7 @@ function resetAutomationProfileDir(profileDir, emit){
   }
 }
 
-function allowLocalNetworkPermission(profileDir, origins, emit){
-  if (!profileDir || !Array.isArray(origins) || origins.length === 0) return;
-  const prefPath = path.join(profileDir, 'Preferences');
-  let data = {};
-  let modified = false;
-  if (fs.existsSync(prefPath)) {
-    try {
-      data = JSON.parse(fs.readFileSync(prefPath, 'utf-8'));
-    } catch (err) {
-      emit && emit({ type:'log', level:'warn', msg:`[browser] Preferences 파싱 실패, 새로 생성합니다: ${(err && err.message) || err}` });
-      data = {};
-    }
-  }
-  if (!data || typeof data !== 'object') data = {};
-  data.profile = data.profile || {};
-  const profile = data.profile;
-  profile.default_content_settings = profile.default_content_settings || {};
-  if (profile.default_content_settings.local_network !== 1) {
-    profile.default_content_settings.local_network = 1;
-    modified = true;
-  }
-  profile.content_settings = profile.content_settings || {};
-  profile.content_settings.exceptions = profile.content_settings.exceptions || {};
-  const bucket = profile.content_settings.exceptions.local_network
-    || (profile.content_settings.exceptions.local_network = {});
-  const ts = chromeTimestamp();
-  for (const origin of origins) {
-    if (!origin) continue;
-    const pattern = `${origin},*`;
-    const prev = bucket[pattern];
-    if (!prev || prev.setting !== 1) {
-      bucket[pattern] = { setting: 1, last_modified: ts };
-      modified = true;
-    }
-  }
-  if (modified) {
-    try {
-      fs.writeFileSync(prefPath, JSON.stringify(data, null, 2));
-      emit && emit({ type:'log', level:'debug', msg:`[browser] Local Network 권한 허용: ${origins.filter(Boolean).join(', ')}` });
-    } catch (err) {
-      emit && emit({ type:'log', level:'warn', msg:`[browser] Local Network 권한 저장 실패: ${(err && err.message) || err}` });
-    }
-  }
-}
+// Edge 전용 자동화 프로필 재사용 시 깨끗한 종료 상태를 만들어 복구 팝업을 방지한다.
 
 async function openAndPrepareLogin(job, emit, outDir){
   pw = requirePlaywright(emit);
@@ -121,12 +69,8 @@ async function openAndPrepareLogin(job, emit, outDir){
   const headless = job?.options?.headless === true;
   const slowMo = debug ? 250 : 0;
   const viewport = { width: 1280, height: 900 };
-  const targetUrl = String(job?.url || '');
-  const targetOrigin = (() => {
-    try { return new URL(targetUrl).origin; } catch { return ''; }
-  })();
 
-  const requestedBrowser = String(job?.options?.browser || 'chrome').toLowerCase();
+  const requestedBrowser = String(job?.options?.browser || 'edge').toLowerCase();
   const browserChannelMap = {
     chrome: 'chrome',
     edge: 'msedge',
@@ -138,8 +82,6 @@ async function openAndPrepareLogin(job, emit, outDir){
     : 'Chromium';
   const useAutomationProfile = job?.options?.useAutomationProfile !== false;
   const resetAutomationProfile = job?.options?.resetAutomationProfile !== false;
-  const seedLocalNetworkPermission = job?.options?.seedLocalNetworkPermission !== false;
-  const applyLocalNetworkPolicy = job?.options?.applyLocalNetworkPolicy !== false;
   const automationProfileDir = job?.options?.automationProfileDir
     || path.join(os.homedir(), '.automation-engine', `${browserLabel.toLowerCase()}-profile`);
   const requestedPermissions = Array.isArray(job?.options?.browserPermissions)
@@ -148,8 +90,7 @@ async function openAndPrepareLogin(job, emit, outDir){
   const defaultLaunchArgs = [
     '--no-first-run',
     '--no-default-browser-check',
-    '--disable-session-crashed-bubble',
-    '--disable-features=BlockInsecurePrivateNetworkRequests,BlockInsecurePrivateNetworkRequestsForNavigations'
+    '--disable-session-crashed-bubble'
   ];
   const launchArgs = [...defaultLaunchArgs];
   if (Array.isArray(job?.options?.browserLaunchArgs)) {
@@ -183,13 +124,6 @@ async function openAndPrepareLogin(job, emit, outDir){
   let browser = null;
   let ctx = null;
 
-  if (browserLabel === 'Chrome' && applyLocalNetworkPolicy && targetOrigin) {
-    try {
-      await ensureChromeLocalNetworkPolicy([targetOrigin], emit);
-    } catch (err) {
-      emit && emit({ type:'log', level:'warn', msg:`[browser] Chrome 정책 적용 중 오류: ${(err && err.message) || err}` });
-    }
-  }
   if (reuseProfile && profileRoot) {
     const persistentArgs = launchArgs.slice();
     if (!persistentArgs.some(arg => typeof arg === 'string' && arg.toLowerCase().startsWith('--profile-directory='))) {
@@ -216,10 +150,7 @@ async function openAndPrepareLogin(job, emit, outDir){
     } catch (err) {
       emit && emit({ type:'log', level:'warn', msg:`[browser] 프로필 디렉터리 생성 실패(${automationProfileDir}): ${(err && err.message) || err}` });
     }
-    ensureCleanChromeExitFlags(automationProfileDir, emit);
-    if (seedLocalNetworkPermission && targetOrigin) {
-      allowLocalNetworkPermission(automationProfileDir, [targetOrigin], emit);
-    }
+    ensureCleanProfileExitFlags(automationProfileDir, emit);
     try {
       ctx = await pw.chromium.launchPersistentContext(automationProfileDir, persistentOpts(browserChannel));
     } catch (err) {
@@ -252,7 +183,7 @@ async function openAndPrepareLogin(job, emit, outDir){
   // auto-close notice/event popups across the context
   attachPopupAutoCloser(ctx, emit);
   let page = await ctx.newPage();
-  const url = targetUrl;
+  const url = job?.url || '';
   if (!url) {
     try { await ctx?.close?.(); } catch {}
     try { await browser?.close?.(); } catch {}
@@ -267,31 +198,6 @@ async function openAndPrepareLogin(job, emit, outDir){
       emit && emit({ type:'log', level:'warn', msg:`[browser] 권한 부여 실패: ${(err && err.message) || err}` });
     }
   }
-  const startPermissionWatcher = () => {
-    if (browserLabel !== 'Chrome') return null;
-    if (job?.options?.autoClickLocalNetworkPermission === false) return null;
-    const timeoutSec = Number(job?.options?.localNetworkTimeoutSec || 90);
-    const btnLabels = (job?.options?.localNetworkButtonLabels || ['허용','Allow']).filter(Boolean);
-    const defaultWindows = [targetOrigin, job?.company?.name || '', 'Chrome'].filter(Boolean);
-    const windowKeywords = (job?.options?.localNetworkWindowKeywords || defaultWindows).filter(Boolean);
-    const promise = clickChromePermissionPopup({
-      buttonLabels: btnLabels,
-      windowKeywords,
-      timeoutSec
-    }, emit).then(res => {
-      if (res?.ok) {
-        emit && emit({ type:'log', level:'info', msg:'[browser] Chrome 권한 팝업 자동 허용 완료' });
-      } else if (res) {
-        emit && emit({ type:'log', level:'warn', msg:`[browser] Chrome 권한 팝업 처리 실패 (${res.error || 'unknown'})` });
-      }
-    }).catch(err => {
-      emit && emit({ type:'log', level:'warn', msg:`[browser] Chrome 권한 팝업 스크립트 오류: ${(err && err.message) || err}` });
-    });
-    return promise;
-  };
-
-  const permissionWatcher = startPermissionWatcher();
-
   await page.goto(url, { waitUntil: 'load', timeout: 60000 });
   emit && emit({ type:'log', level:'info', msg:`페이지 접속: ${await page.title().catch(()=>url)} (${page.url()})` });
   await dismissCommonOverlays(page, emit);
