@@ -51,6 +51,16 @@ function ensureCleanChromeExitFlags(profileDir, emit){
   patchFile('Local State');
 }
 
+function resetAutomationProfileDir(profileDir, emit){
+  if (!profileDir) return;
+  try {
+    fs.rmSync(profileDir, { recursive: true, force: true });
+    emit && emit({ type:'log', level:'info', msg:`[browser] 자동화 프로필을 초기화했습니다: ${profileDir}` });
+  } catch (err) {
+    emit && emit({ type:'log', level:'warn', msg:`[browser] 프로필 초기화 실패(${profileDir}): ${(err && err.message) || err}` });
+  }
+}
+
 async function openAndPrepareLogin(job, emit, outDir){
   pw = requirePlaywright(emit);
   const debug = job?.options?.debug === true;
@@ -69,6 +79,7 @@ async function openAndPrepareLogin(job, emit, outDir){
     : browserChannel === 'chrome' ? 'Chrome'
     : 'Chromium';
   const useAutomationProfile = job?.options?.useAutomationProfile !== false;
+  const resetAutomationProfile = job?.options?.resetAutomationProfile !== false;
   const automationProfileDir = job?.options?.automationProfileDir
     || path.join(os.homedir(), '.automation-engine', `${browserLabel.toLowerCase()}-profile`);
   const requestedPermissions = Array.isArray(job?.options?.browserPermissions)
@@ -128,6 +139,9 @@ async function openAndPrepareLogin(job, emit, outDir){
   }
 
   if (!ctx && useAutomationProfile) {
+    if (resetAutomationProfile) {
+      resetAutomationProfileDir(automationProfileDir, emit);
+    }
     try {
       fs.mkdirSync(automationProfileDir, { recursive: true });
     } catch (err) {
