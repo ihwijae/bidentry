@@ -3,7 +3,7 @@
 ## 전체 흐름
 1. `automation-engine/src/cli.js`는 선택 입력인 job JSON을 읽고 `started` · `progress` · `done/error` 이벤트를 JSON 라인으로 내보낸 뒤 오케스트레이터 `run()`을 호출합니다. 외부 프로세스(Electron 등)는 이 스트림으로 실시간 상태를 확인합니다.
 2. `automation-engine/src/core/orchestrator.js`는 작업 수명주기를 관리합니다.
-   - `web/playwright.js`를 통해 Edge 프로필을 재사용하며 브라우저를 띄우고, 사이트별 로그인 훅(`loginKepco`, `loginMnd`)을 호출합니다.
+   - `web/playwright.js`가 자동화 전용 Chrome 프로필을 띄워 사용자의 기존 브라우저와 충돌하지 않게 하고, 이후 사이트별 로그인 훅(`loginKepco`, `loginMnd`)을 호출합니다.
    - 로그인 후 NX 웹 인증서 핸들러(`handleKepcoCertificate`/`handleMndCertificate`)를 먼저 시도하고, 실패 시 PowerShell UIAutomation(`native/uia.js`)으로 인증서 선택·PIN 입력을 진행합니다.
    - 한전의 경우 `goToBidApplyAndSearch`, `applyAfterSearch`를 호출해 메뉴 이동과 신청 버튼까지 이어집니다. 최종 `submit` 단계는 아직 자리표시자이며, 성공 시 `PREPARED-<site>-<timestamp>` 형태의 결과만 반환합니다.
 3. Electron 셸(`electron-app`)은 최소 UI로 CLI를 실행하고 설정(`settings.json`)을 관리하며, JSON 이벤트를 렌더러에 전달해 진행률/로그를 표시합니다.

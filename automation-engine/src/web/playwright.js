@@ -22,11 +22,47 @@ async function openAndPrepareLogin(job, emit, outDir){
   const slowMo = debug ? 250 : 0;
   const viewport = { width: 1280, height: 900 };
 
+  const requestedBrowser = String(job?.options?.browser || 'chrome').toLowerCase();
+  const browserChannelMap = {
+    chrome: 'chrome',
+    edge: 'msedge',
+    msedge: 'msedge'
+  };
+  const browserChannel = browserChannelMap[requestedBrowser] || null;
+  const browserLabel = browserChannel === 'msedge' ? 'Edge'
+    : browserChannel === 'chrome' ? 'Chrome'
+    : 'Chromium';
+  const useAutomationProfile = job?.options?.useAutomationProfile !== false;
+  const automationProfileDir = job?.options?.automationProfileDir
+    || path.join(os.homedir(), '.automation-engine', `${browserLabel.toLowerCase()}-profile`);
+  const launchArgs = [];
+  if (Array.isArray(job?.options?.browserLaunchArgs)) {
+    launchArgs.push(...job.options.browserLaunchArgs);
+  }
+  if (Array.isArray(job?.options?.edgeLaunchArgs)) {
+    // 레거시 옵션 호환
+    launchArgs.push(...job.options.edgeLaunchArgs);
+  }
   const reuseProfile = job?.options?.reuseEdgeProfile === true;
   const profileRoot = job?.options?.edgeUserDataDir
     || path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'Microsoft', 'Edge', 'User Data');
   const profileDirName = job?.options?.edgeProfileDir || 'Default';
-  const launchArgs = Array.isArray(job?.options?.edgeLaunchArgs) ? [...job.options.edgeLaunchArgs] : [];
+
+  const persistentOpts = (channel, extra = {}) => ({
+    headless,
+    slowMo,
+    viewport,
+    args: launchArgs,
+    ...(channel ? { channel } : {}),
+    ...extra
+  });
+
+  const launchOpts = (channel) => ({
+    headless,
+    slowMo,
+    args: launchArgs,
+    ...(channel ? { channel } : {})
+  });
 
   let browser = null;
   let ctx = null;
@@ -36,13 +72,7 @@ async function openAndPrepareLogin(job, emit, outDir){
       persistentArgs.push(`--profile-directory=${profileDirName}`);
     }
     try {
-      ctx = await pw.chromium.launchPersistentContext(profileRoot, {
-        channel: 'msedge',
-        headless,
-        slowMo,
-        viewport,
-        args: persistentArgs
-      });
+      ctx = await pw.chromium.launchPersistentContext(profileRoot, persistentOpts('msedge', { args: persistentArgs }));
       browser = ctx.browser();
       emit && emit({ type:'log', level:'info', msg:`[browser] Reusing Edge profile (${profileRoot})` });
     } catch (err) {
@@ -53,10 +83,38 @@ async function openAndPrepareLogin(job, emit, outDir){
     }
   }
 
+  if (!ctx && useAutomationProfile) {
+    try {
+      fs.mkdirSync(automationProfileDir, { recursive: true });
+    } catch (err) {
+      emit && emit({ type:'log', level:'warn', msg:`[browser] 프로필 디렉터리 생성 실패(${automationProfileDir}): ${(err && err.message) || err}` });
+    }
+    try {
+      ctx = await pw.chromium.launchPersistentContext(automationProfileDir, persistentOpts(browserChannel));
+    } catch (err) {
+      if (browserChannel) {
+        emit && emit({ type:'log', level:'warn', msg:`[browser] ${browserLabel} 채널 실행 실패, Chromium으로 재시도 (${(err && err.message) || err})` });
+        ctx = await pw.chromium.launchPersistentContext(automationProfileDir, persistentOpts(null));
+      } else {
+        throw err;
+      }
+    }
+    browser = ctx.browser();
+    emit && emit({ type:'log', level:'info', msg:`[browser] 전용 ${browserLabel} 프로필 사용: ${automationProfileDir}` });
+  }
+
   if (!ctx) {
-    browser = await pw.chromium
-      .launch({ headless, channel: 'msedge', slowMo, args: launchArgs })
-      .catch(async () => pw.chromium.launch({ headless, slowMo, args: launchArgs }));
+    const tryBrowserLaunch = async (channel) => {
+      try { return await pw.chromium.launch(launchOpts(channel)); }
+      catch (err) {
+        if (channel) {
+          emit && emit({ type:'log', level:'warn', msg:`[browser] ${browserLabel} 채널 실행 실패, Chromium으로 재시도 (${(err && err.message) || err})` });
+          return await pw.chromium.launch(launchOpts(null));
+        }
+        throw err;
+      }
+    };
+    browser = await tryBrowserLaunch(browserChannel);
     ctx = await browser.newContext({ viewport });
   }
 
@@ -158,7 +216,6 @@ async function fillCommonCredentials(page, auth, emit){
 }
 
 module.exports = { openAndPrepareLogin };
-
 
 
 
