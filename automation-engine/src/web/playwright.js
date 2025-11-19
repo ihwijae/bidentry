@@ -35,7 +35,15 @@ async function openAndPrepareLogin(job, emit, outDir){
   const useAutomationProfile = job?.options?.useAutomationProfile !== false;
   const automationProfileDir = job?.options?.automationProfileDir
     || path.join(os.homedir(), '.automation-engine', `${browserLabel.toLowerCase()}-profile`);
-  const launchArgs = [];
+  const requestedPermissions = Array.isArray(job?.options?.browserPermissions)
+    ? job.options.browserPermissions.filter(Boolean)
+    : ['local-network'];
+  const defaultLaunchArgs = [
+    '--no-first-run',
+    '--no-default-browser-check',
+    '--disable-session-crashed-bubble'
+  ];
+  const launchArgs = [...defaultLaunchArgs];
   if (Array.isArray(job?.options?.browserLaunchArgs)) {
     launchArgs.push(...job.options.browserLaunchArgs);
   }
@@ -127,6 +135,15 @@ async function openAndPrepareLogin(job, emit, outDir){
     try { await browser?.close?.(); } catch {}
     return { ok:false, error:'URL not configured (job.url missing)' };
   }
+  if (requestedPermissions.length) {
+    try {
+      const origin = new URL(url).origin;
+      await ctx.grantPermissions(requestedPermissions, { origin });
+      emit && emit({ type:'log', level:'info', msg:`[browser] 권한 부여: ${requestedPermissions.join(', ')} @ ${origin}` });
+    } catch (err) {
+      emit && emit({ type:'log', level:'warn', msg:`[browser] 권한 부여 실패: ${(err && err.message) || err}` });
+    }
+  }
   await page.goto(url, { waitUntil: 'load', timeout: 60000 });
   emit && emit({ type:'log', level:'info', msg:`페이지 접속: ${await page.title().catch(()=>url)} (${page.url()})` });
   await dismissCommonOverlays(page, emit);
@@ -216,6 +233,4 @@ async function fillCommonCredentials(page, auth, emit){
 }
 
 module.exports = { openAndPrepareLogin };
-
-
 
