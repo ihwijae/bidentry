@@ -84,11 +84,12 @@ async function openAndPrepareLogin(job, emit, outDir){
     || path.join(os.homedir(), '.automation-engine', `${browserLabel.toLowerCase()}-profile`);
   const requestedPermissions = Array.isArray(job?.options?.browserPermissions)
     ? job.options.browserPermissions.filter(Boolean)
-    : ['local-network'];
+    : [];
   const defaultLaunchArgs = [
     '--no-first-run',
     '--no-default-browser-check',
-    '--disable-session-crashed-bubble'
+    '--disable-session-crashed-bubble',
+    '--disable-features=BlockInsecurePrivateNetworkRequests,BlockInsecurePrivateNetworkRequestsForNavigations'
   ];
   const launchArgs = [...defaultLaunchArgs];
   if (Array.isArray(job?.options?.browserLaunchArgs)) {
