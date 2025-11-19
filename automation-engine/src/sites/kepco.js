@@ -696,6 +696,29 @@ async function applyAfterSearch(page, emit){
     return false;
   }
 
+  async function ensureGridSelectionViaExt(){
+    return await page.evaluate(() => {
+      try {
+        if (!(window.Ext && Ext.ComponentQuery)) return false;
+        const grids = Ext.ComponentQuery.query('gridpanel');
+        if (!grids || !grids.length) return false;
+        const target = grids.find(g => /\uC785\uCC30|\uAC00\uC2E0\uCCAD|\uACF5\uACE0/.test(String(g?.title || ''))) || grids[0];
+        if (!target) return false;
+        const selModel = target.getSelectionModel?.();
+        const store = target.getStore?.();
+        if (!selModel || !store) return false;
+        if (selModel.hasSelection && selModel.hasSelection()) return true;
+        const record = store.getAt?.(0);
+        if (!record) return false;
+        selModel.select(record);
+        target.getView?.().focusRow?.(record);
+        return selModel.hasSelection ? selModel.hasSelection() : true;
+      } catch (err) {
+        return false;
+      }
+    });
+  }
+
   const findApplyButton = async (ctx) => {
     try {
       const handle = await ctx.evaluateHandle((text) => {
@@ -785,6 +808,10 @@ async function applyAfterSearch(page, emit){
   }
 
   // Alternate flow (legacy logic)
+  const extSelected = await ensureGridSelectionViaExt();
+  if (extSelected) {
+    emit && emit({ type:'log', level:'info', msg:'[KEPCO] Grid selection ensured via Ext.ComponentQuery' });
+  }
   const checker = await waitInFrames(async (ctx)=>{
     const el = await ctx.$('.x-grid-row-checker').catch(()=>null)
            || await ctx.$('div.x-grid-row-checker[role="presentation"]').catch(()=>null);
@@ -792,16 +819,21 @@ async function applyAfterSearch(page, emit){
     return null;
   }, 6000);
   if (checker){
-    try { await checker.el.click({ force:true }).catch(()=>{}); } catch {}
-    try { await checker.ctx.evaluate((e)=>{ e.click(); }, checker.el).catch(()=>{}); } catch {}
-    emit && emit({ type:'log', level:'info', msg:'[KEPCO] Grid checkbox click' });
-    await sleep(200);
+    if (!extSelected) {
+      try { await checker.el.click({ force:true }).catch(()=>{}); } catch {}
+      try { await checker.ctx.evaluate((e)=>{ e.click(); }, checker.el).catch(()=>{}); } catch {}
+      emit && emit({ type:'log', level:'info', msg:'[KEPCO] Grid checkbox click' });
+      await sleep(200);
+    }
     // Ensure row is selected: click first grid row if no selection class
-    const sel = await inFrames(async (ctx)=>{
-      const selected = await ctx.$('.x-grid-row.x-grid-row-selected, tr.x-grid-row-selected').catch(()=>null);
-      if (selected) return true;
-      const first = await ctx.$('.x-grid-row, tr.x-grid-row').catch(()=>null);
-      if (first) { try { await first.click({ force:true }).catch(()=>{}); } catch {} return true; }
+    await inFrames(async (ctx)=>{
+      const selectors = ['.x-grid-row.x-grid-row-selected', 'tr.x-grid-row-selected', '.x-grid-item-selected'];
+      for (const sel of selectors){
+        const selected = await ctx.$(sel).catch(()=>null);
+        if (selected) return false;
+      }
+      const first = await ctx.$('.x-grid-row, tr.x-grid-row, .x-grid-item').catch(()=>null);
+      if (first) { try { await first.click({ force:true }).catch(()=>{}); } catch {} }
       return false;
     });
     // Try to scroll the grid bottom toolbar into view
@@ -809,7 +841,7 @@ async function applyAfterSearch(page, emit){
       try { const grid = await ctx.$('.x-grid'); if (grid){ await grid.scrollIntoViewIfNeeded?.().catch(()=>{}); } } catch {}
       return false;
     });
-  } else {
+  } else if (!extSelected) {
     emit && emit({ type:'log', level:'warn', msg:'[KEPCO] Failed to locate grid checkbox' });
   }
 
