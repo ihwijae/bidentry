@@ -992,6 +992,7 @@ async function applyAfterSearch(page, emit){
     const modal = await waitInFrames(async (ctx)=>{ try { return await ctx.$('.x-window'); } catch { return null; } }, 1500);
     if (!modal) {
       emit && emit({ type:'log', level:'warn', msg:'[KEPCO] apply button clicked but follow-up modal was not detected' });
+      await dumpKepcoHtml(page, emit, 'apply_modal_missing');
     }
     await sleep(300);
   } else {
@@ -1012,6 +1013,12 @@ async function handleFinalAgreementAndSubmit(page, emit){
   ];
   const SUBMIT_SELECTOR = '#button-1693-btnInnerEl, span.x-btn-inner:has-text("\uC81C\uCD9C"), button:has-text("\uC81C\uCD9C"), a:has-text("\uC81C\uCD9C")';
   const contexts = () => [page, ...(page.frames?.() || [])];
+  let dumpedAgreementState = false;
+  const ensureAgreementDump = async (tag = 'agreement_missing') => {
+    if (dumpedAgreementState) return;
+    dumpedAgreementState = true;
+    await dumpKepcoHtml(page, emit, tag);
+  };
 
   // Close newly opened popup windows (공정위 안내 등)
   try {
@@ -1071,6 +1078,7 @@ async function handleFinalAgreementAndSubmit(page, emit){
   for (const label of AGREEMENT_PATTERNS) {
     if (await checkAgreement(label)) checked++;
   }
+  let fallbackTouchedTotal = 0;
   if (!checked) {
     for (const ctx of contexts()) {
       try {
@@ -1090,10 +1098,15 @@ async function handleFinalAgreementAndSubmit(page, emit){
         });
         if (touched > 0) {
           log('info', `[KEPCO] 텍스트 매칭 실패로 ${touched}개의 체크박스를 일괄 선택했습니다.`);
+          fallbackTouchedTotal += touched;
           break;
         }
+        fallbackTouchedTotal += touched;
       } catch {}
     }
+  }
+  if (!checked && fallbackTouchedTotal === 0) {
+    await ensureAgreementDump('agreement_missing');
   }
 
   let submitted = false;
@@ -1111,6 +1124,7 @@ async function handleFinalAgreementAndSubmit(page, emit){
   }
   if (!submitted) {
     log('warn', '[KEPCO] 최종 제출 버튼을 찾지 못했습니다. 수동 확인 필요');
+    await ensureAgreementDump('submit_button_missing');
   }
   await sleep(200);
 }
