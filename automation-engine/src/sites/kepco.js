@@ -648,12 +648,6 @@ async function goToBidApplyAndSearch(page, emit, bidId){
 
 async function applyAfterSearch(page, emit){
   const APPLY_BUTTON_TEXT = '\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD';
-  const APPLY_BUTTON_SELECTORS = [
-    '.x-toolbar-docked-bottom a.x-btn:has(.btn-request)',
-    '.x-toolbar-docked-bottom .btn-request',
-    '.x-toolbar-docked-bottom a.x-btn',
-    '.x-toolbar-docked-bottom button'
-  ];
   const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
   async function inFrames(run){
     const ctxs = [page, ...page.frames?.() || []];
@@ -684,33 +678,36 @@ async function applyAfterSearch(page, emit){
   }
 
   const findApplyButton = async (ctx) => {
-    const isCancelButton = async (el) => {
-      if (!el) return false;
-      try {
-        const parent = await el.evaluateHandle(node => node.closest('a.x-btn, button, .x-btn') || node);
-        const text = parent && (await parent.asElement()?.textContent()?.catch(()=>'')) || '';
-        return /\uCDE8\uC18C/.test(text);
-      } catch { return false; }
-    };
-
-    for (const sel of APPLY_BUTTON_SELECTORS) {
-      try {
-        const el = await ctx.$(sel);
-        if (el && !(await isCancelButton(el))) return el;
-      } catch {}
+    try {
+      const handle = await ctx.evaluateHandle((text) => {
+        const normalize = (node) => (node && (node.textContent || '').replace(/\s+/g,'')) || '';
+        const isValid = (node) => {
+          if (!node) return false;
+          const txt = normalize(node);
+          if (!txt.includes(text)) return false;
+          return !/\uCDE8\uC18C/.test(txt);
+        };
+        const toolbarButtons = Array.from(document.querySelectorAll('.x-toolbar-docked-bottom .x-btn, .x-toolbar-docked-bottom button'));
+        for (const btn of toolbarButtons) {
+          if (isValid(btn)) return btn;
+          const inner = btn.querySelector('.x-btn-inner, span');
+          if (isValid(inner)) return btn;
+        }
+        const fallback = Array.from(document.querySelectorAll('.x-btn, button, a'));
+        for (const node of fallback) {
+          if (isValid(node)) {
+            const toolbar = node.closest('.x-toolbar');
+            if (toolbar && toolbar.classList.contains('x-toolbar-docked-bottom')) {
+              return node.closest('a.x-btn, button, .x-btn') || node;
+            }
+          }
+        }
+        return null;
+      }, APPLY_BUTTON_TEXT);
+      return handle.asElement?.() || null;
+   } catch {
+      return null;
     }
-    const fallback = [
-      `a.x-btn:has-text("${APPLY_BUTTON_TEXT}")`,
-      `button:has-text("${APPLY_BUTTON_TEXT}")`,
-      `span.x-btn-inner:has-text("${APPLY_BUTTON_TEXT}")`
-    ];
-    for (const sel of fallback) {
-      try {
-        const el = await ctx.$(sel);
-        if (el && !(await isCancelButton(el))) return el;
-      } catch {}
-    }
-    return null;
   };
 
   // 1) Grid checkbox + "입찰참가신청" 버튼 빠른 경로
