@@ -15,6 +15,13 @@ const os = require('os');
 const path = require('path');
 const { attachPopupAutoCloser, dismissCommonOverlays } = require('./popups');
 
+function chromeTimestamp(){
+  const unixMillis = BigInt(Date.now());
+  const unixMicros = unixMillis * 1000n;
+  const epochOffset = 11644473600000000n; // Windows epoch (1601) in microseconds
+  return (unixMicros + epochOffset).toString();
+}
+
 function ensureCleanChromeExitFlags(profileDir, emit){
   if (!profileDir) return;
   const patchFile = (fileName) => {
@@ -61,12 +68,56 @@ function resetAutomationProfileDir(profileDir, emit){
   }
 }
 
+function allowLocalNetworkPermission(profileDir, origins, emit){
+  if (!profileDir || !Array.isArray(origins) || origins.length === 0) return;
+  const prefPath = path.join(profileDir, 'Preferences');
+  let data = {};
+  if (fs.existsSync(prefPath)) {
+    try {
+      data = JSON.parse(fs.readFileSync(prefPath, 'utf-8'));
+    } catch (err) {
+      emit && emit({ type:'log', level:'warn', msg:`[browser] Preferences 파싱 실패, 새로 생성합니다: ${(err && err.message) || err}` });
+      data = {};
+    }
+  }
+  if (!data || typeof data !== 'object') data = {};
+  data.profile = data.profile || {};
+  const profile = data.profile;
+  profile.content_settings = profile.content_settings || {};
+  profile.content_settings.exceptions = profile.content_settings.exceptions || {};
+  const bucket = profile.content_settings.exceptions.local_network
+    || (profile.content_settings.exceptions.local_network = {});
+  let modified = false;
+  const ts = chromeTimestamp();
+  for (const origin of origins) {
+    if (!origin) continue;
+    const pattern = `${origin},*`;
+    const prev = bucket[pattern];
+    if (!prev || prev.setting !== 1) {
+      bucket[pattern] = { setting: 1, last_modified: ts };
+      modified = true;
+    }
+  }
+  if (modified) {
+    try {
+      fs.writeFileSync(prefPath, JSON.stringify(data, null, 2));
+      emit && emit({ type:'log', level:'debug', msg:`[browser] Local Network 권한 허용: ${origins.filter(Boolean).join(', ')}` });
+    } catch (err) {
+      emit && emit({ type:'log', level:'warn', msg:`[browser] Local Network 권한 저장 실패: ${(err && err.message) || err}` });
+    }
+  }
+}
+
 async function openAndPrepareLogin(job, emit, outDir){
   pw = requirePlaywright(emit);
   const debug = job?.options?.debug === true;
   const headless = job?.options?.headless === true;
   const slowMo = debug ? 250 : 0;
   const viewport = { width: 1280, height: 900 };
+  const targetUrl = String(job?.url || '');
+  const targetOrigin = (() => {
+    try { return new URL(targetUrl).origin; } catch { return ''; }
+  })();
 
   const requestedBrowser = String(job?.options?.browser || 'chrome').toLowerCase();
   const browserChannelMap = {
@@ -80,6 +131,7 @@ async function openAndPrepareLogin(job, emit, outDir){
     : 'Chromium';
   const useAutomationProfile = job?.options?.useAutomationProfile !== false;
   const resetAutomationProfile = job?.options?.resetAutomationProfile !== false;
+  const seedLocalNetworkPermission = job?.options?.seedLocalNetworkPermission !== false;
   const automationProfileDir = job?.options?.automationProfileDir
     || path.join(os.homedir(), '.automation-engine', `${browserLabel.toLowerCase()}-profile`);
   const requestedPermissions = Array.isArray(job?.options?.browserPermissions)
@@ -149,6 +201,9 @@ async function openAndPrepareLogin(job, emit, outDir){
       emit && emit({ type:'log', level:'warn', msg:`[browser] 프로필 디렉터리 생성 실패(${automationProfileDir}): ${(err && err.message) || err}` });
     }
     ensureCleanChromeExitFlags(automationProfileDir, emit);
+    if (seedLocalNetworkPermission && targetOrigin) {
+      allowLocalNetworkPermission(automationProfileDir, [targetOrigin], emit);
+    }
     try {
       ctx = await pw.chromium.launchPersistentContext(automationProfileDir, persistentOpts(browserChannel));
     } catch (err) {
@@ -181,7 +236,7 @@ async function openAndPrepareLogin(job, emit, outDir){
   // auto-close notice/event popups across the context
   attachPopupAutoCloser(ctx, emit);
   let page = await ctx.newPage();
-  const url = job?.url || '';
+  const url = targetUrl;
   if (!url) {
     try { await ctx?.close?.(); } catch {}
     try { await browser?.close?.(); } catch {}
