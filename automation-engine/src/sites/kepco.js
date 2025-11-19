@@ -592,19 +592,34 @@ async function goToBidApplyAndSearch(page, emit, bidId){
     log('warn', '[KEPCO] \uC785\uCC30\uACF5\uACE0\uBC88\uD638 \uC785\uB825\uCC3D\uC744 \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.');
     return;
   }
-  try {
+  const desiredDigits = String(bidId).replace(/\D/g,'');
+  const ensureValue = async () => {
     await input.scrollIntoViewIfNeeded?.().catch(()=>{});
     await input.click({ force:true }).catch(()=>{});
     await input.evaluate(el => { if (el && typeof el.value === 'string') el.value = ''; });
-    await input.type(String(bidId), { delay: 40 }).catch(()=>input.fill(String(bidId)));
+    await input.type(String(bidId), { delay: 25 }).catch(()=>input.fill(String(bidId)));
+    await input.dispatchEvent('input').catch(()=>{});
     await input.dispatchEvent('change').catch(()=>{});
-    const applied = await input.evaluate(el => (el && typeof el.value === 'string') ? el.value.trim() : '');
-    if (!applied || applied.replace(/\D/g,'') !== String(bidId).replace(/\D/g,'')) {
-      log('warn', `[KEPCO] 입력 필드 값이 일치하지 않을 수 있습니다 (현재='${applied}')`);
+    const matches = await input.evaluate((el, digits) => {
+      if (!el || typeof el.value !== 'string') return '';
+      return el.value.replace(/\D/g,'');
+    }, desiredDigits).catch(()=> '');
+    return matches === desiredDigits;
+  };
+
+  let appliedOk = false;
+  for (let attempt = 0; attempt < 3 && !appliedOk; attempt++) {
+    appliedOk = await ensureValue();
+    if (!appliedOk) {
+      await page.waitForTimeout(120).catch(()=>{});
     }
-  } catch {
-    log('warn', '[KEPCO] \uC785\uCC30\uACF5\uACE0\uBC88\uD638 \uC785\uB825\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4.');
   }
+  if (!appliedOk) {
+    const finalValue = await input.evaluate(el => (el && typeof el.value === 'string') ? el.value : '').catch(()=> '');
+    log('warn', `[KEPCO] 공고번호 입력 검증 실패 (현재='${finalValue}')`);
+    return;
+  }
+  await page.waitForTimeout(120).catch(()=>{});
   log('info', `[KEPCO] \uC785\uCC30\uACF5\uACE0\uBC88\uD638 \uC785\uB825 \uC644\uB8CC: ${bidId}`);
 
   const searchBtn = await waitForCondition(findSearchButton, 5000);
