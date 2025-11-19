@@ -1294,6 +1294,45 @@ async function navigateToApplication(page, emit) {
     return false;
   }
 
+  async function tryDomTreeClick(targetText) {
+    const selectors = [
+      'div.x-tree-node-text',
+      'span.x-tree-node-text',
+      'div.x-tree-node-text h4',
+      'span.x-tree-node-text h4'
+    ];
+    for (const ctx of contexts()) {
+      let clicked = false;
+      try {
+        clicked = await ctx.evaluate((needle, sels) => {
+          const normalized = (needle || '').replace(/\s+/g, '');
+          for (const sel of sels) {
+            const nodes = Array.from(document.querySelectorAll(sel));
+            for (const node of nodes) {
+              const text = (node.textContent || '').replace(/\s+/g, '');
+              if (!text || !text.includes(normalized)) continue;
+              const target = node.closest('.x-tree-node-text') || node;
+              target.scrollIntoView?.({ block:'center' });
+              target.click();
+              target.dispatchEvent?.(new MouseEvent('click', { bubbles:true }));
+              const clickable = target.querySelector('a, span, h4');
+              if (clickable) {
+                clickable.click?.();
+                clickable.dispatchEvent?.(new MouseEvent('click', { bubbles:true }));
+              }
+              return true;
+            }
+          }
+          return false;
+        }, targetText, selectors);
+      } catch {
+        clicked = false;
+      }
+      if (clicked) return true;
+    }
+    return false;
+  }
+
   log('info', '[KEPCO] Navigating menu to reach "' + TEXT_BID_APPLY + '".');
   const topSelectors = [
     'span.x-btn-inner:has-text("' + TEXT_BID_CONTRACT + '")',
@@ -1359,6 +1398,7 @@ async function navigateToApplication(page, emit) {
       'text=' + TEXT_BID_APPLY,
       'xpath=//h4[contains(normalize-space(.),"' + TEXT_BID_APPLY + '")]',
       'xpath=//span[contains(@class,"x-tree-node-text") and contains(normalize-space(.),"' + TEXT_BID_APPLY + '")]',
+      'xpath=//div[contains(@class,"x-tree-node-text")]//h4[contains(normalize-space(.),"' + TEXT_BID_APPLY + '")]',
     ];
     const treeNode = await waitForLocator(treeSelectors, 8000);
     if (treeNode) {
@@ -1366,6 +1406,11 @@ async function navigateToApplication(page, emit) {
       clickedTree = await tryClick(treeNode);
       await navPromise;
     }
+  }
+
+  if (!clickedTree) {
+    clickedTree = await tryDomTreeClick(TEXT_BID_APPLY);
+    if (clickedTree) log('info', '[KEPCO] DOM fallback tree click succeeded');
   }
 
   if (!clickedTree) {
