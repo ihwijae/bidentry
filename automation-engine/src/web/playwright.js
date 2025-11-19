@@ -15,6 +15,7 @@ const os = require('os');
 const path = require('path');
 const { attachPopupAutoCloser, dismissCommonOverlays } = require('./popups');
 const { clickChromePermissionPopup } = require('../native/chromePermissions');
+const { ensureChromeLocalNetworkPolicy } = require('../native/chromePolicy');
 
 function chromeTimestamp(){
   const unixMillis = BigInt(Date.now());
@@ -138,6 +139,7 @@ async function openAndPrepareLogin(job, emit, outDir){
   const useAutomationProfile = job?.options?.useAutomationProfile !== false;
   const resetAutomationProfile = job?.options?.resetAutomationProfile !== false;
   const seedLocalNetworkPermission = job?.options?.seedLocalNetworkPermission !== false;
+  const applyLocalNetworkPolicy = job?.options?.applyLocalNetworkPolicy !== false;
   const automationProfileDir = job?.options?.automationProfileDir
     || path.join(os.homedir(), '.automation-engine', `${browserLabel.toLowerCase()}-profile`);
   const requestedPermissions = Array.isArray(job?.options?.browserPermissions)
@@ -180,6 +182,14 @@ async function openAndPrepareLogin(job, emit, outDir){
 
   let browser = null;
   let ctx = null;
+
+  if (browserLabel === 'Chrome' && applyLocalNetworkPolicy && targetOrigin) {
+    try {
+      await ensureChromeLocalNetworkPolicy([targetOrigin], emit);
+    } catch (err) {
+      emit && emit({ type:'log', level:'warn', msg:`[browser] Chrome 정책 적용 중 오류: ${(err && err.message) || err}` });
+    }
+  }
   if (reuseProfile && profileRoot) {
     const persistentArgs = launchArgs.slice();
     if (!persistentArgs.some(arg => typeof arg === 'string' && arg.toLowerCase().startsWith('--profile-directory='))) {
