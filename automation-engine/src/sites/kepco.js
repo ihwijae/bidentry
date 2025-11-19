@@ -680,32 +680,30 @@ async function applyAfterSearch(page, emit){
   const findApplyButton = async (ctx) => {
     try {
       const handle = await ctx.evaluateHandle((text) => {
-        const normalize = (node) => (node && (node.textContent || '').replace(/\s+/g,'')) || '';
-        const isValid = (node) => {
-          if (!node) return false;
-          const txt = normalize(node);
-          if (!txt.includes(text)) return false;
-          return !/\uCDE8\uC18C/.test(txt);
+        const isValidBtn = (node) => {
+          if (!node) return null;
+          const btn = node.closest('a.x-btn, button, .x-btn') || node;
+          if (!btn) return null;
+          const label = (btn.textContent || '').replace(/\s+/g,'');
+          if (label.indexOf('취소') !== -1) return null;
+          if (label.indexOf(text) !== -1) return btn;
+          if (btn.querySelector && btn.querySelector('.btn-request')) return btn;
+          return null;
         };
+        const icons = Array.from(document.querySelectorAll('.x-toolbar-docked-bottom .btn-request'));
+        for (const icon of icons){
+          const btn = isValidBtn(icon);
+          if (btn) return btn;
+        }
         const toolbarButtons = Array.from(document.querySelectorAll('.x-toolbar-docked-bottom .x-btn, .x-toolbar-docked-bottom button'));
         for (const btn of toolbarButtons) {
-          if (isValid(btn)) return btn;
-          const inner = btn.querySelector('.x-btn-inner, span');
-          if (isValid(inner)) return btn;
-        }
-        const fallback = Array.from(document.querySelectorAll('.x-btn, button, a'));
-        for (const node of fallback) {
-          if (isValid(node)) {
-            const toolbar = node.closest('.x-toolbar');
-            if (toolbar && toolbar.classList.contains('x-toolbar-docked-bottom')) {
-              return node.closest('a.x-btn, button, .x-btn') || node;
-            }
-          }
+          const hit = isValidBtn(btn) || isValidBtn(btn.querySelector('.x-btn-inner, span'));
+          if (hit) return hit;
         }
         return null;
       }, APPLY_BUTTON_TEXT);
       return handle.asElement?.() || null;
-   } catch {
+    } catch {
       return null;
     }
   };
