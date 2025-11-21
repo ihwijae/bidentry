@@ -354,6 +354,39 @@ async function closeMndBidGuideModal(page, emit, opts = {}) {
       emit && emit({ type: 'log', level: 'info', msg: '[MND] "입찰서 작성안내" 팝업을 제거했습니다.' });
       return true;
     }
+    let domClicked = false;
+    try {
+      const fallbackHandle = await page.evaluateHandle(() => {
+        const normalize = (txt) => (txt || '').replace(/\s+/g, '');
+        const texts = ['닫기', '확인', '확인하기', '예'];
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
+        while (walker.nextNode()) {
+          const el = walker.currentNode;
+          const text = normalize(el.innerText || el.textContent || '');
+          if (!text) continue;
+          if (/입찰서.*작성안내/.test(text)) {
+            const btn = el.querySelector('button, a, [role="button"]');
+            if (btn) return btn;
+          }
+          if (texts.some(t => text.includes(t))) {
+            return el;
+          }
+        }
+        return null;
+      });
+      const fallbackEl = fallbackHandle?.asElement?.();
+      if (fallbackEl) {
+        await fallbackEl.scrollIntoViewIfNeeded?.().catch(() => {});
+        await fallbackEl.click({ force: true }).catch(async () => {
+          await page.evaluate((node) => node && node.click && node.click(), fallbackEl).catch(() => {});
+        });
+        domClicked = true;
+      }
+    } catch {}
+    if (domClicked) {
+      emit && emit({ type: 'log', level: 'info', msg: '[MND] "입찰서 작성안내" 팝업을 수동으로 닫았습니다.' });
+      return true;
+    }
     try {
       await page.keyboard?.press('Escape').catch(() => {});
       await page.keyboard?.press('Enter').catch(() => {});
