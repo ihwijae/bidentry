@@ -297,6 +297,7 @@ async function dumpMndState(page, emit, tag) {
   };
   try {
     await page.bringToFront?.().catch(()=>{});
+    await page.waitForLoadState?.('domcontentloaded').catch(()=>{});
     await page.waitForTimeout?.(1200);
     const mainHtml = await page.content().catch(async () => {
       return await page.evaluate(() => document.documentElement.outerHTML).catch(() => '');
@@ -312,6 +313,7 @@ async function dumpMndState(page, emit, tag) {
       let html = '';
       try {
         await ctx.bringToFront?.().catch(()=>{});
+        await ctx.waitForLoadState?.('domcontentloaded').catch(()=>{});
         await ctx.waitForTimeout?.(300).catch(()=>{});
         if (typeof ctx.content === 'function') {
           html = await ctx.content();
@@ -344,7 +346,10 @@ async function dumpMndState(page, emit, tag) {
       const name = `${base}_popup${idx}`;
       try {
         await pg.bringToFront?.().catch(()=>{});
+        await pg.waitForLoadState?.('load', { timeout: 8000 }).catch(()=>{});
         await pg.waitForTimeout?.(800).catch(()=>{});
+        const url = pg.url?.() || '';
+        emit && emit({ type:'log', level:'info', msg:`[MND] 팝업 페이지 감지: ${url}` });
         const html = await pg.content().catch(async () => {
           return await pg.evaluate(() => document.documentElement.outerHTML).catch(() => '');
         });
