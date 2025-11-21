@@ -316,51 +316,51 @@ async function closeMndBidGuideModal(page, emit, opts = {}) {
     }
     const handled = await evaluateInMndContexts(page, () => {
       const killNodes = () => {
-        const layers = Array.from(document.querySelectorAll('div, section, article, .layer, .modal, .layer_pop'));
-        const target = layers.find(el => /입찰서\s*작성안내/.test((el.textContent || '').replace(/\s+/g,'')));
-        if (target) {
-          const btn = target.querySelector('button, a, [role="button"]');
-          if (btn) {
-            btn.click();
-            return 'button';
+        const layers = Array.from(document.querySelectorAll('div, section, article, .layer, .modal, .layer_pop, #mask, .x-mask'));
+        let hit = '';
+        layers.forEach(el => {
+          const txt = (el.textContent || '').replace(/\s+/g, '');
+          if (/입찰서\s*작성안내/.test(txt) || el.id === 'mask') {
+            el.style.display = 'none';
+            if (typeof el.remove === 'function') el.remove();
+            hit = 'removed';
           }
-          if (typeof target.remove === 'function') target.remove();
-          target.style.display = 'none';
-          return 'removed';
+        });
+        const dialog = document.querySelector('#alertLayer, #alertModal, .alertLayer');
+        if (dialog) {
+          dialog.style.display = 'none';
+          if (typeof dialog.remove === 'function') dialog.remove();
+          hit = 'removed';
         }
-        return '';
+        const btn = document.querySelector('#alertLayer button, #alertLayer a, .alertLayer button, .alertLayer a');
+        if (btn) {
+          btn.click();
+          hit = 'button';
+        }
+        return hit;
       };
       const closeViaExt = () => {
         if (!(window.Ext && Ext.ComponentQuery)) return '';
-        let closed = '';
         const wins = Ext.ComponentQuery.query('window');
-        wins.forEach(win => {
+        for (const win of wins) {
           try {
             const title = String(win.title || (win.getTitle && win.getTitle()) || '');
             if (/입찰서/.test(title) || /참가/.test(title)) {
               win.close?.();
-              closed = 'ext';
+              return 'ext';
             }
           } catch {}
-        });
-        return closed;
+        }
+        return '';
       };
-      const normalize = (txt) => (txt || '').replace(/\s+/g, '');
       const clickByText = () => {
         const texts = ['닫기', '확인', '확인하기', '예'];
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
         while (walker.nextNode()) {
           const el = walker.currentNode;
-          const text = normalize(el.innerText || el.textContent || '');
+          const text = (el.innerText || el.textContent || '').replace(/\s+/g, '');
           if (!text) continue;
-          if (/입찰서.*작성안내/.test(text)) {
-            const btn = el.querySelector('button, a, [role="button"]');
-            if (btn) {
-              btn.click();
-              return 'text';
-            }
-          }
-          if (texts.some(t => text.includes(t))) {
+          if (/입찰서.*작성안내/.test(text) || texts.some(t => text.includes(t))) {
             if (typeof el.click === 'function') {
               el.click();
               return 'text';
@@ -369,7 +369,20 @@ async function closeMndBidGuideModal(page, emit, opts = {}) {
         }
         return '';
       };
-      return closeViaExt() || killNodes() || clickByText();
+      const fnCall = () => {
+        try {
+          if (typeof window.confirmLayerClose === 'function') {
+            window.confirmLayerClose();
+            return 'fn-confirmLayer';
+          }
+          if (window.Mdi && window.Mdi.view && window.Mdi.view.mdi && typeof window.Mdi.view.mdi.alertClose === 'function') {
+            window.Mdi.view.mdi.alertClose();
+            return 'fn-alertClose';
+          }
+        } catch {}
+        return '';
+      };
+      return fnCall() || closeViaExt() || killNodes() || clickByText();
     });
     if (handled?.value) {
       emit && emit({ type: 'log', level: 'info', msg: `[MND] "입찰서 작성안내" 팝업을 제거했습니다. (${handled.value})` });
