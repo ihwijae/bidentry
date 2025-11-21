@@ -279,18 +279,56 @@ async function handleMndCertificate(page, emit, cert = {}, extra = {}) {
   });
 }
 
-async function dumpMndHtml(page, emit, tag) {
+async function dumpMndState(page, emit, tag) {
   if (!page) return;
+  const stamp = new Date().toISOString().replace(/[:.]/g,'-');
+  const base = `${stamp}_${tag || 'mnd'}`;
+  const dir = path.join(process.cwd(), 'engine_runs');
+  try { fs.mkdirSync(dir, { recursive: true }); } catch {}
+  const writeFile = (suffix, contents) => {
+    if (!contents) return;
+    const file = path.join(dir, `${base}_${suffix}.html`);
+    try {
+      fs.writeFileSync(file, contents, 'utf-8');
+      emit && emit({ type:'log', level:'info', msg:`[MND] HTML 덤프 저장: ${file}` });
+    } catch (err) {
+      emit && emit({ type:'log', level:'warn', msg:`[MND] HTML 덤프 실패(${suffix}): ${(err && err.message) || err}` });
+    }
+  };
   try {
-    const html = await page.content();
-    const stamp = new Date().toISOString().replace(/[:.]/g,'-');
-    const dir = path.join(process.cwd(), 'engine_runs');
-    fs.mkdirSync(dir, { recursive: true });
-    const file = path.join(dir, `${stamp}_${tag || 'mnd'}.html`);
-    fs.writeFileSync(file, html, 'utf-8');
-    emit && emit({ type:'log', level:'info', msg:`[MND] HTML 덤프 저장: ${file}` });
+    await page.waitForTimeout?.(500);
+    const mainHtml = await page.content().catch(async () => {
+      return await page.evaluate(() => document.documentElement.outerHTML).catch(() => '');
+    });
+    writeFile('main', mainHtml);
+  } catch {}
+
+  try {
+    const contexts = buildMndContexts(page) || [];
+    let idx = 0;
+    for (const ctx of contexts) {
+      if (!ctx || ctx === page) continue;
+      let html = '';
+      try {
+        if (typeof ctx.content === 'function') {
+          html = await ctx.content();
+        } else if (typeof ctx.evaluate === 'function') {
+          html = await ctx.evaluate(() => document.documentElement.outerHTML).catch(() => '');
+        }
+      } catch {}
+      if (html) {
+        writeFile(`ctx${idx}`, html);
+        idx += 1;
+      }
+    }
+  } catch {}
+
+  try {
+    const shot = path.join(dir, `${base}.png`);
+    await page.screenshot({ path: shot, fullPage: true }).catch(() => null);
+    emit && emit({ type:'log', level:'info', msg:`[MND] 스크린샷 저장: ${shot}` });
   } catch (err) {
-    emit && emit({ type:'log', level:'warn', msg:`[MND] HTML 덤프 실패: ${(err && err.message) || err}` });
+    emit && emit({ type:'log', level:'warn', msg:`[MND] 스크린샷 실패: ${(err && err.message) || err}` });
   }
 }
 
@@ -595,7 +633,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   }
 
   if (!input) {
-    await dumpMndHtml(workPage, emit, 'bid_input_missing');
+    await dumpMndState(workPage, emit, 'bid_input_missing');
     throw new Error('[MND] 협정자동신청 공고번호 입력창을 찾지 못했습니다.');
   }
 
