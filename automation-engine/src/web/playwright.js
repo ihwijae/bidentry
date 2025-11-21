@@ -63,7 +63,11 @@ function resetAutomationProfileDir(profileDir, emit){
 
 // Edge 전용 자동화 프로필 재사용 시 깨끗한 종료 상태를 만들어 복구 팝업을 방지한다.
 
-async function openAndPrepareLogin(job, emit, outDir){
+async function openAndPrepareLogin(job, emit, outDirProvider){
+  const ensureOutDir = () => {
+    if (typeof outDirProvider === 'function') return outDirProvider();
+    return outDirProvider;
+  };
   pw = requirePlaywright(emit);
   const debug = job?.options?.debug === true;
   const headless = job?.options?.headless === true;
@@ -226,9 +230,12 @@ async function openAndPrepareLogin(job, emit, outDir){
   } catch (e) {
     // Capture HTML for debugging
     try {
-      const htmlPath = path.join(outDir, '02_login_error.html');
-      fs.writeFileSync(htmlPath, await page.content(), 'utf-8');
-      emit && emit({ type:'log', level:'error', msg:`HTML 덤프 저장: ${htmlPath}` });
+      const dumpDir = ensureOutDir();
+      if (dumpDir) {
+        const htmlPath = path.join(dumpDir, '02_login_error.html');
+        fs.writeFileSync(htmlPath, await page.content(), 'utf-8');
+        emit && emit({ type:'log', level:'error', msg:`HTML 덤프 저장: ${htmlPath}` });
+      }
     } catch {}
     // Optional pause to observe before closing
     const pauseMs = Number(job?.options?.pauseOnErrorMs) || 5000;

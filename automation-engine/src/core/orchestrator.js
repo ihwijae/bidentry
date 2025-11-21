@@ -26,11 +26,15 @@ async function run(job, emit) {
     emit({ type:'progress', step:'submit', pct:90 }); await sleep(200);
     return { receiptId: `DEMO-${Date.now()}`, site: job?.site || 'kepco' };
   }
-  const outDir = runDir();
+  let outDir = null;
+  const ensureOutDir = () => {
+    if (!outDir) outDir = runDir();
+    return outDir;
+  };
   const site = (job?.site || 'kepco').toLowerCase();
   emit({ type: 'progress', step: 'open_site', pct: 5 });
 
-  const openRes = await openAndPrepareLogin(job, emit, outDir);
+  const openRes = await openAndPrepareLogin(job, emit, ensureOutDir);
   // openRes: { ok, site, browser?, page? }
 
   if (!openRes.ok) {
@@ -102,7 +106,7 @@ async function run(job, emit) {
         pin: job?.cert?.pin || '',
         path: requestedCertPath,
         timeoutSec: Number(job?.options?.certTimeoutSec) || 30,
-        outDir,
+        outDir: null,
         labels: {
           certWindowTitles: ['인증서 선택','공동인증서','인증서','전자서명','인증서 로그인','인증서 비밀번호'],
           browseBtnLabels: ['찾기','찾아보기','열기','경로','경로 변경','폴더 찾아보기','폴더 선택'],

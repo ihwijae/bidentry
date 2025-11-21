@@ -279,6 +279,7 @@ async function handleMndCertificate(page, emit, cert = {}, extra = {}) {
 
 async function closeMndBidGuideModal(page, emit, opts = {}) {
   const timeoutMs = Number(opts?.timeoutMs) || 5000;
+  try { await page?.waitForLoadState?.('domcontentloaded', { timeout: 2000 }); } catch {}
   const start = Date.now();
   const modalSelectors = [
     'text=/\uC785\uCC30\uC11C\s*\uC791\uC131\uC548\uB0B4/i',
@@ -313,26 +314,49 @@ async function closeMndBidGuideModal(page, emit, opts = {}) {
         return true;
       } catch {}
     }
+    let handled = false;
     try {
-      const removed = await page.evaluate(() => {
-        const layers = Array.from(document.querySelectorAll('div, section, article, .layer, .modal'));
-        const target = layers.find(el => /입찰서\s*작성안내/.test(el.textContent || ''));
-        if (target) {
-          const btn = target.querySelector('button, a');
-          if (btn) {
-            btn.click();
+      handled = await page.evaluate(() => {
+        const killNodes = () => {
+          const layers = Array.from(document.querySelectorAll('div, section, article, .layer, .modal, .layer_pop'));
+          const target = layers.find(el => /입찰서\s*작성안내/.test((el.textContent || '').replace(/\s+/g,'')));
+          if (target) {
+            const btn = target.querySelector('button, a, [role="button"]');
+            if (btn) {
+              btn.click();
+              return true;
+            }
+            if (typeof target.remove === 'function') target.remove();
+            target.style.display = 'none';
             return true;
           }
-          target.style.display = 'none';
-          if (typeof target.remove === 'function') target.remove();
-          return true;
-        }
-        return false;
+          return false;
+        };
+        const closeViaExt = () => {
+          if (!(window.Ext && Ext.ComponentQuery)) return false;
+          let closed = false;
+          const wins = Ext.ComponentQuery.query('window');
+          wins.forEach(win => {
+            try {
+              const title = String(win.title || (win.getTitle && win.getTitle()) || '');
+              if (/입찰서/.test(title) || /참가/.test(title)) {
+                win.close?.();
+                closed = true;
+              }
+            } catch {}
+          });
+          return closed;
+        };
+        return closeViaExt() || killNodes();
       });
-      if (removed) {
-        emit && emit({ type: 'log', level: 'info', msg: '[MND] "입찰서 작성안내" 팝업을 제거했습니다.' });
-        return true;
-      }
+    } catch {}
+    if (handled) {
+      emit && emit({ type: 'log', level: 'info', msg: '[MND] "입찰서 작성안내" 팝업을 제거했습니다.' });
+      return true;
+    }
+    try {
+      await page.keyboard?.press('Escape').catch(() => {});
+      await page.keyboard?.press('Enter').catch(() => {});
     } catch {}
     await page?.waitForTimeout?.(200).catch(() => {});
   }
