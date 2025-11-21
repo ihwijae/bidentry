@@ -315,6 +315,39 @@ async function closeMndBidGuideModal(page, emit, opts = {}) {
       } catch {}
     }
     const handled = await evaluateInMndContexts(page, () => {
+      const scheduleWatcher = () => {
+        if (window.__autoCloseBidGuide) return '';
+        const closer = () => {
+          const guidetext = /입찰서\s*작성안내/;
+          const maskCandidates = ['#mask', '.x-mask', '.layer_dim', '.dim'];
+          maskCandidates.forEach(sel => {
+            document.querySelectorAll(sel).forEach(el => {
+              el.style.display = 'none';
+              if (typeof el.remove === 'function') el.remove();
+            });
+          });
+          const dialog = document.querySelector('#alertLayer, #alertModal, .alertLayer, .layer_pop, .layer_pop_box');
+          if (dialog) {
+            dialog.style.display = 'none';
+            const btn = dialog.querySelector('button, a');
+            if (btn) btn.click();
+          }
+          const nodes = Array.from(document.querySelectorAll('div, section, article'));
+          for (const node of nodes) {
+            const txt = (node.textContent || '').replace(/\s+/g, '');
+            if (guidetext.test(txt)) {
+              const btn = node.querySelector('button, a, [role="button"]');
+              if (btn) { btn.click(); return; }
+              if (typeof node.remove === 'function') node.remove();
+              node.style.display = 'none';
+              return;
+            }
+          }
+        };
+        closer();
+        window.__autoCloseBidGuide = setInterval(closer, 1200);
+        return 'watcher';
+      };
       const killNodes = () => {
         const layers = Array.from(document.querySelectorAll('div, section, article, .layer, .modal, .layer_pop, #mask, .x-mask'));
         let hit = '';
@@ -382,7 +415,7 @@ async function closeMndBidGuideModal(page, emit, opts = {}) {
         } catch {}
         return '';
       };
-      return fnCall() || closeViaExt() || killNodes() || clickByText();
+      return fnCall() || closeViaExt() || killNodes() || clickByText() || scheduleWatcher();
     });
     if (handled?.value) {
       emit && emit({ type: 'log', level: 'info', msg: `[MND] "입찰서 작성안내" 팝업을 제거했습니다. (${handled.value})` });
