@@ -277,4 +277,267 @@ async function handleMndCertificate(page, emit, cert = {}, extra = {}) {
   });
 }
 
-module.exports = { loginMnd, handleMndCertificate };
+function buildMndContexts(page) {
+  const seen = new Set();
+  const stack = [];
+  if (page && typeof page === 'object') stack.push(page);
+  const out = [];
+  while (stack.length) {
+    const ctx = stack.shift();
+    if (!ctx || seen.has(ctx)) continue;
+    seen.add(ctx);
+    out.push(ctx);
+    try {
+      const childFrames = typeof ctx.frames === 'function'
+        ? ctx.frames()
+        : (typeof ctx.childFrames === 'function' ? ctx.childFrames() : []);
+      for (const child of childFrames) {
+        if (child && !seen.has(child)) stack.push(child);
+      }
+    } catch {}
+  }
+  return out;
+}
+
+async function findInMndContexts(page, selectors, { visibleOnly = true } = {}) {
+  if (!selectors || selectors.length === 0) return null;
+  const ctxs = buildMndContexts(page);
+  for (const ctx of ctxs) {
+    for (const sel of selectors) {
+      if (!sel) continue;
+      try {
+        const handle = await ctx.$(sel);
+        if (!handle) continue;
+        if (!visibleOnly) return handle;
+        const vis = typeof handle.isVisible === 'function'
+          ? await handle.isVisible().catch(() => true)
+          : true;
+        if (vis) return handle;
+      } catch {}
+    }
+  }
+  return null;
+}
+
+async function waitForMndElement(page, selectors, { timeoutMs = 6000, visibleOnly = true } = {}) {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const handle = await findInMndContexts(page, selectors, { visibleOnly });
+    if (handle) return handle;
+    try { await page?.waitForTimeout?.(180); } catch {}
+  }
+  return null;
+}
+
+async function clickMndMenuCandidate(page, emit, selectors) {
+  const target = await findInMndContexts(page, selectors);
+  if (!target) return { ok: false };
+  emit && emit({ type:'log', level:'info', msg:'[MND] 협정자동신청 관련 메뉴를 클릭합니다.' });
+  const popupPromise = typeof page?.waitForEvent === 'function'
+    ? page.waitForEvent('popup', { timeout: 2000 }).catch(() => null)
+    : Promise.resolve(null);
+  const navPromise = typeof page?.waitForNavigation === 'function'
+    ? page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 8000 }).catch(() => null)
+    : Promise.resolve(null);
+  try { await target.scrollIntoViewIfNeeded?.(); } catch {}
+  try { await target.click({ force:true }); }
+  catch (err) {
+    try { await target.evaluate((el) => { if (el) el.click(); }); } catch {}
+  }
+  const popup = await popupPromise;
+  if (popup) {
+    await popup.waitForLoadState('domcontentloaded').catch(() => {});
+    emit && emit({ type:'log', level:'info', msg:'[MND] 협정자동신청 페이지가 팝업으로 열렸습니다.' });
+    return { ok: true, page: popup };
+  }
+  await navPromise;
+  return { ok: true, page };
+}
+
+async function ensureAgreementWorkspace(page, emit) {
+  const agreementSelectors = [
+    'a:has-text("\uD611\uC815\uC790\uB3D9\uC2E0\uCCAD")',
+    'a:has-text("\uC790\uB3D9\uC2E0\uCCAD" i)',
+    'button:has-text("\uD611\uC815\uC2E0\uCCAD")',
+    'text=/\uD611\uC815.?\uC790\uB3D9\uC2E0\uCCAD/i'
+  ];
+  const res = await clickMndMenuCandidate(page, emit, agreementSelectors);
+  return res?.page || page;
+}
+
+async function waitForMndResults(page) {
+  const resultSelectors = [
+    '.table tbody tr:not(.empty)',
+    '.tb_list tbody tr',
+    'table tbody tr',
+    '.grid-body tr',
+    '.x-grid-item',
+    '.list tbody tr'
+  ];
+  await waitForMndElement(page, resultSelectors, { timeoutMs: 8000, visibleOnly: false });
+}
+
+async function goToMndAgreementAndSearch(page, emit, bidId) {
+  const log = (level, msg) => emit && emit({ type:'log', level, msg });
+  if (!bidId) {
+    log('warn', '[MND] 협정자동신청 공고번호가 비어 있어 검색을 건너뜁니다.');
+    return { ok: true, page };
+  }
+  const digits = String(bidId).trim();
+  log('info', `[MND] 협정자동신청 대상 공고번호: ${digits}`);
+
+  let workPage = page;
+  let input = await waitForMndElement(workPage, [
+    'input[title*="\uACF5\uACE0" i]',
+    'input[placeholder*="\uACF5\uACE0" i]',
+    'input[name*="bid" i]',
+    'input[id*="bid" i]',
+    'input[name*="notice" i]',
+    'input[id*="notice" i]',
+    'input[name*="gonggo" i]',
+    'input[name*="numb" i]'
+  ], { timeoutMs: 5000 });
+
+  if (!input) {
+    workPage = await ensureAgreementWorkspace(workPage, emit);
+    input = await waitForMndElement(workPage, [
+      'input[title*="\uACF5\uACE0" i]',
+      'input[placeholder*="\uACF5\uACE0" i]',
+      'input[name*="bid" i]',
+      'input[id*="bid" i]',
+      'input[name*="notice" i]',
+      'input[id*="notice" i]',
+      'input[name*="gonggo" i]',
+      'input[name*="numb" i]'
+    ], { timeoutMs: 6000 });
+  }
+
+  if (!input) {
+    throw new Error('[MND] 협정자동신청 공고번호 입력창을 찾지 못했습니다.');
+  }
+
+  try {
+    await input.scrollIntoViewIfNeeded?.();
+    await input.click({ force:true }).catch(() => {});
+    await input.fill('');
+  } catch {}
+  await input.type(digits, { delay: 20 }).catch(() => input.fill(digits));
+  try {
+    await input.dispatchEvent('input');
+    await input.dispatchEvent('change');
+  } catch {}
+
+  const searchBtn = await waitForMndElement(workPage, [
+    'button:has-text("\uC870\uD68C")',
+    'button:has-text("\uAC80\uC0C9")',
+    'a:has-text("\uC870\uD68C")',
+    'a:has-text("\uAC80\uC0C9")',
+    '[role="button"]:has-text("\uC870\uD68C")',
+    'input[type="submit"][value*="\uC870\uD68C"]'
+  ], { timeoutMs: 5000, visibleOnly: true });
+
+  if (searchBtn) {
+    try {
+      await searchBtn.scrollIntoViewIfNeeded?.();
+      await searchBtn.click({ force:true });
+    } catch {
+      try { await workPage?.keyboard?.press('Enter'); } catch {}
+    }
+  } else {
+    try { await input.press('Enter'); }
+    catch {}
+  }
+
+  try { await workPage?.waitForTimeout?.(600); } catch {}
+  await waitForMndResults(workPage);
+  return { ok: true, page: workPage };
+}
+
+async function ensureMndRowSelection(page) {
+  const rowSelectors = [
+    '.table tbody tr:not(.empty)',
+    '.tb_list tbody tr',
+    'table tbody tr',
+    '.grid-body tr'
+  ];
+  const row = await waitForMndElement(page, rowSelectors, { timeoutMs: 7000, visibleOnly: true });
+  if (!row) return null;
+  try {
+    const checkbox = await row.$('input[type="checkbox"], input[type="radio"]');
+    if (checkbox) {
+      const checked = await checkbox.isChecked?.().catch(() => false);
+      if (!checked) await checkbox.check?.({ force:true }).catch(() => checkbox.click({ force:true }));
+    } else {
+      await row.click({ force:true }).catch(() => {});
+    }
+  } catch {}
+  return row;
+}
+
+async function handleAgreementConfirmation(page, emit) {
+  const agreementModal = await waitForMndElement(page, [
+    '.layer-pop', '.modal', '.dialog', 'div[role="dialog"]', '.pop-layer'
+  ], { timeoutMs: 6000, visibleOnly: false });
+  if (!agreementModal) return;
+  try {
+    await page.evaluate(() => {
+      const labels = Array.from(document.querySelectorAll('label'));
+      for (const label of labels) {
+        const text = (label.textContent || '').trim();
+        if (!text) continue;
+        if (/동의|확인|유의사항|안내/.test(text)) {
+          const input = label.querySelector('input[type="checkbox"]')
+            || document.getElementById(label.getAttribute('for') || '');
+          if (input) {
+            input.checked = true;
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        }
+      }
+    });
+  } catch {}
+
+  const confirmBtn = await waitForMndElement(page, [
+    'button:has-text("\uD655\uC778")',
+    'button:has-text("\uC2E0\uCCAD")',
+    'button:has-text("\uC804\uC1A1")',
+    'a:has-text("\uC2E0\uCCAD")',
+    'button:has-text("OK")'
+  ], { timeoutMs: 5000, visibleOnly: true });
+  if (confirmBtn) {
+    try {
+      await confirmBtn.scrollIntoViewIfNeeded?.();
+      await confirmBtn.click({ force:true });
+      emit && emit({ type:'log', level:'info', msg:'[MND] 협정자동신청 확인 버튼을 클릭했습니다.' });
+    } catch {}
+  }
+}
+
+async function applyMndAgreementAfterSearch(page, emit) {
+  const log = (level, msg) => emit && emit({ type:'log', level, msg });
+  const row = await ensureMndRowSelection(page);
+  if (!row) {
+    throw new Error('[MND] 협정자동신청 대상 목록을 찾지 못했습니다.');
+  }
+  const applySelectors = [
+    'button:has-text("\uD611\uC815\uC790\uB3D9\uC2E0\uCCAD")',
+    'button:has-text("\uC790\uB3D9\uC2E0\uCCAD")',
+    'a:has-text("\uC2E0\uCCAD")',
+    '[role="button"]:has-text("\uC2E0\uCCAD")'
+  ];
+  const applyBtn = await waitForMndElement(page, applySelectors, { timeoutMs: 5000, visibleOnly: true });
+  if (!applyBtn) {
+    throw new Error('[MND] 협정자동신청 버튼을 찾지 못했습니다.');
+  }
+  try {
+    await applyBtn.scrollIntoViewIfNeeded?.();
+    await applyBtn.click({ force:true });
+    log('info', '[MND] 협정자동신청 버튼을 클릭했습니다.');
+  } catch (err) {
+    log('warn', `[MND] 협정자동신청 버튼 클릭 실패: ${(err && err.message) || err}`);
+    throw err;
+  }
+  await handleAgreementConfirmation(page, emit);
+}
+
+module.exports = { loginMnd, handleMndCertificate, goToMndAgreementAndSearch, applyMndAgreementAfterSearch };
