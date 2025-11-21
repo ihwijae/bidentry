@@ -9,7 +9,7 @@ function requirePlaywright(emit){
 }
 
 const { loginKepco, closeKepcoPostLoginModals } = require('../sites/kepco');
-const { loginMnd } = require('../sites/mnd');
+const { loginMnd, closeMndBidGuideModal } = require('../sites/mnd');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -214,6 +214,7 @@ async function openAndPrepareLogin(job, emit, outDir){
     } else if (site === 'mnd') {
       const newPage = await loginMnd(page, emit, job?.auth || {});
       if (newPage) page = newPage;
+      try { await closeMndBidGuideModal(page, emit); } catch {}
     } else {
       emit && emit({ type:'log', level:'warn', msg:`알 수 없는 사이트 '${site}', 기본 로그인 버튼 탐색을 시도합니다.` });
       if (job?.auth?.id && job?.auth?.pw) {

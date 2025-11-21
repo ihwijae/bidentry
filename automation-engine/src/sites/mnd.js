@@ -277,6 +277,68 @@ async function handleMndCertificate(page, emit, cert = {}, extra = {}) {
   });
 }
 
+async function closeMndBidGuideModal(page, emit, opts = {}) {
+  const timeoutMs = Number(opts?.timeoutMs) || 5000;
+  const start = Date.now();
+  const modalSelectors = [
+    'text=/\uC785\uCC30\uC11C\s*\uC791\uC131\uC548\uB0B4/i',
+    'text=/\uC785\uCC30\s*\uC791\uC131\uC548\uB0B4/i'
+  ];
+  const buttonSelectors = [
+    'div:has-text("\uC785\uCC30\uC11C \uC791\uC131\uC548\uB0B4") button:has-text("\uB2EB\uAE30")',
+    'button:has-text("\uB2EB\uAE30")',
+    'a:has-text("\uB2EB\uAE30")',
+    '[role="button"]:has-text("\uB2EB\uAE30")',
+    'button:has-text("\uD655\uC778")'
+  ];
+
+  while (Date.now() - start < timeoutMs) {
+    const modal = await findInMndContexts(page, modalSelectors, { visibleOnly: false });
+    if (!modal) {
+      await page?.waitForTimeout?.(200).catch(() => {});
+      continue;
+    }
+    const element = modal.asElement?.() || modal;
+    for (const sel of buttonSelectors) {
+      let btn = null;
+      try { btn = await element.$(sel); } catch {}
+      if (!btn) {
+        try { btn = await findInMndContexts(page, [sel], { visibleOnly: true }); } catch {}
+      }
+      if (!btn) continue;
+      try {
+        await btn.scrollIntoViewIfNeeded?.().catch(() => {});
+        await btn.click({ force: true });
+        emit && emit({ type: 'log', level: 'info', msg: '[MND] "입찰서 작성안내" 팝업을 닫았습니다.' });
+        return true;
+      } catch {}
+    }
+    try {
+      const removed = await page.evaluate(() => {
+        const layers = Array.from(document.querySelectorAll('div, section, article, .layer, .modal'));
+        const target = layers.find(el => /입찰서\s*작성안내/.test(el.textContent || ''));
+        if (target) {
+          const btn = target.querySelector('button, a');
+          if (btn) {
+            btn.click();
+            return true;
+          }
+          target.style.display = 'none';
+          if (typeof target.remove === 'function') target.remove();
+          return true;
+        }
+        return false;
+      });
+      if (removed) {
+        emit && emit({ type: 'log', level: 'info', msg: '[MND] "입찰서 작성안내" 팝업을 제거했습니다.' });
+        return true;
+      }
+    } catch {}
+    await page?.waitForTimeout?.(200).catch(() => {});
+  }
+  return false;
+}
+
 function buildMndContexts(page) {
   const seen = new Set();
   const stack = [];
@@ -540,4 +602,4 @@ async function applyMndAgreementAfterSearch(page, emit) {
   await handleAgreementConfirmation(page, emit);
 }
 
-module.exports = { loginMnd, handleMndCertificate, goToMndAgreementAndSearch, applyMndAgreementAfterSearch };
+module.exports = { loginMnd, handleMndCertificate, goToMndAgreementAndSearch, applyMndAgreementAfterSearch, closeMndBidGuideModal };
