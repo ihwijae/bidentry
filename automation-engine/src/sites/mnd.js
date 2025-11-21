@@ -449,6 +449,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   log('info', `[MND] 협정자동신청 대상 공고번호: ${digits}`);
 
   let workPage = page;
+  try { await closeMndBidGuideModal(workPage, emit, { timeoutMs: 5000 }); } catch {}
   let input = await waitForMndElement(workPage, [
     'input[title*="\uACF5\uACE0" i]',
     'input[placeholder*="\uACF5\uACE0" i]',
@@ -461,6 +462,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   ], { timeoutMs: 5000 });
 
   if (!input) {
+    try { await closeMndBidGuideModal(workPage, emit, { timeoutMs: 2000 }); } catch {}
     workPage = await ensureAgreementWorkspace(workPage, emit);
     input = await waitForMndElement(workPage, [
       'input[title*="\uACF5\uACE0" i]',
