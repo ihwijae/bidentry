@@ -296,7 +296,8 @@ async function dumpMndState(page, emit, tag) {
     }
   };
   try {
-    await page.waitForTimeout?.(500);
+    await page.bringToFront?.().catch(()=>{});
+    await page.waitForTimeout?.(1200);
     const mainHtml = await page.content().catch(async () => {
       return await page.evaluate(() => document.documentElement.outerHTML).catch(() => '');
     });
@@ -307,9 +308,11 @@ async function dumpMndState(page, emit, tag) {
     const contexts = buildMndContexts(page) || [];
     let idx = 0;
     for (const ctx of contexts) {
-      if (!ctx || ctx === page) continue;
+      if (!ctx) continue;
       let html = '';
       try {
+        await ctx.bringToFront?.().catch(()=>{});
+        await ctx.waitForTimeout?.(300).catch(()=>{});
         if (typeof ctx.content === 'function') {
           html = await ctx.content();
         } else if (typeof ctx.evaluate === 'function') {
@@ -325,11 +328,36 @@ async function dumpMndState(page, emit, tag) {
 
   try {
     const shot = path.join(dir, `${base}.png`);
+    await page.bringToFront?.().catch(()=>{});
+    await page.waitForTimeout?.(500);
     await page.screenshot({ path: shot, fullPage: true }).catch(() => null);
     emit && emit({ type:'log', level:'info', msg:`[MND] 스크린샷 저장: ${shot}` });
   } catch (err) {
     emit && emit({ type:'log', level:'warn', msg:`[MND] 스크린샷 실패: ${(err && err.message) || err}` });
   }
+
+  try {
+    const pages = page.context?.().pages?.() || [];
+    let idx = 0;
+    for (const pg of pages) {
+      if (!pg || pg === page) continue;
+      const name = `${base}_popup${idx}`;
+      try {
+        await pg.bringToFront?.().catch(()=>{});
+        await pg.waitForTimeout?.(800).catch(()=>{});
+        const html = await pg.content().catch(async () => {
+          return await pg.evaluate(() => document.documentElement.outerHTML).catch(() => '');
+        });
+        writeFile(`popup${idx}`, html);
+        const shotPath = path.join(dir, `${name}.png`);
+        await pg.screenshot({ path: shotPath, fullPage: true }).catch(()=>{});
+        emit && emit({ type:'log', level:'info', msg:`[MND] 팝업 스크린샷 저장: ${shotPath}` });
+      } catch (err) {
+        emit && emit({ type:'log', level:'warn', msg:`[MND] 팝업 덤프 실패: ${(err && err.message) || err}` });
+      }
+      idx += 1;
+    }
+  } catch {}
 }
 
 async function closeMndBidGuideModal(page, emit, opts = {}) {
