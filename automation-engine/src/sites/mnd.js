@@ -1,5 +1,7 @@
 ﻿"use strict";
 
+const fs = require('fs');
+const path = require('path');
 const { handleNxCertificate } = require('./nxCertificate');
 const TEXT_LOGIN = '\uB85C\uADF8\uC778';
 const TEXT_CERT_CORE = '\uACF5\uB3D9\uC778\uC99D';
@@ -275,6 +277,21 @@ async function handleMndCertificate(page, emit, cert = {}, extra = {}) {
     pinSelectors,
     confirmSelectors
   });
+}
+
+async function dumpMndHtml(page, emit, tag) {
+  if (!page) return;
+  try {
+    const html = await page.content();
+    const stamp = new Date().toISOString().replace(/[:.]/g,'-');
+    const dir = path.join(process.cwd(), 'engine_runs');
+    fs.mkdirSync(dir, { recursive: true });
+    const file = path.join(dir, `${stamp}_${tag || 'mnd'}.html`);
+    fs.writeFileSync(file, html, 'utf-8');
+    emit && emit({ type:'log', level:'info', msg:`[MND] HTML 덤프 저장: ${file}` });
+  } catch (err) {
+    emit && emit({ type:'log', level:'warn', msg:`[MND] HTML 덤프 실패: ${(err && err.message) || err}` });
+  }
 }
 
 async function closeMndBidGuideModal(page, emit, opts = {}) {
@@ -578,6 +595,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   }
 
   if (!input) {
+    await dumpMndHtml(workPage, emit, 'bid_input_missing');
     throw new Error('[MND] 협정자동신청 공고번호 입력창을 찾지 못했습니다.');
   }
 
