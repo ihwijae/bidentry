@@ -474,7 +474,12 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
 
   let workPage = page;
   try { await closeMndBidGuideModal(workPage, emit, { timeoutMs: 5000 }); } catch {}
-  let input = await waitForMndElement(workPage, [
+
+  const buildInputSelector = () => [
+    'input#numb_divs',
+    'input[name="numb_divs"]',
+    'input[title*="G2B" i]',
+    'input[placeholder*="G2B" i]',
     'input[title*="\uACF5\uACE0" i]',
     'input[placeholder*="\uACF5\uACE0" i]',
     'input[name*="bid" i]',
@@ -483,21 +488,14 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     'input[id*="notice" i]',
     'input[name*="gonggo" i]',
     'input[name*="numb" i]'
-  ], { timeoutMs: 5000 });
+  ];
+
+  let input = await waitForMndElement(workPage, buildInputSelector(), { timeoutMs: 5000 });
 
   if (!input) {
     try { await closeMndBidGuideModal(workPage, emit, { timeoutMs: 2000 }); } catch {}
     workPage = await ensureAgreementWorkspace(workPage, emit);
-    input = await waitForMndElement(workPage, [
-      'input[title*="\uACF5\uACE0" i]',
-      'input[placeholder*="\uACF5\uACE0" i]',
-      'input[name*="bid" i]',
-      'input[id*="bid" i]',
-      'input[name*="notice" i]',
-      'input[id*="notice" i]',
-      'input[name*="gonggo" i]',
-      'input[name*="numb" i]'
-    ], { timeoutMs: 6000 });
+    input = await waitForMndElement(workPage, buildInputSelector(), { timeoutMs: 6000 });
   }
 
   if (!input) {
