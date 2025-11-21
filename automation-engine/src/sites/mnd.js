@@ -314,50 +314,39 @@ async function closeMndBidGuideModal(page, emit, opts = {}) {
         return true;
       } catch {}
     }
-    let handled = false;
-    try {
-      handled = await page.evaluate(() => {
-        const killNodes = () => {
-          const layers = Array.from(document.querySelectorAll('div, section, article, .layer, .modal, .layer_pop'));
-          const target = layers.find(el => /입찰서\s*작성안내/.test((el.textContent || '').replace(/\s+/g,'')));
-          if (target) {
-            const btn = target.querySelector('button, a, [role="button"]');
-            if (btn) {
-              btn.click();
-              return true;
-            }
-            if (typeof target.remove === 'function') target.remove();
-            target.style.display = 'none';
-            return true;
+    const handled = await evaluateInMndContexts(page, () => {
+      const killNodes = () => {
+        const layers = Array.from(document.querySelectorAll('div, section, article, .layer, .modal, .layer_pop'));
+        const target = layers.find(el => /입찰서\s*작성안내/.test((el.textContent || '').replace(/\s+/g,'')));
+        if (target) {
+          const btn = target.querySelector('button, a, [role="button"]');
+          if (btn) {
+            btn.click();
+            return 'button';
           }
-          return false;
-        };
-        const closeViaExt = () => {
-          if (!(window.Ext && Ext.ComponentQuery)) return false;
-          let closed = false;
-          const wins = Ext.ComponentQuery.query('window');
-          wins.forEach(win => {
-            try {
-              const title = String(win.title || (win.getTitle && win.getTitle()) || '');
-              if (/입찰서/.test(title) || /참가/.test(title)) {
-                win.close?.();
-                closed = true;
-              }
-            } catch {}
-          });
-          return closed;
-        };
-        return closeViaExt() || killNodes();
-      });
-    } catch {}
-    if (handled) {
-      emit && emit({ type: 'log', level: 'info', msg: '[MND] "입찰서 작성안내" 팝업을 제거했습니다.' });
-      return true;
-    }
-    let domClicked = false;
-    try {
-      const fallbackHandle = await page.evaluateHandle(() => {
-        const normalize = (txt) => (txt || '').replace(/\s+/g, '');
+          if (typeof target.remove === 'function') target.remove();
+          target.style.display = 'none';
+          return 'removed';
+        }
+        return '';
+      };
+      const closeViaExt = () => {
+        if (!(window.Ext && Ext.ComponentQuery)) return '';
+        let closed = '';
+        const wins = Ext.ComponentQuery.query('window');
+        wins.forEach(win => {
+          try {
+            const title = String(win.title || (win.getTitle && win.getTitle()) || '');
+            if (/입찰서/.test(title) || /참가/.test(title)) {
+              win.close?.();
+              closed = 'ext';
+            }
+          } catch {}
+        });
+        return closed;
+      };
+      const normalize = (txt) => (txt || '').replace(/\s+/g, '');
+      const clickByText = () => {
         const texts = ['닫기', '확인', '확인하기', '예'];
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
         while (walker.nextNode()) {
@@ -366,25 +355,24 @@ async function closeMndBidGuideModal(page, emit, opts = {}) {
           if (!text) continue;
           if (/입찰서.*작성안내/.test(text)) {
             const btn = el.querySelector('button, a, [role="button"]');
-            if (btn) return btn;
+            if (btn) {
+              btn.click();
+              return 'text';
+            }
           }
           if (texts.some(t => text.includes(t))) {
-            return el;
+            if (typeof el.click === 'function') {
+              el.click();
+              return 'text';
+            }
           }
         }
-        return null;
-      });
-      const fallbackEl = fallbackHandle?.asElement?.();
-      if (fallbackEl) {
-        await fallbackEl.scrollIntoViewIfNeeded?.().catch(() => {});
-        await fallbackEl.click({ force: true }).catch(async () => {
-          await page.evaluate((node) => node && node.click && node.click(), fallbackEl).catch(() => {});
-        });
-        domClicked = true;
-      }
-    } catch {}
-    if (domClicked) {
-      emit && emit({ type: 'log', level: 'info', msg: '[MND] "입찰서 작성안내" 팝업을 수동으로 닫았습니다.' });
+        return '';
+      };
+      return closeViaExt() || killNodes() || clickByText();
+    });
+    if (handled?.value) {
+      emit && emit({ type: 'log', level: 'info', msg: `[MND] "입찰서 작성안내" 팝업을 제거했습니다. (${handled.value})` });
       return true;
     }
     try {
@@ -416,6 +404,18 @@ function buildMndContexts(page) {
     } catch {}
   }
   return out;
+}
+
+async function evaluateInMndContexts(page, evaluator) {
+  const ctxs = buildMndContexts(page);
+  for (const ctx of ctxs) {
+    if (!ctx || typeof ctx.evaluate !== 'function') continue;
+    try {
+      const result = await ctx.evaluate(evaluator);
+      if (result) return { context: ctx, value: result };
+    } catch {}
+  }
+  return null;
 }
 
 async function findInMndContexts(page, selectors, { visibleOnly = true } = {}) {
