@@ -239,11 +239,11 @@ async function run(job, emit) {
         ? job.bidIds.map(b => String(b || '').trim()).filter(Boolean)
         : (job?.bidId ? [String(job.bidId).trim()] : []);
       if (!bidQueue.length) {
-        emit && emit({ type:'log', level:'warn', msg:'[MND] 공고번호가 설정되어 있지 않아 협정자동신청 검색을 건너뜁니다.' });
+        emit && emit({ type:'log', level:'warn', msg:'[MND] 공고번호가 설정되어 있지 않아 입찰공고 검색을 건너뜁니다.' });
       }
       let processed = 0;
       for (const bid of bidQueue) {
-        emit && emit({ type:'log', level:'info', msg:`[MND] 협정자동신청 공고번호 (${processed + 1}/${bidQueue.length}): ${bid}` });
+        emit && emit({ type:'log', level:'info', msg:`[MND] 입찰공고 검색 (${processed + 1}/${bidQueue.length}): ${bid}` });
         emit({ type:'progress', step:'navigate_bid', pct: 82 });
         try {
           const navRes = await goToMndAgreementAndSearch(openRes.page, emit, bid);
@@ -251,23 +251,15 @@ async function run(job, emit) {
             openRes.page = navRes.page;
           }
         } catch (e) {
-          const msg = `[MND] 공고번호 ${bid} 협정자동신청 페이지 이동 실패: ${(e && e.message) || e}`;
+          const msg = `[MND] 공고번호 ${bid} 입찰공고 검색 실패: ${(e && e.message) || e}`;
           emit({ type:'log', level:'error', msg });
           throw new Error(msg);
         }
         try { await sweepPopups(openRes.page.context?.(), emit); } catch {}
         try { await dismissCommonOverlays(openRes.page, emit); } catch {}
-        emit({ type:'progress', step:'search_bid', pct: 88 });
-        try {
-          await applyMndAgreementAfterSearch(openRes.page, emit);
-        } catch (e) {
-          const msg = `[MND] 공고번호 ${bid} 협정자동신청 실패: ${(e && e.message) || e}`;
-          emit({ type:'log', level:'error', msg });
-          throw new Error(msg);
-        }
         processed += 1;
       }
-      emit && emit({ type:'log', level:'info', msg:`[MND] 협정자동신청 처리 완료: ${processed}/${bidQueue.length}` });
+      emit && emit({ type:'log', level:'info', msg:`[MND] 입찰공고 검색 완료: ${processed}/${bidQueue.length}` });
     }
   } finally {
     const keepOnError = job?.options?.keepBrowserOnError === true;

@@ -816,79 +816,106 @@ async function waitForMndResults(page) {
 async function goToMndAgreementAndSearch(page, emit, bidId) {
   const log = (level, msg) => emit && emit({ type:'log', level, msg });
   try { await installMndPopupGuards(page, emit); } catch {}
-  if (!bidId) {
-    log('warn', '[MND] 협정자동신청 공고번호가 비어 있어 검색을 건너뜁니다.');
-    return { ok: true, page };
+  const digits = bidId ? String(bidId).trim() : '';
+  if (!digits) {
+    log('warn', '[MND] 공고번호가 설정되어 있지 않습니다.');
+  } else {
+    log('info', `[MND] 공고번호 검색 준비: ${digits}`);
   }
-  const digits = String(bidId).trim();
-  log('info', `[MND] 협정자동신청 대상 공고번호: ${digits}`);
 
-  let workPage = page;
-  try { await closeMndBidGuideModal(workPage, emit, { timeoutMs: 5000 }); } catch {}
+  const menuSelectors = [
+    'a:has-text("\uC785\uCC30\uACF5\uACE0")',
+    'a:has-text("\uACF5\uACE0" i)',
+    'a[href*="bidAnnounce" i]'
+  ];
+  const clickBidMenu = async () => {
+    const link = await findInMndContexts(page, menuSelectors, { visibleOnly: true });
+    if (!link) {
+      log('warn', '[MND] 좌측 "입찰공고" 메뉴를 찾지 못했습니다.');
+      return;
+    }
+    try {
+      await link.scrollIntoViewIfNeeded?.();
+      await link.click({ force:true }).catch(()=>link.evaluate(el => el && el.click()));
+    log('info', '[MND] 좌측 "입찰공고" 메뉴를 클릭했습니다.');
+    } catch (err) {
+      log('warn', `[MND] "입찰공고" 메뉴 클릭 실패: ${(err && err.message) || err}`);
+    }
+    try { await page.waitForTimeout(800); } catch {}
+  };
 
-  const buildInputSelector = () => [
-    'input#numb_divs',
-    'input[name="numb_divs"]',
+  try { await closeMndBidGuideModal(page, emit, { timeoutMs: 5000 }); } catch {}
+  await clickBidMenu();
+
+  if (!digits) return { ok: true, page };
+
+  const inputSelectors = [
+    '#numb_divs',
+    'input[name="numb_divs" i]',
     'input[title*="G2B" i]',
     'input[placeholder*="G2B" i]',
     'input[title*="\uACF5\uACE0" i]',
     'input[placeholder*="\uACF5\uACE0" i]',
-    'input[name*="bid" i]',
-    'input[id*="bid" i]',
-    'input[name*="notice" i]',
-    'input[id*="notice" i]',
     'input[name*="gonggo" i]',
-    'input[name*="numb" i]'
+    'input[id*="gonggo" i]',
+    'input[name*="bid" i]',
+    'input[id*="bid" i]'
   ];
-
-  let input = await waitForMndElement(workPage, buildInputSelector(), { timeoutMs: 5000 });
-
+  const input = await waitForMndElement(page, inputSelectors, { timeoutMs: 6000, visibleOnly: true });
   if (!input) {
-    try { await closeMndBidGuideModal(workPage, emit, { timeoutMs: 2000 }); } catch {}
-    workPage = await ensureAgreementWorkspace(workPage, emit);
-    input = await waitForMndElement(workPage, buildInputSelector(), { timeoutMs: 6000 });
-  }
-
-  if (!input) {
-    await dumpMndState(workPage, emit, 'bid_input_missing');
-    throw new Error('[MND] 협정자동신청 공고번호 입력창을 찾지 못했습니다.');
+    await dumpMndState(page, emit, 'bid_notice_input_missing');
+    throw new Error('[MND] 입찰공고 공고번호 입력창을 찾지 못했습니다.');
   }
 
   try {
     await input.scrollIntoViewIfNeeded?.();
-    await input.click({ force:true }).catch(() => {});
+    await input.click({ force:true }).catch(()=>{});
     await input.fill('');
-  } catch {}
-  await input.type(digits, { delay: 20 }).catch(() => input.fill(digits));
-  try {
-    await input.dispatchEvent('input');
-    await input.dispatchEvent('change');
-  } catch {}
+    await input.type(digits, { delay: 20 }).catch(()=>input.fill(digits));
+    await input.dispatchEvent('input').catch(()=>{});
+    await input.dispatchEvent('change').catch(()=>{});
+  } catch (err) {
+    log('warn', `[MND] 공고번호 입력 실패: ${(err && err.message) || err}`);
+  }
 
-  const searchBtn = await waitForMndElement(workPage, [
-    'button:has-text("\uC870\uD68C")',
+  const searchSelectors = [
     'button:has-text("\uAC80\uC0C9")',
-    'a:has-text("\uC870\uD68C")',
-    'a:has-text("\uAC80\uC0C9")',
-    '[role="button"]:has-text("\uC870\uD68C")',
-    'input[type="submit"][value*="\uC870\uD68C"]'
-  ], { timeoutMs: 5000, visibleOnly: true });
-
+    'button:has-text("\uAC80\uC0AC")',
+    'button:has-text("\uC870\uD68C")',
+    'a:has-text("\uC870\uD68C")'
+  ];
+  const searchBtn = await waitForMndElement(page, searchSelectors, { timeoutMs: 5000, visibleOnly: true });
   if (searchBtn) {
     try {
       await searchBtn.scrollIntoViewIfNeeded?.();
-      await searchBtn.click({ force:true });
-    } catch {
-      try { await workPage?.keyboard?.press('Enter'); } catch {}
-    }
+      await searchBtn.click({ force:true }).catch(()=>{});
+    } catch {}
   } else {
-    try { await input.press('Enter'); }
-    catch {}
+    try { await input.press('Enter'); } catch {}
+  }
+  await waitForMndResults(page);
+
+  const firstRowSelectors = [
+    '.table tbody tr:not(.empty) td a',
+    '.tb_list tbody tr:first-child td a',
+    '.grid-body tr:first-child a',
+    'table tbody tr:first-child a'
+  ];
+  const first = await waitForMndElement(page, firstRowSelectors, { timeoutMs: 6000, visibleOnly: true });
+  if (!first) {
+    await dumpMndState(page, emit, 'bid_results_missing');
+    throw new Error('[MND] 공고 검색 결과를 찾지 못했습니다.');
+  }
+  try {
+    await first.scrollIntoViewIfNeeded?.();
+    await first.click({ force:true });
+    log('info', '[MND] 공고 검색 후 첫 공고를 클릭했습니다.');
+  } catch (err) {
+    log('warn', `[MND] 검색 결과 클릭 실패: ${(err && err.message) || err}`);
+    throw err;
   }
 
-  try { await workPage?.waitForTimeout?.(600); } catch {}
-  await waitForMndResults(workPage);
-  return { ok: true, page: workPage };
+  return { ok: true, page };
 }
 
 async function ensureMndRowSelection(page) {
