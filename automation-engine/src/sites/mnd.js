@@ -6,7 +6,75 @@ const { handleNxCertificate } = require('./nxCertificate');
 const TEXT_LOGIN = '\uB85C\uADF8\uC778';
 const TEXT_CERT_CORE = '\uACF5\uB3D9\uC778\uC99D';
 const TEXT_CERT_LOGIN = TEXT_CERT_CORE + ' \uB85C\uADF8\uC778';
+const BID_GUIDE_TEXT_REGEX = /\uC785\uCC30\uC11C\s*\uC791\uC131\uC548\uB0B4/i;
+const BID_GUIDE_SKIP_REGEXES = [/\uC778\uC99D/i, /\uACF5\uB3D9/i, /certificate/i, /cert/i];
+const MND_GUARDED_CONTEXTS = new WeakSet();
+const MND_GUARDED_PAGES = new WeakSet();
+
+function runBidGuideGuardClient() {
+  if (window.__mndBidGuideGuardInstalled) return;
+  window.__mndBidGuideGuardInstalled = true;
+  const maskSelectors = ['#mask', '.x-mask', '.layer_dim', '.dim', '.bg_dim', '.layer_pop', '.layer_pop_box', '.modal', '.layer'];
+  const targetText = /\uC785\uCC30\uC11C\s*\uC791\uC131\uC548\uB0B4/;
+  const hideNodes = () => {
+    let touched = false;
+    maskSelectors.forEach(sel => {
+      document.querySelectorAll(sel).forEach(el => {
+        el.style.display = 'none';
+        if (typeof el.remove === 'function') el.remove();
+        touched = true;
+      });
+    });
+    const nodes = Array.from(document.querySelectorAll('#alertLayer, #alertModal, .alertLayer, .layer_pop, .layer_pop_box, div, section, article'));
+    for (const node of nodes) {
+      const text = (node.innerText || node.textContent || '').replace(/\s+/g, '');
+      if (!text) continue;
+      if (targetText.test(text) || node.id === 'alertLayer') {
+        const btn = node.querySelector('button, a, [role="button"], .btn');
+        if (btn && typeof btn.click === 'function') {
+          btn.click();
+        } else if (typeof node.remove === 'function') {
+          node.remove();
+        } else {
+          node.style.display = 'none';
+        }
+        touched = true;
+      }
+    }
+    return touched;
+  };
+
+  const wrapFunctions = () => {
+    const names = ['alertLayerOpen', 'alertLayerClose', 'alertLayerShow', 'confirmLayerOpen', 'confirmLayerClose', 'confirmLayerShow', 'noticeLayerOpen'];
+    names.forEach(name => {
+      try {
+        const fn = window[name];
+        if (typeof fn !== 'function' || fn.__mndBidGuideWrapped) return;
+        const wrapped = function(...args) {
+          const result = fn.apply(this, args);
+          setTimeout(hideNodes, 0);
+          return result;
+        };
+        wrapped.__mndBidGuideWrapped = true;
+        window[name] = wrapped;
+      } catch {}
+    });
+  };
+
+  wrapFunctions();
+  hideNodes();
+  setInterval(() => {
+    wrapFunctions();
+    hideNodes();
+  }, 900);
+  document.addEventListener('DOMContentLoaded', () => setTimeout(hideNodes, 0), true);
+  window.addEventListener('load', () => setTimeout(hideNodes, 0), true);
+  window.addEventListener('pageshow', () => setTimeout(hideNodes, 0), true);
+  ['click', 'keydown'].forEach(evt => document.addEventListener(evt, () => setTimeout(hideNodes, 0), true));
+  window.__mndBidGuideGuardKill = hideNodes;
+}
 async function loginMnd(page, emit, auth = {}) {
+  try { await installMndPopupGuards(page, emit); } catch {}
   async function $(selector) {
     const inMain = await page.$(selector);
     if (inMain) return inMain;
@@ -26,6 +94,7 @@ async function loginMnd(page, emit, auth = {}) {
       await el.click().catch(() => {});
       const popup = await popupPromise;
       if (popup) {
+        try { await installMndPopupGuards(popup, emit); } catch {}
         await popup.waitForLoadState('load').catch(() => {});
         emit && emit({ type: 'log', level: 'info', msg: '[MND] 새 창(팝업)으로 전환' });
         return popup;
@@ -46,6 +115,7 @@ async function loginMnd(page, emit, auth = {}) {
   ];
   const popup = await clickWithPopup(page, loginCandidates);
   const loginPage = popup || page;
+  try { await installMndPopupGuards(loginPage, emit); } catch {}
   try { loginPage.on('dialog', d => d.dismiss().catch(()=>{})); } catch {}
   await loginPage.waitForLoadState('domcontentloaded').catch(()=>{});
 
@@ -253,6 +323,7 @@ async function loginMnd(page, emit, auth = {}) {
     'a:has-text("' + TEXT_CERT_LOGIN + '")'
   ];
   const certPopup = await clickWithPopup(loginPage, certCandidates);
+  if (certPopup) { try { await installMndPopupGuards(certPopup, emit); } catch {} }
   return certPopup || popup || null;
 }
 
@@ -285,6 +356,40 @@ async function dumpMndState(page, emit, tag) {
   const base = `${stamp}_${tag || 'mnd'}`;
   const dir = path.join(process.cwd(), 'engine_runs');
   try { fs.mkdirSync(dir, { recursive: true }); } catch {}
+  const logPageMeta = async (label, ctx) => {
+    if (!ctx) return;
+    try {
+      const url = typeof ctx.url === 'function' ? ctx.url() : '';
+      let title = '';
+      if (typeof ctx.title === 'function') {
+        title = await ctx.title().catch(() => '') || '';
+      } else if (ctx.page && typeof ctx.page === 'function') {
+        try { title = await ctx.page().title(); } catch {}
+      }
+      let name = '';
+      if (typeof ctx.name === 'function') {
+        name = ctx.name();
+      } else if (ctx.frame && typeof ctx.frame === 'function') {
+        try { name = ctx.frame().name(); } catch {}
+      }
+      let preview = '';
+      if (typeof ctx.evaluate === 'function') {
+        preview = await ctx.evaluate(() => {
+          const body = document.body;
+          if (!body) return '';
+          const txt = (body.innerText || body.textContent || '').trim();
+          return txt.length > 600 ? txt.slice(0, 600) : txt;
+        }).catch(() => '') || '';
+      }
+      emit && emit({
+        type: 'log',
+        level: 'info',
+        msg: `[MND] dump[${label}] title='${title}' name='${name}' url='${url}' text='${preview.slice(0, 120).replace(/\s+/g, ' ')}'`
+      });
+    } catch (err) {
+      emit && emit({ type:'log', level:'warn', msg:`[MND] dump meta 실패(${label}): ${(err && err.message) || err}` });
+    }
+  };
   const writeFile = (suffix, contents) => {
     if (!contents) return;
     const file = path.join(dir, `${base}_${suffix}.html`);
@@ -303,6 +408,7 @@ async function dumpMndState(page, emit, tag) {
       return await page.evaluate(() => document.documentElement.outerHTML).catch(() => '');
     });
     writeFile('main', mainHtml);
+    await logPageMeta('main', page);
   } catch {}
 
   try {
@@ -323,6 +429,7 @@ async function dumpMndState(page, emit, tag) {
       } catch {}
       if (html) {
         writeFile(`ctx${idx}`, html);
+        await logPageMeta(`ctx${idx}`, ctx);
         idx += 1;
       }
     }
@@ -357,6 +464,7 @@ async function dumpMndState(page, emit, tag) {
         const shotPath = path.join(dir, `${name}.png`);
         await pg.screenshot({ path: shotPath, fullPage: true }).catch(()=>{});
         emit && emit({ type:'log', level:'info', msg:`[MND] 팝업 스크린샷 저장: ${shotPath}` });
+        await logPageMeta(`popup${idx}`, pg);
       } catch (err) {
         emit && emit({ type:'log', level:'warn', msg:`[MND] 팝업 덤프 실패: ${(err && err.message) || err}` });
       }
@@ -367,6 +475,7 @@ async function dumpMndState(page, emit, tag) {
 
 async function closeMndBidGuideModal(page, emit, opts = {}) {
   const timeoutMs = Number(opts?.timeoutMs) || 5000;
+  const skipOtherPages = opts?.skipOtherPages === true;
   try { await page?.waitForLoadState?.('domcontentloaded', { timeout: 2000 }); } catch {}
   const start = Date.now();
   const modalSelectors = [
@@ -384,6 +493,23 @@ async function closeMndBidGuideModal(page, emit, opts = {}) {
   while (Date.now() - start < timeoutMs) {
     const modal = await findInMndContexts(page, modalSelectors, { visibleOnly: false });
     if (!modal) {
+      if (!skipOtherPages) {
+        const remain = timeoutMs - (Date.now() - start);
+        if (remain <= 0) break;
+        const others = page.context?.().pages?.() || [];
+        for (const other of others) {
+          if (!other || other === page) continue;
+          if (typeof other.isClosed === 'function' && other.isClosed()) continue;
+          let title = '';
+          let url = '';
+          try { title = (await other.title?.().catch(() => '')) || ''; } catch {}
+          try { url = typeof other.url === 'function' ? other.url() : ''; } catch {}
+          if (BID_GUIDE_SKIP_REGEXES.some(rx => rx.test(title) || rx.test(url))) continue;
+          emit && emit({ type:'log', level:'debug', msg:`[MND] 다른 페이지 팝업 검사: title='${title}' url='${url}'` });
+          const nested = await closeMndBidGuideModal(other, emit, { timeoutMs: Math.min(remain, 3000), skipOtherPages: true });
+          if (nested) return true;
+        }
+      }
       await page?.waitForTimeout?.(200).catch(() => {});
       continue;
     }
@@ -518,6 +644,63 @@ async function closeMndBidGuideModal(page, emit, opts = {}) {
   return false;
 }
 
+async function inspectMndBidGuidePopup(pg, emit) {
+  if (!pg) return;
+  try {
+    await pg.waitForLoadState?.('domcontentloaded', { timeout: 5000 }).catch(() => {});
+    const title = (typeof pg.title === 'function' ? await pg.title().catch(() => '') : '') || '';
+    const url = typeof pg.url === 'function' ? pg.url() : '';
+    const skip = BID_GUIDE_SKIP_REGEXES.some(rx => rx.test(title) || rx.test(url));
+    if (skip) return;
+    let text = '';
+    if (typeof pg.evaluate === 'function') {
+      try {
+        text = await pg.evaluate(() => {
+          const body = document.body;
+          if (!body) return '';
+          return (body.innerText || body.textContent || '').trim();
+        });
+      } catch {}
+    }
+    if (!text && typeof pg.content === 'function') {
+      try { text = await pg.content(); } catch {}
+    }
+    const matched = BID_GUIDE_TEXT_REGEX.test(title) || BID_GUIDE_TEXT_REGEX.test(url) || BID_GUIDE_TEXT_REGEX.test(text);
+    if (matched) {
+      emit && emit({ type:'log', level:'info', msg:`[MND] 팝업 창에서 "입찰서 작성안내" 감지(title='${title}' url='${url}'). 닫기 시도.` });
+      try {
+        await closeMndBidGuideModal(pg, emit, { timeoutMs: 3500, skipOtherPages: true });
+        return;
+      } catch {}
+      try { await pg.close({ runBeforeUnload: true }); } catch {}
+    }
+  } catch (err) {
+    emit && emit({ type:'log', level:'debug', msg:`[MND] 팝업 감시 중 오류: ${(err && err.message) || err}` });
+  }
+}
+
+async function installMndPopupGuards(page, emit) {
+  if (!page) return;
+  const ctx = typeof page.context === 'function' ? page.context() : null;
+  if (ctx && !MND_GUARDED_CONTEXTS.has(ctx)) {
+    MND_GUARDED_CONTEXTS.add(ctx);
+    try {
+      ctx.on('page', (pg) => {
+        if (!pg) return;
+        installMndPopupGuards(pg, emit).catch(() => {});
+        setTimeout(() => {
+          inspectMndBidGuidePopup(pg, emit).catch(() => {});
+        }, 400);
+      });
+    } catch {}
+  }
+  if (!MND_GUARDED_PAGES.has(page)) {
+    MND_GUARDED_PAGES.add(page);
+    try { await page.addInitScript(runBidGuideGuardClient); } catch {}
+  }
+  try { await page.evaluate(runBidGuideGuardClient); } catch {}
+}
+
 function buildMndContexts(page) {
   const seen = new Set();
   const stack = [];
@@ -632,6 +815,7 @@ async function waitForMndResults(page) {
 
 async function goToMndAgreementAndSearch(page, emit, bidId) {
   const log = (level, msg) => emit && emit({ type:'log', level, msg });
+  try { await installMndPopupGuards(page, emit); } catch {}
   if (!bidId) {
     log('warn', '[MND] 협정자동신청 공고번호가 비어 있어 검색을 건너뜁니다.');
     return { ok: true, page };
@@ -794,4 +978,11 @@ async function applyMndAgreementAfterSearch(page, emit) {
   await handleAgreementConfirmation(page, emit);
 }
 
-module.exports = { loginMnd, handleMndCertificate, goToMndAgreementAndSearch, applyMndAgreementAfterSearch, closeMndBidGuideModal };
+module.exports = {
+  loginMnd,
+  handleMndCertificate,
+  goToMndAgreementAndSearch,
+  applyMndAgreementAfterSearch,
+  closeMndBidGuideModal,
+  installMndPopupGuards
+};

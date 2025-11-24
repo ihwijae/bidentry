@@ -9,7 +9,7 @@ function requirePlaywright(emit){
 }
 
 const { loginKepco, closeKepcoPostLoginModals } = require('../sites/kepco');
-const { loginMnd, closeMndBidGuideModal } = require('../sites/mnd');
+const { loginMnd, closeMndBidGuideModal, installMndPopupGuards } = require('../sites/mnd');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
@@ -73,6 +73,7 @@ async function openAndPrepareLogin(job, emit, outDirProvider){
   const headless = job?.options?.headless === true;
   const slowMo = debug ? 250 : 0;
   const viewport = { width: 1280, height: 900 };
+  const site = (job?.site || '').toLowerCase();
 
   const requestedBrowser = String(job?.options?.browser || 'edge').toLowerCase();
   const browserChannelMap = {
@@ -193,6 +194,9 @@ async function openAndPrepareLogin(job, emit, outDirProvider){
     try { await browser?.close?.(); } catch {}
     return { ok:false, error:'URL not configured (job.url missing)' };
   }
+  if (site === 'mnd') {
+    try { await installMndPopupGuards(page, emit); } catch {}
+  }
   if (requestedPermissions.length) {
     try {
       const origin = new URL(url).origin;
@@ -206,7 +210,6 @@ async function openAndPrepareLogin(job, emit, outDirProvider){
   emit && emit({ type:'log', level:'info', msg:`페이지 접속: ${await page.title().catch(()=>url)} (${page.url()})` });
   await dismissCommonOverlays(page, emit);
 
-  const site = (job?.site || '').toLowerCase();
   try {
     const hasId = !!(job?.auth?.id);
     const hasPw = !!(job?.auth?.pw);
@@ -218,6 +221,7 @@ async function openAndPrepareLogin(job, emit, outDirProvider){
     } else if (site === 'mnd') {
       const newPage = await loginMnd(page, emit, job?.auth || {});
       if (newPage) page = newPage;
+      try { await installMndPopupGuards(page, emit); } catch {}
       try { await closeMndBidGuideModal(page, emit); } catch {}
     } else {
       emit && emit({ type:'log', level:'warn', msg:`알 수 없는 사이트 '${site}', 기본 로그인 버튼 탐색을 시도합니다.` });
