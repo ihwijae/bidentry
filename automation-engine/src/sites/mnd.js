@@ -1019,10 +1019,16 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   }
 
   const searchSelectors = [
-    'button:has-text("\uAC80\uC0C9")',
+    '.search_area button:has-text("\uAC80\uC0C9")',
+    '.search_area button:has-text("\uC870\uD68C")',
+    '.search_tbl button:has-text("\uAC80\uC0C9")',
+    '.search_tbl button:has-text("\uC870\uD68C")',
+    'form[action*="bid"] button:has-text("\uAC80\uC0C9")',
+    'form[action*="bid"] button:has-text("\uC870\uD68C")',
+    'button#searchBtn',
+    'button[name="searchBtn"]',
     'button:has-text("\uAC80\uC0AC")',
-    'button:has-text("\uC870\uD68C")',
-    'a:has-text("\uC870\uD68C")'
+    'button:has-text("\uC870\uD68C")'
   ];
   const searchBtn = await waitForMndElement(workPage, searchSelectors, { timeoutMs: 5000, visibleOnly: true });
   if (searchBtn) {
@@ -1033,6 +1039,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   } else {
     try { await input.press('Enter'); } catch {}
   }
+  try { await workPage.waitForTimeout(400); } catch {}
   await waitForMndResults(workPage);
 
   const firstRowSelectors = [
