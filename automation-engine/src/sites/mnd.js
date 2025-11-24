@@ -849,7 +849,12 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     return page;
   };
 
-  const workPage = await resolveWorkPage() || page;
+  let workPage = await resolveWorkPage() || page;
+  const adoptWorkPage = async (nextPage) => {
+    if (!nextPage || workPage === nextPage) return;
+    workPage = nextPage;
+    try { await installMndPopupGuards(workPage, emit); } catch {}
+  };
   try {
     const resolvedUrl = workPage && typeof workPage.url === 'function' ? workPage.url() : '';
     if (resolvedUrl) log('debug', `[MND] 작업 페이지: ${resolvedUrl}`);
@@ -906,9 +911,23 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
       return false;
     }
     try {
+      const popupPromise = typeof workPage.waitForEvent === 'function'
+        ? workPage.waitForEvent('popup', { timeout: 4000 }).catch(() => null)
+        : Promise.resolve(null);
+      const navPromise = typeof workPage.waitForNavigation === 'function'
+        ? workPage.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 8000 }).catch(() => null)
+        : Promise.resolve(null);
       await link.scrollIntoViewIfNeeded?.();
       await link.click({ force:true }).catch(()=>link.evaluate(el => el && el.click()));
       log('info', '[MND] 좌측 "입찰공고" 메뉴를 클릭했습니다.');
+      const popup = await popupPromise;
+      if (popup) {
+        log('info', '[MND] "입찰공고" 메뉴가 새 창으로 열려 전환합니다.');
+        await popup.waitForLoadState('domcontentloaded').catch(() => {});
+        await adoptWorkPage(popup);
+      } else {
+        await navPromise;
+      }
       await waitForBidNoticePage(4000);
       return true;
     } catch (err) {
