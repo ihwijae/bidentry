@@ -1067,7 +1067,10 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     '.table tbody tr:not(.empty) td a',
     '.tb_list tbody tr:first-child td a',
     '.grid-body tr:first-child a',
-    'table tbody tr:first-child a'
+    'table tbody tr:first-child a',
+    '#sbGridArea .sbgrid_datagrid_GridWhole_table tbody tr:first-child td:nth-of-type(5)',
+    '#sbGridArea .sbgrid_datagrid_GridWhole_table tbody tr:first-child td:nth-of-type(4)',
+    'div[id^="SBHE_DATAGRID"] tbody tr:first-child td:nth-of-type(5)'
   ];
   const first = await waitForMndElement(workPage, firstRowSelectors, { timeoutMs: 6000, visibleOnly: true });
   if (!first) {
@@ -1075,6 +1078,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     throw new Error('[MND] 공고 검색 결과를 찾지 못했습니다.');
   }
   try {
+    try { await first.click({ clickCount: 2, delay: 50 }); } catch {}
     await clickAndAdopt(first, { waitMs: 8000 });
     log('info', '[MND] 공고 검색 결과의 공사명을 클릭했습니다.');
   } catch (err) {
