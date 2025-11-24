@@ -859,28 +859,93 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   }
 
   const menuSelectors = [
-    'a:has-text("\uC785\uCC30\uACF5\uACE0")',
-    'a:has-text("\uACF5\uACE0" i)',
-    'a[href*="bidAnnounce" i]'
+    '#lnb a:has-text("\uC785\uCC30\uACF5\uACE0")',
+    '.lnb a:has-text("\uC785\uCC30\uACF5\uACE0")',
+    '.left_menu a:has-text("\uC785\uCC30\uACF5\uACE0")',
+    'nav a:has-text("\uC785\uCC30\uACF5\uACE0")',
+    'aside a:has-text("\uC785\uCC30\uACF5\uACE0")',
+    '[class*="lnb"] a:has-text("\uC785\uCC30\uACF5\uACE0")',
+    'a[href*="bidAnnounce" i]:has-text("\uC785\uCC30\uACF5\uACE0")',
+    'a[href*="announceList" i]:has-text("\uC785\uCC30\uACF5\uACE0")'
   ];
+
+  const isBidNoticePage = async () => {
+    try {
+      const currentUrl = typeof workPage.url === 'function' ? workPage.url() : '';
+      if (/bidAnnounce|announceList|BidAnnounce/i.test(currentUrl)) return true;
+      const hasHeading = await workPage.evaluate(() => {
+        const selectors = [
+          '.contents h3', '.cont_tit', '.content_title', '.tit_area h3',
+          'h2', 'h3', '.board_tit', '.page_title'
+        ];
+        for (const sel of selectors) {
+          const el = document.querySelector(sel);
+          if (el && /입찰공고/.test((el.textContent || '').replace(/\s+/g, ''))) return true;
+        }
+        return false;
+      }).catch(() => false);
+      return hasHeading;
+    } catch {
+      return false;
+    }
+  };
+
+  const waitForBidNoticePage = async (timeoutMs = 5000) => {
+    const start = Date.now();
+    while (Date.now() - start < timeoutMs) {
+      if (await isBidNoticePage()) return true;
+      try { await workPage.waitForTimeout(200); } catch {}
+    }
+    return await isBidNoticePage();
+  };
+
   const clickBidMenu = async () => {
     const link = await findInMndContexts(workPage, menuSelectors, { visibleOnly: true });
     if (!link) {
       log('warn', '[MND] 좌측 "입찰공고" 메뉴를 찾지 못했습니다.');
-      return;
+      return false;
     }
     try {
       await link.scrollIntoViewIfNeeded?.();
       await link.click({ force:true }).catch(()=>link.evaluate(el => el && el.click()));
-    log('info', '[MND] 좌측 "입찰공고" 메뉴를 클릭했습니다.');
+      log('info', '[MND] 좌측 "입찰공고" 메뉴를 클릭했습니다.');
+      await waitForBidNoticePage(4000);
+      return true;
     } catch (err) {
       log('warn', `[MND] "입찰공고" 메뉴 클릭 실패: ${(err && err.message) || err}`);
+      return false;
     }
-    try { await workPage.waitForTimeout(800); } catch {}
   };
 
   try { await closeMndBidGuideModal(workPage, emit, { timeoutMs: 5000 }); } catch {}
-  await clickBidMenu();
+  const clicked = await clickBidMenu();
+  let onBidPage = await isBidNoticePage();
+  if (!onBidPage && !clicked) {
+    log('warn', '[MND] 메뉴 클릭이 실패하여 직접 이동을 시도합니다.');
+  }
+  if (!onBidPage) {
+    const fallbackUrls = [
+      'https://www.d2b.go.kr/peb/bid/bidAnnounceList.do?key=541',
+      'https://www.d2b.go.kr/peb/bid/announceList.do?key=541',
+      'https://www.d2b.go.kr/pdb/bid/goodsBidAnnounceList.do?key=129',
+      'https://www.d2b.go.kr/psb/bid/serviceBidAnnounceList.do?key=137'
+    ];
+    for (const target of fallbackUrls) {
+      try {
+        await workPage.goto(target, { waitUntil:'domcontentloaded', timeout: 10000 });
+        log('info', `[MND] 직접 이동 시도: ${target}`);
+        onBidPage = await waitForBidNoticePage(2500);
+        if (onBidPage) break;
+      } catch (err) {
+        log('warn', `[MND] 직접 이동 실패(${target}): ${(err && err.message) || err}`);
+      }
+    }
+  }
+
+  if (!onBidPage) {
+    await dumpMndState(workPage, emit, 'bid_notice_page_missing');
+    throw new Error('[MND] 입찰공고 페이지로 이동하지 못했습니다.');
+  }
 
   if (!digits) return { ok: true, page: workPage };
 
