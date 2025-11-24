@@ -1081,6 +1081,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     log('warn', `[MND] 검색 결과 클릭 실패: ${(err && err.message) || err}`);
     throw err;
   }
+  await waitForMndResults(workPage);
 
   const detailButtonSelectors = [
     'button:has-text("\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD\uC11C \uC791\uC131")',
