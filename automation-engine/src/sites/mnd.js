@@ -969,19 +969,40 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   if (!digits) return { ok: true, page: workPage };
 
   const inputSelectors = [
-    '#numb_divs',
+    'input#numb_divs',
     'input[name="numb_divs" i]',
     'input[title*="G2B" i]',
     'input[placeholder*="G2B" i]',
-    'input[title*="\uACF5\uACE0" i]',
-    'input[placeholder*="\uACF5\uACE0" i]',
     'input[name*="gonggo" i]',
     'input[id*="gonggo" i]',
-    'input[name*="bid" i]',
-    'input[id*="bid" i]'
+    'input[title*="\uACF5\uACE0" i]',
+    '.search_tbl input[type="text" i]',
+    '.search_area input[type="text" i]',
+    '#bidNo',
+    'input[name*="bidNo" i]',
+    'input[name*="gonggo_no" i]',
+    'input[id*="gonggo_no" i]',
+    'label:has-text("\uACF5\uACE0\uBC88\uD638") ~ input',
+    'td:has-text("\uACF5\uACE0\uBC88\uD638") input',
+    'th:has-text("\uACF5\uACE0\uBC88\uD638") ~ td input',
+    'div:has-text("\uACF5\uACE0\uBC88\uD638") input'
   ];
   const input = await waitForMndElement(workPage, inputSelectors, { timeoutMs: 6000, visibleOnly: true });
   if (!input) {
+    try {
+      const info = await workPage.evaluate(() => {
+        return Array.from(document.querySelectorAll('input'))
+          .filter(el => el.type !== 'hidden')
+          .map(el => ({
+            id: el.id,
+            name: el.name,
+            title: el.title,
+            placeholder: el.getAttribute('placeholder'),
+            label: ((el.closest('td, label, div') || {}).innerText || '').trim().slice(0, 40)
+          }));
+      });
+      log('warn', `[MND] 입력 후보 목록: ${JSON.stringify(info)}`);
+    } catch {}
     await dumpMndState(workPage, emit, 'bid_notice_input_missing');
     throw new Error('[MND] 입찰공고 공고번호 입력창을 찾지 못했습니다.');
   }
