@@ -855,6 +855,27 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     workPage = nextPage;
     try { await installMndPopupGuards(workPage, emit); } catch {}
   };
+  const clickAndAdopt = async (handle, { waitMs = 8000 } = {}) => {
+    if (!handle) return null;
+    const popupPromise = typeof workPage.waitForEvent === 'function'
+      ? workPage.waitForEvent('popup', { timeout: 4000 }).catch(() => null)
+      : Promise.resolve(null);
+    const navPromise = typeof workPage.waitForNavigation === 'function'
+      ? workPage.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: waitMs }).catch(() => null)
+      : Promise.resolve(null);
+    try { await handle.scrollIntoViewIfNeeded?.(); } catch {}
+    try { await handle.click({ force:true }); }
+    catch { try { await handle.evaluate(el => el && el.click()); } catch {} }
+    const popup = await popupPromise;
+    if (popup) {
+      log('info', '[MND] 새 창이 열려 전환합니다.');
+      await popup.waitForLoadState('domcontentloaded').catch(() => {});
+      await adoptWorkPage(popup);
+      return workPage;
+    }
+    await navPromise;
+    return workPage;
+  };
   try {
     const resolvedUrl = workPage && typeof workPage.url === 'function' ? workPage.url() : '';
     if (resolvedUrl) log('debug', `[MND] 작업 페이지: ${resolvedUrl}`);
@@ -1054,13 +1075,77 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     throw new Error('[MND] 공고 검색 결과를 찾지 못했습니다.');
   }
   try {
-    await first.scrollIntoViewIfNeeded?.();
-    await first.click({ force:true });
-    log('info', '[MND] 공고 검색 후 첫 공고를 클릭했습니다.');
+    await clickAndAdopt(first, { waitMs: 8000 });
+    log('info', '[MND] 공고 검색 결과의 공사명을 클릭했습니다.');
   } catch (err) {
     log('warn', `[MND] 검색 결과 클릭 실패: ${(err && err.message) || err}`);
     throw err;
   }
+
+  const detailButtonSelectors = [
+    'button:has-text("\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD\uC11C \uC791\uC131")',
+    'a:has-text("\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD\uC11C \uC791\uC131")',
+    'button:has-text("\uC2E0\uCCAD\uC11C \uC791\uC131")',
+    'a:has-text("\uC2E0\uCCAD\uC11C \uC791\uC131")'
+  ];
+  const detailButton = await waitForMndElement(workPage, detailButtonSelectors, { timeoutMs: 8000, visibleOnly: true });
+  if (!detailButton) {
+    await dumpMndState(workPage, emit, 'bid_detail_missing');
+    throw new Error('[MND] 입찰공고 상세의 "입찰참가신청서 작성" 버튼을 찾지 못했습니다.');
+  }
+
+  await clickAndAdopt(detailButton, { waitMs: 8000 });
+  try { await closeMndBidGuideModal(workPage, emit, { timeoutMs: 4000 }); } catch {}
+
+  const agreementPresence = await waitForMndElement(workPage, [
+    'label:has-text("\uB3D9\uC758") input[type="checkbox"]',
+    '.agree_area input[type="checkbox"]',
+    'input[name*="agree" i]'
+  ], { timeoutMs: 7000, visibleOnly: false });
+  if (!agreementPresence) {
+    await dumpMndState(workPage, emit, 'agreement_page_missing');
+    throw new Error('[MND] 서약서 동의 페이지를 확인하지 못했습니다.');
+  }
+
+  const ensureAgreementSelections = async () => {
+    await workPage.evaluate(() => {
+      const mark = (el) => {
+        if (!el) return;
+        if (el.type === 'checkbox' || el.type === 'radio') {
+          el.checked = true;
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      };
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        const text = ((cb.closest('label')?.innerText || '') + (cb.closest('td')?.innerText || '')).replace(/\s+/g, '');
+        if (/동의|확인/.test(text) || /agree/i.test(cb.name || '')) mark(cb);
+      });
+      const radios = Array.from(document.querySelectorAll('input[type="radio"]'));
+      const optionOne = radios.find(r => {
+        const txt = ((r.closest('label')?.innerText || '') + (r.title || '')).replace(/\s+/g, '');
+        return /선택1/.test(txt) || /select1/i.test(r.name || '');
+      });
+      if (optionOne) mark(optionOne);
+    }).catch(() => {});
+  };
+
+  const agreementButtonSelectors = [
+    'button:has-text("\uD655\uC778")',
+    '.btn_area button:has-text("\uD655\uC778")',
+    '.btn_box button:has-text("\uD655\uC778")',
+    'a:has-text("\uD655\uC778")'
+  ];
+
+  await ensureAgreementSelections();
+
+  const finalConfirm = await waitForMndElement(workPage, agreementButtonSelectors, { timeoutMs: 6000, visibleOnly: true });
+  if (!finalConfirm) {
+    await dumpMndState(workPage, emit, 'agreement_confirm_missing');
+    throw new Error('[MND] 서약서 동의 화면에서 확인 버튼을 찾지 못했습니다.');
+  }
+  await clickAndAdopt(finalConfirm, { waitMs: 6000 });
+  log('info', '[MND] 서약서 동의 및 확인을 완료했습니다.');
 
   return { ok: true, page: workPage };
 }
