@@ -823,13 +823,48 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     log('info', `[MND] 공고번호 검색 준비: ${digits}`);
   }
 
+  const resolveWorkPage = async () => {
+    if (!page) return page;
+    const ctx = typeof page.context === 'function' ? page.context() : null;
+    const seen = new Set();
+    const candidates = [];
+    const push = (pg) => {
+      if (!pg || seen.has(pg)) return;
+      seen.add(pg);
+      candidates.push(pg);
+    };
+    push(page);
+    if (ctx) {
+      const pages = ctx.pages?.() || [];
+      for (const pg of pages) push(pg);
+    }
+    for (const pg of candidates) {
+      let url = '';
+      try { url = typeof pg.url === 'function' ? pg.url() : ''; } catch {}
+      if (!url || url === 'about:blank') continue;
+      if (!/d2b\.go\.kr/i.test(url)) continue;
+      try { await pg.bringToFront?.(); } catch {}
+      return pg;
+    }
+    return page;
+  };
+
+  const workPage = await resolveWorkPage() || page;
+  try {
+    const resolvedUrl = workPage && typeof workPage.url === 'function' ? workPage.url() : '';
+    if (resolvedUrl) log('debug', `[MND] 작업 페이지: ${resolvedUrl}`);
+  } catch {}
+  if (workPage && workPage !== page) {
+    try { await installMndPopupGuards(workPage, emit); } catch {}
+  }
+
   const menuSelectors = [
     'a:has-text("\uC785\uCC30\uACF5\uACE0")',
     'a:has-text("\uACF5\uACE0" i)',
     'a[href*="bidAnnounce" i]'
   ];
   const clickBidMenu = async () => {
-    const link = await findInMndContexts(page, menuSelectors, { visibleOnly: true });
+    const link = await findInMndContexts(workPage, menuSelectors, { visibleOnly: true });
     if (!link) {
       log('warn', '[MND] 좌측 "입찰공고" 메뉴를 찾지 못했습니다.');
       return;
@@ -841,13 +876,13 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     } catch (err) {
       log('warn', `[MND] "입찰공고" 메뉴 클릭 실패: ${(err && err.message) || err}`);
     }
-    try { await page.waitForTimeout(800); } catch {}
+    try { await workPage.waitForTimeout(800); } catch {}
   };
 
-  try { await closeMndBidGuideModal(page, emit, { timeoutMs: 5000 }); } catch {}
+  try { await closeMndBidGuideModal(workPage, emit, { timeoutMs: 5000 }); } catch {}
   await clickBidMenu();
 
-  if (!digits) return { ok: true, page };
+  if (!digits) return { ok: true, page: workPage };
 
   const inputSelectors = [
     '#numb_divs',
@@ -861,9 +896,9 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     'input[name*="bid" i]',
     'input[id*="bid" i]'
   ];
-  const input = await waitForMndElement(page, inputSelectors, { timeoutMs: 6000, visibleOnly: true });
+  const input = await waitForMndElement(workPage, inputSelectors, { timeoutMs: 6000, visibleOnly: true });
   if (!input) {
-    await dumpMndState(page, emit, 'bid_notice_input_missing');
+    await dumpMndState(workPage, emit, 'bid_notice_input_missing');
     throw new Error('[MND] 입찰공고 공고번호 입력창을 찾지 못했습니다.');
   }
 
@@ -884,7 +919,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     'button:has-text("\uC870\uD68C")',
     'a:has-text("\uC870\uD68C")'
   ];
-  const searchBtn = await waitForMndElement(page, searchSelectors, { timeoutMs: 5000, visibleOnly: true });
+  const searchBtn = await waitForMndElement(workPage, searchSelectors, { timeoutMs: 5000, visibleOnly: true });
   if (searchBtn) {
     try {
       await searchBtn.scrollIntoViewIfNeeded?.();
@@ -893,7 +928,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   } else {
     try { await input.press('Enter'); } catch {}
   }
-  await waitForMndResults(page);
+  await waitForMndResults(workPage);
 
   const firstRowSelectors = [
     '.table tbody tr:not(.empty) td a',
@@ -901,9 +936,9 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     '.grid-body tr:first-child a',
     'table tbody tr:first-child a'
   ];
-  const first = await waitForMndElement(page, firstRowSelectors, { timeoutMs: 6000, visibleOnly: true });
+  const first = await waitForMndElement(workPage, firstRowSelectors, { timeoutMs: 6000, visibleOnly: true });
   if (!first) {
-    await dumpMndState(page, emit, 'bid_results_missing');
+    await dumpMndState(workPage, emit, 'bid_results_missing');
     throw new Error('[MND] 공고 검색 결과를 찾지 못했습니다.');
   }
   try {
@@ -915,7 +950,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     throw err;
   }
 
-  return { ok: true, page };
+  return { ok: true, page: workPage };
 }
 
 async function ensureMndRowSelection(page) {
