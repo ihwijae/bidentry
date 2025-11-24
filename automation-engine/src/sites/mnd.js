@@ -855,7 +855,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     workPage = nextPage;
     try { await installMndPopupGuards(workPage, emit); } catch {}
   };
-  const clickAndAdopt = async (handle, { waitMs = 8000 } = {}) => {
+  const clickAndAdopt = async (handle, { waitMs = 8000, mouseClick = false, clickCount = 1 } = {}) => {
     if (!handle) return null;
     const popupPromise = typeof workPage.waitForEvent === 'function'
       ? workPage.waitForEvent('popup', { timeout: 4000 }).catch(() => null)
@@ -864,8 +864,23 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
       ? workPage.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: waitMs }).catch(() => null)
       : Promise.resolve(null);
     try { await handle.scrollIntoViewIfNeeded?.(); } catch {}
-    try { await handle.click({ force:true }); }
-    catch { try { await handle.evaluate(el => el && el.click()); } catch {} }
+    let clicked = false;
+    if (mouseClick) {
+      try {
+        const box = await handle.boundingBox();
+        if (box) {
+          const x = box.x + box.width / 2;
+          const y = box.y + box.height / 2;
+          await workPage.mouse.move(x, y);
+          await workPage.mouse.click(x, y, { clickCount });
+          clicked = true;
+        }
+      } catch {}
+    }
+    if (!clicked) {
+      try { await handle.click({ force:true, clickCount }); clicked = true; }
+      catch { try { await handle.evaluate(el => el && el.click()); clicked = true; } catch {} }
+    }
     const popup = await popupPromise;
     if (popup) {
       log('info', '[MND] 새 창이 열려 전환합니다.');
@@ -1079,7 +1094,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   }
   try {
     try { await first.click({ clickCount: 2, delay: 50 }); } catch {}
-    await clickAndAdopt(first, { waitMs: 8000 });
+    await clickAndAdopt(first, { waitMs: 8000, mouseClick: true, clickCount: 2 });
     log('info', '[MND] 공고 검색 결과의 공사명을 클릭했습니다.');
   } catch (err) {
     log('warn', `[MND] 검색 결과 클릭 실패: ${(err && err.message) || err}`);
