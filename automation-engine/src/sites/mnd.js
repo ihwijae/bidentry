@@ -1439,7 +1439,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   return { ok: true, page: workPage };
 }
 
-async function ensureMndRowSelection(page) {
+async function ensureMndRowSelection(page, emit) {
   const rowSelectors = [
     'table tbody tr td:has-text("\uBB3C\uD488\uBA85")',
     'table tbody tr'
@@ -1458,7 +1458,10 @@ async function ensureMndRowSelection(page) {
       row = await waitForMndElement(page, rowSelectors, { timeoutMs: 1500, visibleOnly: true });
     }
   }
-  if (!row) return null;
+  if (!row) {
+    await dumpMndState(page, emit, 'apply_row_missing');
+    return null;
+  }
   try {
     const checkbox = await row.$('input[type="checkbox"], input[type="radio"]');
     if (checkbox) {
@@ -1512,7 +1515,7 @@ async function handleAgreementConfirmation(page, emit) {
 
 async function applyMndAgreementAfterSearch(page, emit) {
   const log = (level, msg) => emit && emit({ type:'log', level, msg });
-  const row = await ensureMndRowSelection(page);
+  const row = await ensureMndRowSelection(page, emit);
   if (!row) {
     throw new Error('[MND] 협정자동신청 대상 목록을 찾지 못했습니다.');
   }
@@ -1536,7 +1539,10 @@ async function applyMndAgreementAfterSearch(page, emit) {
       'select:has(option:has-text("\uBAA8\uB4DD\uAE08\uBA74\uC81C"))'
     ];
     const select = await waitForMndElement(page, waiverSelectors, { timeoutMs: 5000, visibleOnly: true });
-    if (!select) return false;
+    if (!select) {
+      await dumpMndState(page, emit, 'deposit_select_missing');
+      return false;
+    }
     try {
       await select.scrollIntoViewIfNeeded?.().catch(() => {});
       await select.selectOption?.({ label: '보증금면제' }).catch(async () => {
@@ -1615,6 +1621,7 @@ async function applyMndAgreementAfterSearch(page, emit) {
   ];
   const applyBtn = await waitForMndElement(page, applySelectors, { timeoutMs: 5000, visibleOnly: true });
   if (!applyBtn) {
+    await dumpMndState(page, emit, 'apply_button_missing');
     throw new Error('[MND] 협정자동신청 버튼을 찾지 못했습니다.');
   }
   try {
