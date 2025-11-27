@@ -1528,7 +1528,10 @@ async function applyMndAgreementAfterSearch(page, emit) {
         const reason = document.getElementById('gram_excd');
         if (reason) {
           reason.disabled = false;
-          if (!reason.value) reason.value = 'K';
+          if (!reason.value) {
+            const pref = reason.querySelector('option[value="K"]') ? 'K' : (reason.options[1]?.value || '');
+            if (pref) reason.value = pref;
+          }
           reason.dispatchEvent(new Event('change', { bubbles: true }));
         }
       });
@@ -1542,8 +1545,8 @@ async function applyMndAgreementAfterSearch(page, emit) {
     const selected = await selectDepositWaiver();
     if (!selected) return;
     const layerSel = '#comfort_confirm_add';
+    const deadline = Date.now() + 5000;
     let layer = await page.$(layerSel);
-    const deadline = Date.now() + 4000;
     while (layer && Date.now() < deadline) {
       const visible = await layer.evaluate(el => {
         const style = window.getComputedStyle(el);
@@ -1562,7 +1565,7 @@ async function applyMndAgreementAfterSearch(page, emit) {
       await page.evaluate(() => {
         ['#c_box2', '#c_box3'].forEach(sel => {
           const el = document.querySelector(sel);
-          if (el) {
+          if (el && !el.checked) {
             el.checked = true;
             el.dispatchEvent(new Event('change', { bubbles: true }));
           }

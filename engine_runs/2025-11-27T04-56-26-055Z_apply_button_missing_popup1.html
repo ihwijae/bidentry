@@ -1,0 +1,2310 @@
+<!DOCTYPE html><html xmlns="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko"><head>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
+	<!-- W3C조치 2017-12-14
+	<meta http-equiv="Expires" content="-1" />
+	<meta http-equiv="Pragma" content="no-cache" />
+	<meta http-equiv="Cache-Control" content="no-cache" />
+	-->
+	<title>방위사업청 국방전자조달시스템 &gt; 참가신청서 작성</title>
+	<link type="text/css" rel="stylesheet" href="/sbGrid/kr/co/softbowl/css/Sbgrid_default.css">
+	<link rel="shortcut icon" href="/images/common/favicon.ico"> <!-- 170110 : 파비콘 추가 -->
+	<link type="text/css" rel="stylesheet" href="/css/common.css">
+	<link type="text/css" rel="stylesheet" href="/css/jquery-ui.css">
+	
+	<script type="text/javascript" src="/js/lib/jquery-1.10.1.js"></script>
+	<script type="text/javascript" src="/js/lib/basic-ui.js"></script>
+	<script type="text/javascript" src="/js/lib/jquery-ui.js"></script>
+	<script type="text/javascript" src="/js/lib/jquery.form.js"></script>
+	
+	<!-- SB GRID 관련 -->
+	<script type="text/javascript" src="/sbGrid/kr/co/softbowl/js/Library/json2.js"></script>
+	<script type="text/javascript" src="/sbGrid/kr/co/softbowl/SBGrid.js"></script>
+	
+	<!-- common function -->
+	<script type="text/javascript" src="/js/common/gitis_common.js"></script>
+	<script type="text/javascript" src="/js/EgovMultiFile.js"></script>
+	
+	<script type="text/javascript" src="/js/pdb/commonPdb.js?v=1764219370228"></script>
+	
+	<script type="text/javascript">
+		$(function(){
+			
+			$('#_logout').on('click', function(){
+				if(confirm('로그아웃 하시겠습니까?')){
+					GITIS.util.logout();
+				}
+			});
+			
+			
+		});
+	</script>
+<style type="text/css">  .JColResizer{table-layout:fixed;} .JColResizer td, .JColResizer th{overflow:hidden;padding-left:0!important; padding-right:0!important;}  .JCLRgrips{ height:0px; position:relative;} .JCLRgrip{margin-left:-5px; position:absolute; z-index:5; } .JCLRgrip .JColResizer{position:absolute;background-color:red;filter:alpha(opacity=1);opacity:0;width:10px;height:100%;cursor: e-resize;top:0px} .JCLRLastGrip{position:absolute; width:1px; } .JCLRgripDrag{ border-left:1px dotted black;	} .JCLRFlex{width:auto!important;}</style><style id="SBHE_SBGrid_Style" type="text/css"></style></head>
+<body id="body" title="" style="visibility: visible;"><div id="nppfs-loading-modal" style="display: none; position: fixed; z-index: 10000; top: 0px; left: 0px; height: 0px; width: 0px; background: url(&quot;data:image/gif;base64,R0lGODlhIAAgAPMAAP///wAAAMbGxoSEhLa2tpqamjY2NlZWVtjY2OTk5Ly8vB4eHgQEBAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAIAAgAAAE5xDISWlhperN52JLhSSdRgwVo1ICQZRUsiwHpTJT4iowNS8vyW2icCF6k8HMMBkCEDskxTBDAZwuAkkqIfxIQyhBQBFvAQSDITM5VDW6XNE4KagNh6Bgwe60smQUB3d4Rz1ZBApnFASDd0hihh12BkE9kjAJVlycXIg7CQIFA6SlnJ87paqbSKiKoqusnbMdmDC2tXQlkUhziYtyWTxIfy6BE8WJt5YJvpJivxNaGmLHT0VnOgSYf0dZXS7APdpB309RnHOG5gDqXGLDaC457D1zZ/V/nmOM82XiHRLYKhKP1oZmADdEAAAh+QQJCgAAACwAAAAAIAAgAAAE6hDISWlZpOrNp1lGNRSdRpDUolIGw5RUYhhHukqFu8DsrEyqnWThGvAmhVlteBvojpTDDBUEIFwMFBRAmBkSgOrBFZogCASwBDEY/CZSg7GSE0gSCjQBMVG023xWBhklAnoEdhQEfyNqMIcKjhRsjEdnezB+A4k8gTwJhFuiW4dokXiloUepBAp5qaKpp6+Ho7aWW54wl7obvEe0kRuoplCGepwSx2jJvqHEmGt6whJpGpfJCHmOoNHKaHx61WiSR92E4lbFoq+B6QDtuetcaBPnW6+O7wDHpIiK9SaVK5GgV543tzjgGcghAgAh+QQJCgAAACwAAAAAIAAgAAAE7hDISSkxpOrN5zFHNWRdhSiVoVLHspRUMoyUakyEe8PTPCATW9A14E0UvuAKMNAZKYUZCiBMuBakSQKG8G2FzUWox2AUtAQFcBKlVQoLgQReZhQlCIJesQXI5B0CBnUMOxMCenoCfTCEWBsJColTMANldx15BGs8B5wlCZ9Po6OJkwmRpnqkqnuSrayqfKmqpLajoiW5HJq7FL1Gr2mMMcKUMIiJgIemy7xZtJsTmsM4xHiKv5KMCXqfyUCJEonXPN2rAOIAmsfB3uPoAK++G+w48edZPK+M6hLJpQg484enXIdQFSS1u6UhksENEQAAIfkECQoAAAAsAAAAACAAIAAABOcQyEmpGKLqzWcZRVUQnZYg1aBSh2GUVEIQ2aQOE+G+cD4ntpWkZQj1JIiZIogDFFyHI0UxQwFugMSOFIPJftfVAEoZLBbcLEFhlQiqGp1Vd140AUklUN3eCA51C1EWMzMCezCBBmkxVIVHBWd3HHl9JQOIJSdSnJ0TDKChCwUJjoWMPaGqDKannasMo6WnM562R5YluZRwur0wpgqZE7NKUm+FNRPIhjBJxKZteWuIBMN4zRMIVIhffcgojwCF117i4nlLnY5ztRLsnOk+aV+oJY7V7m76PdkS4trKcdg0Zc0tTcKkRAAAIfkECQoAAAAsAAAAACAAIAAABO4QyEkpKqjqzScpRaVkXZWQEximw1BSCUEIlDohrft6cpKCk5xid5MNJTaAIkekKGQkWyKHkvhKsR7ARmitkAYDYRIbUQRQjWBwJRzChi9CRlBcY1UN4g0/VNB0AlcvcAYHRyZPdEQFYV8ccwR5HWxEJ02YmRMLnJ1xCYp0Y5idpQuhopmmC2KgojKasUQDk5BNAwwMOh2RtRq5uQuPZKGIJQIGwAwGf6I0JXMpC8C7kXWDBINFMxS4DKMAWVWAGYsAdNqW5uaRxkSKJOZKaU3tPOBZ4DuK2LATgJhkPJMgTwKCdFjyPHEnKxFCDhEAACH5BAkKAAAALAAAAAAgACAAAATzEMhJaVKp6s2nIkolIJ2WkBShpkVRWqqQrhLSEu9MZJKK9y1ZrqYK9WiClmvoUaF8gIQSNeF1Er4MNFn4SRSDARWroAIETg1iVwuHjYB1kYc1mwruwXKC9gmsJXliGxc+XiUCby9ydh1sOSdMkpMTBpaXBzsfhoc5l58Gm5yToAaZhaOUqjkDgCWNHAULCwOLaTmzswadEqggQwgHuQsHIoZCHQMMQgQGubVEcxOPFAcMDAYUA85eWARmfSRQCdcMe0zeP1AAygwLlJtPNAAL19DARdPzBOWSm1brJBi45soRAWQAAkrQIykShQ9wVhHCwCQCACH5BAkKAAAALAAAAAAgACAAAATrEMhJaVKp6s2nIkqFZF2VIBWhUsJaTokqUCoBq+E71SRQeyqUToLA7VxF0JDyIQh/MVVPMt1ECZlfcjZJ9mIKoaTl1MRIl5o4CUKXOwmyrCInCKqcWtvadL2SYhyASyNDJ0uIiRMDjI0Fd30/iI2UA5GSS5UDj2l6NoqgOgN4gksEBgYFf0FDqKgHnyZ9OX8HrgYHdHpcHQULXAS2qKpENRg7eAMLC7kTBaixUYFkKAzWAAnLC7FLVxLWDBLKCwaKTULgEwbLA4hJtOkSBNqITT3xEgfLpBtzE/jiuL04RGEBgwWhShRgQExHBAAh+QQJCgAAACwAAAAAIAAgAAAE7xDISWlSqerNpyJKhWRdlSAVoVLCWk6JKlAqAavhO9UkUHsqlE6CwO1cRdCQ8iEIfzFVTzLdRAmZX3I2SfZiCqGk5dTESJeaOAlClzsJsqwiJwiqnFrb2nS9kmIcgEsjQydLiIlHehhpejaIjzh9eomSjZR+ipslWIRLAgMDOR2DOqKogTB9pCUJBagDBXR6XB0EBkIIsaRsGGMMAxoDBgYHTKJiUYEGDAzHC9EACcUGkIgFzgwZ0QsSBcXHiQvOwgDdEwfFs0sDzt4S6BK4xYjkDOzn0unFeBzOBijIm1Dgmg5YFQwsCMjp1oJ8LyIAACH5BAkKAAAALAAAAAAgACAAAATwEMhJaVKp6s2nIkqFZF2VIBWhUsJaTokqUCoBq+E71SRQeyqUToLA7VxF0JDyIQh/MVVPMt1ECZlfcjZJ9mIKoaTl1MRIl5o4CUKXOwmyrCInCKqcWtvadL2SYhyASyNDJ0uIiUd6GGl6NoiPOH16iZKNlH6KmyWFOggHhEEvAwwMA0N9GBsEC6amhnVcEwavDAazGwIDaH1ipaYLBUTCGgQDA8NdHz0FpqgTBwsLqAbWAAnIA4FWKdMLGdYGEgraigbT0OITBcg5QwPT4xLrROZL6AuQAPUS7bxLpoWidY0JtxLHKhwwMJBTHgPKdEQAACH5BAkKAAAALAAAAAAgACAAAATrEMhJaVKp6s2nIkqFZF2VIBWhUsJaTokqUCoBq+E71SRQeyqUToLA7VxF0JDyIQh/MVVPMt1ECZlfcjZJ9mIKoaTl1MRIl5o4CUKXOwmyrCInCKqcWtvadL2SYhyASyNDJ0uIiUd6GAULDJCRiXo1CpGXDJOUjY+Yip9DhToJA4RBLwMLCwVDfRgbBAaqqoZ1XBMHswsHtxtFaH1iqaoGNgAIxRpbFAgfPQSqpbgGBqUD1wBXeCYp1AYZ19JJOYgH1KwA4UBvQwXUBxPqVD9L3sbp2BNk2xvvFPJd+MFCN6HAAIKgNggY0KtEBAAh+QQJCgAAACwAAAAAIAAgAAAE6BDISWlSqerNpyJKhWRdlSAVoVLCWk6JKlAqAavhO9UkUHsqlE6CwO1cRdCQ8iEIfzFVTzLdRAmZX3I2SfYIDMaAFdTESJeaEDAIMxYFqrOUaNW4E4ObYcCXaiBVEgULe0NJaxxtYksjh2NLkZISgDgJhHthkpU4mW6blRiYmZOlh4JWkDqILwUGBnE6TYEbCgevr0N1gH4At7gHiRpFaLNrrq8HNgAJA70AWxQIH1+vsYMDAzZQPC9VCNkDWUhGkuE5PxJNwiUK4UfLzOlD4WvzAHaoG9nxPi5d+jYUqfAhhykOFwJWiAAAIfkECQoAAAAsAAAAACAAIAAABPAQyElpUqnqzaciSoVkXVUMFaFSwlpOCcMYlErAavhOMnNLNo8KsZsMZItJEIDIFSkLGQoQTNhIsFehRww2CQLKF0tYGKYSg+ygsZIuNqJksKgbfgIGepNo2cIUB3V1B3IvNiBYNQaDSTtfhhx0CwVPI0UJe0+bm4g5VgcGoqOcnjmjqDSdnhgEoamcsZuXO1aWQy8KAwOAuTYYGwi7w5h+Kr0SJ8MFihpNbx+4Erq7BYBuzsdiH1jCAzoSfl0rVirNbRXlBBlLX+BP0XJLAPGzTkAuAOqb0WT5AH7OcdCm5B8TgRwSRKIHQtaLCwg1RAAAOwAAAAAAAAAAAA==&quot;) 50% 50% no-repeat rgb(255, 255, 255); opacity: 0.7;"></div>
+<div id="skipnav" title="바로가기 메뉴">
+	<ul>
+		<li><a href="#gnb">주메뉴 영역 바로가기</a></li>
+		<li><a href="#lnb">서브메뉴 영역 바로가기 </a></li>
+		<li><a href="#content">본문영역 바로가기</a></li>
+	</ul>
+</div>
+<div id="header_wrap">
+	
+
+
+
+
+
+
+
+
+
+
+<script>
+	document.cookie = "Name=Value; httpOnly";
+	
+	function search() {
+		
+		var param = {
+				"category":$('#_category').val(),			// 부서코드
+				"kwd":$('#_kwd').val()
+			};
+		f_submit(param, "_searchForm", "/search.do");
+		//document.searchForm.submit();
+	}
+	
+	
+	var IEIndex  = navigator.userAgent.indexOf("MSIE"); //MSIE를 찾고 인덱스를 리턴
+  	var IE8Over  = navigator.userAgent.indexOf("Trident"); //MS IE 8 이상 버전 체크
+  	var trident  = navigator.userAgent.match(/Trident\/(\d.\d)/i); //Trident  버전 확인
+  	var strIEver = "";
+	//console.log( IEIndex, IE8Over, trident )
+  	if(IEIndex > 0 || IE8Over > 0){
+  		if(trident != null){
+  			switch(trident[1]){
+  			case "4.0":
+  				strVer = "8.0";
+  				Trident8(strVer)
+  				break;
+  			default:
+  				break;
+  			}
+  		}
+  	}
+
+  	function Trident8(strVer){
+  		strIEver=strVer;
+		//alert(navigator.userAgent);    //alert 창으로 버전을 확인해 본다
+		if(navigator.userAgent.match(/MSIE 7.*Trident/) != null || navigator.userAgent.indexOf("Mozilla/5.0 (compatible") >= 0 || navigator.userAgent.indexOf("Mozilla/4.0 (compatible; MSIE 7.0") >= 0){
+			return;
+		} else {
+  			alert("웹 브라우져 버전을 최신버전으로 업그레이드 해주시기 바랍니다.");
+  		}
+  	}
+
+	
+	/// (호환성보기 설정확인 추가 end)
+
+
+	
+</script>
+ 
+<script type="text/javascript" src="/pluginfree/js/nppfs-1.13.0.js" charset="utf-8"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+
+	npPfsStartup(null, true, false, false, false, "npkencrypt", "on");
+
+	//통합검색 keypress 이벤트 추가
+	$("#_kwd").on("keypress",function(e){
+		if(e.keyCode === 13){
+			search();
+		}
+	});
+	
+});
+</script>
+
+<div id="header">
+	<div class="header_top">
+	<h1><a href="/"><img src="/images/common/img_logo.png" alt="국방전자조달시스템 투명한 전자입찰"></a></h1>
+	<h2>상단영역</h2>
+	
+	<!-- <a href="/fbis/" class="head_global" target="_blank">DAPA-FBIS</a> -->
+	
+	<div id="total_sch">
+		<select name="category" id="_category" title="검색분야 선택">
+			<option value="TOTAL">통합검색</option>
+			<option value="ANNOUNCE">입찰공고</option>
+			<option value="ANNOUNCERESULT">개찰결과</option>
+			<option value="WINBID">낙찰자 안내</option>
+			<option value="CONTINFO">계약정보</option>
+			<option value="PROCUREPLAN">조달계획</option>
+			<option value="PRESTD">사전규격(군부대)</option>
+			<option value="SEOGO">전자서고</option>
+		</select>
+		<strong><input type="text" name="kwd" id="_kwd" title="검색어 입력" style=""></strong>
+		<button type="button" title="검색" onclick="javascript:search();">검색</button>
+	</div>
+	
+	<div class="head_util">
+	
+	
+		<ul>
+			<li class="util_mymenu"><a href="#none">나의메뉴</a></li>
+			<li class="util_user"><a href="#none">이휘재
+			
+				
+					
+						
+						
+							
+								(입찰대리인)
+								
+							
+						
+					
+					
+				
+				
+			
+			</a></li>
+		</ul> 
+		<div class="user_more">
+			<ul>
+				
+				<li><a href="/mp/uim/userInfoAccess.do?key=361&amp;returnUrl=/mp/uim/userInfoModi.do">나의정보수정</a></li>
+				
+				
+				<li><a href="#" id="_logout">로그아웃</a></li>
+			</ul>
+		</div>
+		<!-- 나의메뉴 -->
+		<div class="user_mymenu">
+			<ul class="mymenudep1">
+				
+				<li class="myprogram mylast">
+					<h4><span style="color:#ffffff;">메뉴가 없습니다. <a href="/mp/user/myMenuMgt.do?key=482" style="color:#ffffff;">[등록]</a></span></h4>
+				</li>
+				
+				
+			</ul>
+		</div>
+		<!-- //나의메뉴 -->
+	
+			
+	</div>
+	</div>
+	<!-- GNB -->
+	
+	
+		
+		
+		
+		
+		
+		<!-- 조달업체-일반 -->
+			
+
+
+
+<!-- GNB -->
+<div id="gnb">
+    <ul>
+        <!--  li 상단메뉴 -->
+                    <li>
+                <a href="#none">물품</a>
+                <div class="gnbSm">
+                    <ul>
+                                    <li><a href="/pdb/plan/goodsProcurePlanList.do?key=10" target="_self">조달계획</a></li>
+                                    <li><a href="/pdb/bid/goodsBidAnnounceList.do?key=13" target="_self">입찰</a></li>
+                                    <li><a href="/pdb/nego/negoList.do?key=143&amp;list_divs=pdb" target="_self">비공개수의협상</a></li>
+                                    <li><a href="/pdb/bid/bidGrntRejectList.do?key=24" target="_self">보증서 반려</a></li>
+                                    <li><a href="/edi/cont/contList.do?key=26&amp;menuOption=1" target="_self">계약</a></li>
+                                    <li><a href="/edi/bill/billList.do?key=27&amp;menuOption=1" target="_self">대금청구</a></li>
+                                    <li><a href="/edi/subcontract/subContractList.do?key=560" target="_self">하도급관리</a></li>
+                                    <li><a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=28&amp;menuOption=1&amp;listOption=TL" target="_self">세금계산서</a></li>
+                                    <li><a href="/edi/insprecord/inspReqContList.do?key=29" target="_self">검사 및 납품조서</a></li>
+                                    <li><a href="/edi/goods/goodsDlvryNotiMgtList.do?key=86&amp;menuOption=1" target="_self">물품납품/물량배정</a></li>
+                                    <li><a href="/sym/item/itemTreeList.do?key=922" target="_self">사업구조별품목</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li>
+                <a href="#none">용역</a>
+                <div class="gnbSm">
+                    <ul>
+                                    <li><a href="/psb/plan/serviceProcurePlanList.do?key=31" target="_self">조달계획</a></li>
+                                    <li><a href="/psb/bid/serviceBidAnnounceList.do?key=32" target="_self">입찰</a></li>
+                                    <li><a href="/psb/nego/negoList.do?key=614&amp;list_divs=psb" target="_self">비공개수의협상</a></li>
+                                    <li><a href="/psb/bid/bidGrntRejectList.do?key=34" target="_self">보증서 반려</a></li>
+                                    <li><a href="/edi/cont/psbContList.do?key=36&amp;menuOption=2" target="_self">계약</a></li>
+                                    <li><a href="/edi/bill/billList.do?key=37&amp;menuOption=2" target="_self">대금청구</a></li>
+                                    <li><a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=38&amp;menuOption=2&amp;listOption=TL" target="_self">세금계산서</a></li>
+                                    <li><a href="/edi/insprecord/psbInspReqContList.do?key=39" target="_self">검사 및 납품조서</a></li>
+                                    <li><a href="/edi/cmpdcmpninsp/psbCmpdCmpnInspList.do?key=430" target="_self">기성 및 준공검사</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li>
+                <a href="#none" class="current">공사</a>
+                <div class="gnbSm">
+                    <ul>
+                                    <li><a href="/peb/plan/planList.do?key=22" target="_self">공사계획</a></li>
+                                    <li><a href="/peb/bid/announceList.do?key=41" target="_self">입찰</a></li>
+                                    <li><a href="/peb/nego/negoList.do?key=447&amp;list_divs=peb" target="_self">비공개수의협상</a></li>
+                                    <li><a href="/peb/bid/bidGrntRejectList.do?key=43" target="_self">보증서 반려</a></li>
+                                    <li><a href="/edi/cont/pebContList.do?key=45&amp;menuOption=3" target="_self">계약</a></li>
+                                    <li><a href="/edi/cmpdcmpninsp/cmpdCmpnInspList.do?key=46" target="_self">기성 및 준공검사</a></li>
+                                    <li><a href="/edi/equconstbill/equConstBillList.do?key=47&amp;menuOption=3" target="_self">대금청구</a></li>
+                                    <li><a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=301&amp;menuOption=3&amp;listOption=TL" target="_self">세금계산서</a></li>
+                    </ul>
+                </div>
+            </li>
+            <li>
+                <a href="#none">국외</a>
+                <div class="gnbSm">
+                    <ul>
+                                    <li><a href="/pcb/plan/yearProcurePlanList.do?key=48" target="_self">조달계획</a></li>
+                                    <li><a href="/pcb/bid/exchangeRateList.do?key=49" target="_self">환율조회</a></li>
+                                    <li><a href="/pcb/bid/todayBidAnnounceList.do?key=50" target="_self">오늘의 입찰공고</a></li>
+                                    <li><a href="/pcb/bid/bidAnnounceList.do?key=51" target="_self">경쟁입찰</a></li>
+                                    <li><a href="/pcb/revbid/revBidAnnounceList.do?key=52" target="_self">역경매</a></li>
+                                    <li><a href="/pcb/nego/negoItemInfoRegi.do?key=53" target="_self">협상관리</a></li>
+                                    <li><a href="/pcb/cont/contInfoList.do?key=54" target="_self">계약정보</a></li>
+                                    <li><a href="/pcb/cont/electContProgList.do?key=55" target="_self">전자계약</a></li>
+                                    <li><a href="/pcb/cont/reservedTaxInfoList.do?key=56" target="_self">인지세관리</a></li>
+                                    <li><a href="/pcb/offset/actualExportItemRegi.do?key=57" target="_self">절충교역</a></li>
+                                    <li><a href="/edi/mydoc/commerceContList.do?key=58" target="_self">상업</a></li>
+                                    <li><a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=855&amp;menuOption=5&amp;listOption=TL" target="_self">세금계산서</a></li>
+                    </ul>
+                </div>
+            </li>
+        <li class="gnbcu1"><a href="/techBidAnnounceList.do?key=901">신기술 입찰공고</a></li>	
+        <li class="gnbcu"><a href="/board/notice/getNoticeList.do?key=91&amp;bbs_id=NEW01">고객센터</a></li>
+        <li class="gnbmy"><a href="/edi/mydoc/receiveDocBoxList.do?key=102">마이페이지</a></li>
+        <li class="gnball"><a href="#layer_allmenu">전체메뉴</a></li>
+    </ul>
+</div>  
+<!-- //GNB -->
+
+<!-- 전체메뉴 -->
+<div id="layer_allmenu" class="lp_view" tabindex="0">
+    <div class="allmenu_wrap">
+	    <ul class="clfix">
+        
+        
+            <li class="allmenuGrp">
+                <h4>물품</h4>
+                <ul>
+                        <li>
+                            <strong>조달계획</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pdb/plan/goodsProcureAdcanceList.do?key=928">조달품목사전의향서(방사청)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/plan/goodsProcurePlanList.do?key=127">조달계획</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/plan/goodsPreStdList.do?key=128">사전규격(군부대)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>입찰</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pdb/bid/goodsBidAnnounceList.do?key=129">입찰공고</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/bid/goodsBidApplyList.do?key=130&amp;pageDivs=G">참가신청서 조회</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/bid/goodsBidSubmitList.do?key=132">입찰서제출 및 조회(경쟁입찰)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/mp/progress/openNegoList.do?key=867&amp;pageDivs=Pdb">견적서 조회(공개수의)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/bid/screeningObjList.do?key=275">이행/적격심사대상</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/bid/screeningResultList.do?key=276">이행/적격심사결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/bid/techEvalResultFirmList.do?key=131">기술평가결과</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/bid/goodsBidResultList.do?key=528">입찰결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/bid/goodsContNegoMnufList.do?key=725">협상에의한계약 협상대상</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/bid/goodsTroubleAnnounceList.do?key=138">자동연기공고</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/bid/bidBaseEvalMnufList.do?key=937">복수예비가격 대상목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>비공개수의협상</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pdb/nego/negoList.do?key=144&amp;list_divs=pdb">비공개수의협상</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/nego/negoResultList.do?key=145&amp;list_divs=pdb">비공개수의협상결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>보증서 반려</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pdb/bid/bidGrntRejectList.do?key=133">입찰보증수수료 반려신청</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/bid/contGrntRejectList.do?key=134">계약/선금/하자보증서반려</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>계약</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/cont/contList.do?key=74&amp;menuOption=1">계약</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/adtioncontdepo/adtionContDepoList.do?key=146&amp;menuOption=1">추가계약보증금 관리</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/govSuppliedWarranty/govSuppliedWarrantyList.do?key=940&amp;menuOption=1">관급보증금 관리</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/taxpymt/taxPymtList.do?key=160&amp;menuOption=1">인지세관리</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/contract/goodsContList.do?key=530&amp;pageDivs=G">계약정보</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/contract/goodsContDelayList.do?key=845">계약번호별 지체상금 조회(방위사업청)</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>대금청구</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/bill/billList.do?key=84&amp;menuOption=1">선금/착·중도금/기성대가 신청</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/bill/billStatusList.do?key=487&amp;menuOption=1">대금청구 진행현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/contract/goodsMnufPaymentList.do?key=835">대금지불정보</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/contract/goodsPaymentCollectList.do?key=944">대금지불정보(반납)</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>하도급관리</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/subcontract/subContractList.do?key=561">하도급계약관리</a>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/subcontract/subContractPayPlan.do?key=562">대금지급계획</a>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/subcontract/subContPayChkSub.do?key=563">대금지급확인(하도급)</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>세금계산서</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=158&amp;menuOption=1&amp;listOption=TL">세금계산서목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/electtaxbill/getElectTaxBillStatusList.do?key=243&amp;menuOption=1&amp;listOption=SL">세금계산서 진행현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>검사 및 납품조서</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/insprecord/inspReqContList.do?key=77">검사 및 납품조서</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/insprecord/inspRecordStatusList.do?key=78">검사 및 납품조서 현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/gfp/gfpDeliveryList.do?key=79">관급자산관리</a>
+                                        <ul>
+                                            <li><a href="/edi/gfp/gfpDeliveryList.do?key=80">납품확인 요청</a></li>
+                                            <li><a href="/edi/gfp/gfpGoodsRecvList.do?key=108">물품수령확인</a></li>
+                                            <li><a href="/edi/gfp/gfpCashMgtLedList.do?key=123">관급자재 출납 관리대장</a></li>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>물품납품/물량배정</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/goods/goodsDlvryNotiMgtList.do?key=87&amp;menuOption=1">물품납품/물량배정</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/goods/goodsDlvryReqNotiList.do?key=88&amp;menuOption=1">납품요구서 조회</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>사업구조별품목</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/sym/item/itemTreeList.do?key=923">사업구조별품목</a>
+                                    </li>
+                                    <li>
+                                        <a href="/sym/item/localizationList.do?key=924">국산화개발품목</a>
+                                    </li>
+                            </ul>
+                        </li>
+                </ul>
+            </li>
+        
+	    
+        
+        
+            <li class="allmenuGrp">
+                <h4>용역</h4>
+                <ul>
+                        <li>
+                            <strong>조달계획</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/psb/plan/serviceProcurePlanList.do?key=135">조달계획</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/plan/servicePreStdList.do?key=136">사전규격(군부대)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>입찰</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/psb/bid/serviceBidAnnounceList.do?key=137">입찰공고</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/bid/servicePQApplyList.do?key=870">사전심사(PQ)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/bid/serviceBidApplyList.do?key=603&amp;pageDivs=S">참가신청서조회</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/bid/serviceBidSubmitList.do?key=605">입찰서제출 및 조회(경쟁입찰)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/mp/progress/openNegoList.do?key=868&amp;pageDivs=Psb">견적서 조회(공개수의)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/bid/screeningObjServiceList.do?key=427">적격심사대상</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/bid/screeningserviceResultList.do?key=602">적격심사결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/bid/techEvalResultFirmList.do?key=629&amp;pageDivs=S">기술평가결과</a>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/bid/serviceBidResultList.do?key=608">입찰결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/bid/serviceContNegoMnufList.do?key=742">협상에의한계약 협상대상</a>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/bid/serviceTroubleAnnounceList.do?key=139">자동연기공고</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>비공개수의협상</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/psb/nego/negoList.do?key=615&amp;list_divs=psb">비공개수의협상</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/nego/negoResultList.do?key=616&amp;list_divs=psb">비공개수의협상결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>보증서 반려</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/psb/bid/bidGrntRejectList.do?key=814">입찰보증수수료 반려신청</a>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/bid/contGrntRejectList.do?key=815">계약/선금/하자보증서반려</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>계약</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/cont/psbContList.do?key=356&amp;menuOption=2">계약</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/defect/defectWarrantyList.do?key=952">하자보증금 관리</a>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/taxpymt/taxPymtList.do?key=483&amp;menuOption=2">인지세관리</a>
+                                    </li>
+                                    <li>
+                                        <a href="/psb/contract/serviceContList.do?key=591">계약정보</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>대금청구</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/bill/billList.do?key=429&amp;menuOption=2">대금/선금/착·중도금 신청</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/bill/billStatusList.do?key=496&amp;menuOption=2">대금청구 진행현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>세금계산서</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=300&amp;menuOption=2&amp;listOption=TL">세금계산서목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/electtaxbill/getElectTaxBillStatusList.do?key=306&amp;menuOption=2&amp;listOption=SL">세금계산서 진행현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>검사 및 납품조서</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/insprecord/psbInspReqContList.do?key=410">검사 및 납품조서</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/insprecord/psbInspRecordStatusList.do?key=411">검사 및 납품조서 현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>기성 및 준공검사</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/cmpdcmpninsp/psbCmpdCmpnInspList.do?key=434&amp;contDivs=2">기성 및 준공검사 목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/cmpdcmpninsp/psbHajaList.do?key=932">하자목록조회</a>
+                                    </li>
+                            </ul>
+                        </li>
+                </ul>
+            </li>
+        
+	    
+        
+        
+            <li class="allmenuGrp">
+                <h4>공사</h4>
+                <ul>
+                        <li>
+                            <strong>공사계획</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/peb/plan/planList.do?key=204">공사계획</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/plan/preStdList.do?key=700">사전규격(군부대)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>입찰</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/peb/bid/announceList.do?key=541">입찰공고</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/bid/PQApplyList.do?key=271">사전심사(PQ)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/bid/bidApplyList.do?key=544">참가신청서 조회</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/bid/bidSubmitList.do?key=588">입찰서제출 및 조회(경쟁입찰)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/mp/progress/openNegoList.do?key=869&amp;pageDivs=Peb">견적서 조회(공개수의)</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/bid/screeningList.do?key=273">적격심사대상</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/bid/screeningResultList.do?key=274">적격심사결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/bid/techEvalResultFirmList.do?key=631&amp;pageDivs=E">기술평가결과</a>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/bid/bidResultList.do?key=545">입찰결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/bid/contNegoMnufList.do?key=728">협상에의한계약 협상대상</a>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/bid/autoDelayAnnounceList.do?key=543">자동연기공고</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>비공개수의협상</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/peb/nego/negoList.do?key=448&amp;list_divs=peb">비공개수의협상</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/nego/negoResultList.do?key=621&amp;list_divs=peb">비공개수의협상결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>보증서 반려</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/peb/bid/bidGrntRejectList.do?key=364">입찰보증수수료 반려신청</a>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/bid/contGrntRejectList.do?key=365">계약/선금/하자보증서반려</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>계약</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/cont/pebContList.do?key=484&amp;menuOption=3">계약</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/taxpymt/taxPymtList.do?key=485&amp;menuOption=3">인지세관리</a>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/contract/contList.do?key=586">계약정보</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>기성 및 준공검사</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/cmpdcmpninsp/cmpdCmpnInspList.do?key=686">기성 및 준공검사 목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/cmpdcmpninsp/hajaList.do?key=931">하자목록조회</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>대금청구</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/equconstbill/equConstBillList.do?key=76&amp;menuOption=3">대금청구 목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/peb/contract/mnufPaymentList.do?key=837">대금지불정보</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pdb/contract/goodsPaymentCollectList.do?key=945">대금지불정보(반납)</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>세금계산서</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=302&amp;menuOption=3&amp;listOption=TL">세금계산서목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/electtaxbill/getElectTaxBillStatusList.do?key=307&amp;menuOption=3&amp;listOption=SL">세금계산서 진행현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                </ul>
+            </li>
+        
+	    
+        
+        
+            <li class="allmenuGrp" style="border-right: 0px;">
+                <h4>국외</h4>
+                <ul>
+                        <li>
+                            <strong>조달계획</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pcb/plan/yearProcurePlanList.do?key=259">연간조달계획</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/plan/procureDecisionList.do?key=113">조달판단내역</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                                <strong><a href="/pcb/bid/exchangeRateList.do?key=49">환율조회</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/pcb/bid/todayBidAnnounceList.do?key=50">오늘의 입찰공고</a></strong>
+                        </li>
+                        <li>
+                            <strong>경쟁입찰</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pcb/bid/bidAnnounceList.do?key=114">입찰공고</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/bid/cabinetList.do?key=115">보관함</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/bid/bidApplyReqList.do?key=116">입찰참가신청목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/bid/bidEnrollEvalList.do?key=117">입찰등록심사</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/bid/specEvalResultList.do?key=170">사양서평가결과</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/bid/bidSubmitList.do?key=119">입찰서제출</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/bid/bidResultList.do?key=171">입찰결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/bid/bidBondRejectList.do?key=172">입찰보증서반려</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/bid/bidSpecReqList.do?key=898">규격서제출목록</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>역경매</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pcb/revbid/revBidAnnounceList.do?key=175">입찰공고</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/revbid/revCabinetList.do?key=177">보관함</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/revbid/revBidApplyReqList.do?key=178">입찰참가신청목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/revbid/revBidEnrollEvalList.do?key=198">입찰등록심사</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/revbid/revSpecEvalList.do?key=199">사양서평가결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/revbid/revSpecEvalResultList.do?key=205">사양서평가결과</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/revbid/revBidSubmitList.do?key=617">입찰서제출</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/revbid/revBidExecListRegi.do?key=208">입찰실시목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/revbid/revBidResultList.do?key=421">입찰결과</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>협상관리</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pcb/nego/negoList.do?key=179">협상목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>계약정보</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pcb/cont/contInfoList.do?key=182">계약목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/cont/payCommerceList.do?key=183">대금지불정보</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/cont/transportPayList.do?key=184">수송비지불현황</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>전자계약</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pcb/cont/electContProgList.do?key=185">계약진행목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/cont/electContConfirmList.do?key=200">계약확정목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                                <strong><a href="/pcb/cont/reservedTaxInfoList.do?key=56">인지세관리</a></strong>
+                        </li>
+                        <li>
+                            <strong>절충교역</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pcb/offset/actualExportItemRegi.do?key=181">수출실적품목등록</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pcb/offset/actualExportItemInfo.do?key=355">수출실적품목관리</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>상업</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/mydoc/commerceContList.do?key=81">상업계약현황</a>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/mydoc/lumpsumContList.do?key=933">확정계약현황</a>
+                                    </li>
+                                    <li>
+                                        <a href="#?key=82">한도액계약(BOA)</a>
+                                        <ul>
+                                            <li><a href="/edi/boa/estimateReqList.do?key=83">견적의뢰서조회</a></li>
+                                            <li><a href="/edi/boa/estimateNotiMgt.do?key=109">견적통보서관리</a></li>
+                                            <li><a href="/edi/boa/orderContList.do?key=153">발주의뢰서조회</a></li>
+                                            <li><a href="/edi/boa/orderNotiMgt.do?key=165">발주통보서관리</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/transportinsurance/transportInsuranceList.do?key=161">운송보험부보</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="#?key=162">운송비청구/입고확인의뢰</a>
+                                        <ul>
+                                            <li><a href="/edi/transfarechargestockedreq/stockedreqList.do?key=163">입고확인/의뢰</a></li>
+                                            <li><a href="/edi/transfarechargestockedreq/transFareChargeList.do?key=164">운송비청구</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/shipmentlist/shipmentList.do?key=168">선적내역조회/작성</a>
+                                    </li>
+                                    <li>
+                                        <a href="#?key=892">하자관리</a>
+                                        <ul>
+                                            <li><a href="/edi/defect/defectReqList.do?key=893">하자의뢰서조회</a></li>
+                                            <li><a href="/edi/defect/defectNotiMgt.do?key=894">하자통보서관리</a></li>
+                                            <li><a href="/edi/commercecont/defectReqList.do?key=950">하자의뢰서 조회[new]</a></li>
+                                            <li><a href="/edi/commercecont/defectNotiMgt.do?key=951">하자통보서 관리[new]</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/warreserveitem/wriList.do?key=895">전비품확인서요청</a>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/compensation/compensationList.do?key=896">지체상금부과현황</a>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/payment/paymentList.do?key=897">대금지급현황</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>세금계산서</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=856&amp;menuOption=5&amp;listOption=TL">세금계산서목록</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/edi/electtaxbill/getElectTaxBillStatusList.do?key=857&amp;menuOption=5&amp;listOption=SL">세금계산서 진행현황</a>
+                                        <ul>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                </ul>
+            </li>
+        </ul>
+	    
+        <ul class="clfix two">
+        
+            <li class="allmenuGrp2">
+                <h4>마이페이지</h4>
+                <ul>
+                        <li>
+                                <strong><a href="/edi/mydoc/receiveDocBoxList.do?key=102">나의문서함</a></strong>
+                        </li>
+                        <li>
+                            <strong>나의진행업무</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/mp/progress/bidApplyPvbProgList.do?key=305">입찰참가신청</a>
+                                    </li>
+                                    <li>
+                                        <a href="/mp/progress/screeningPvbProgList.do?key=399">적격심사</a>
+                                    </li>
+                                    <li>
+                                        <a href="/mp/progress/techEvalPvbProgList.do?key=400">기술평가</a>
+                                    </li>
+                                    <li>
+                                        <a href="/mp/progress/specEvalPvbProgList.do?key=402">사양서평가</a>
+                                    </li>
+                                    <li>
+                                        <a href="/mp/progress/contPvbProgList.do?key=406">계약</a>
+                                    </li>
+                                    <li>
+                                        <a href="#?key=428">보증서반려</a>
+                                        <ul>
+                                            <li><a href="/pdb/bid/bidGrntRejectList.do?key=731">입찰보증서반려</a></li>
+                                            <li><a href="/pdb/bid/contGrntRejectList.do?key=732">계약/선금/하자보증서반려</a></li>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>나의업무이력</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/mp/record/bidApplyPvbTaskRecordList.do?key=466">입찰참가신청</a>
+                                    </li>
+                                    <li>
+                                        <a href="/mp/record/bidPvbTaskRecordList.do?key=481">입찰서제출</a>
+                                    </li>
+                                    <li>
+                                        <a href="/mp/progress/openNegoList.do?key=865&amp;type=my">공개수의협상</a>
+                                    </li>
+                                    <li>
+                                        <a href="/mp/record/electContPvbTaskRecordList.do?key=486">계약</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>비공개수의협상</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/mp/progress/negoList.do?key=548">비공개수의협상</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                                <strong><a href="/mp/bid/myBidAnnounceList.do?key=499">관심입찰공고</a></strong>
+                        </li>
+                        <li>
+                            <strong>업체정보관리</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/pvb/mnufmgt/milyGoodsRequetList.do?key=619">군수품무역대리업 신청 및 발급</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pvb/mnufmgt/pvbGenInfoView.do?key=100">업체정보조회</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pvb/mnufmgt/pvbAddInfoView.do?key=101">업체정보 추가등록</a>
+                                    </li>
+                                    <li>
+                                        <a href="/pvb/mnufmgt/pvbAddInfoReqList.do?key=151">추가정보신청조회</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>사용자정보관리</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/mp/uim/userInfoAccess.do?key=361&amp;returnUrl=/mp/uim/userInfoModi.do">개인정보수정</a>
+                                    </li>
+                                    <li>
+                                        <a href="/mp/uim/userSmsServiceReq.do?key=382">SMS서비스신청</a>
+                                    </li>
+                                    <li>
+                                        <a href="/mp/uim/pvbUserMgt.do?key=384">조달업체사용자관리</a>
+                                    </li>
+                                    <li>
+                                        <a href="/mp/uim/userCertCheck.do?key=549">개인신원확인</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                                <strong><a href="/mp/user/myMenuMgt.do?key=482">나의메뉴</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/mp/uim/g2bNewCreditList.do?key=850">나라장터 신용평가조회</a></strong>
+                        </li>
+                </ul>
+            </li>
+        
+	    
+        
+        
+            <li class="allmenuGrp2">
+                <h4>고객센터</h4>
+                <ul>
+                        <li>
+                            <strong>공지사항</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/board/notice/getNoticeList.do?key=91&amp;bbsId=NEWS01">일반공지사항(시스템)</a>
+                                    </li>
+                                    <li>
+                                        <a href="/board/notice/demandNoticeList.do?key=357&amp;bbsId=NEWS03">방위사업청공지사항</a>
+                                    </li>
+                                    <li>
+                                        <a href="/board/notice/demandNoticeList.do?key=92&amp;bbsId=NEWS02">수요부대별공지사항</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>자료실</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/board/pds/getPdsList.do?key=94">일반자료실</a>
+                                    </li>
+                                    <li>
+                                        <a href="/board/pds/demandPdsList.do?key=95">수요부대별자료실</a>
+                                    </li>
+                                    <li>
+                                        <a href="/board/pds/contPdsList.do?key=96">계약관련서식자료실</a>
+                                    </li>
+                                    <li>
+                                        <a href="/board/notice/systImprvNoticeList.do?key=953&amp;bbsId=NEWS04">시스템개선안내</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                                <strong><a href="/board/faq/faqList.do?key=97">자주묻는질문</a></strong>
+                        </li>
+                        <li>
+                            <strong>민원서류발급신청</strong>
+                            <ul>
+                                    <li>
+                                        <a href="#?key=148">실적증명서</a>
+                                        <ul>
+                                            <li><a href="/pvb/civil/resultCertGuide.do?key=149">신청절차 및 안내</a></li>
+                                            <li><a href="/pvb/civil/resultCertReq.do?key=154">실적증명서 신청</a></li>
+                                            <li><a href="/pvb/civil/resultCertReqList.do?key=156">실적증명서 조회</a></li>
+                                            <li><a href="/pvb/civil/resultCertConfirm.do?key=194">실적증명서 확인</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/pvb/mnufmgt/foreignCertReqList.do?key=934">국외조달원 등록증</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                                <strong><a href="/pvb/mnufmgt/centProcureRegiItemCodeList.do?key=866">중앙조달품목 조회</a></strong>
+                        </li>
+                        <li>
+                            <strong>조달정보공개/개방</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/openapi/yearProcurePlanList.do?key=386">조달계획/판단정보</a>
+                                        <ul>
+                                            <li><a href="/openapi/yearProcurePlanList.do?key=387">년간조달계획</a></li>
+                                            <li><a href="/openapi/procureDcsList.do?key=388">조달판단및집행계획</a></li>
+                                            <li><a href="/openapi/defenArtList.do?key=389">방산생산물량확인</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/openapi/sealedBidAnnounceList.do?key=390">경쟁입찰공고 정보</a>
+                                        <ul>
+                                            <li><a href="/openapi/sealedBidAnnounceList.do?key=391">경쟁입찰공고</a></li>
+                                            <li><a href="/openapi/sealedBidResultList.do?key=392">경쟁입찰결과</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/openapi/openNegoPlanList.do?key=393">공개수의협상 정보</a>
+                                        <ul>
+                                            <li><a href="/openapi/openNegoPlanList.do?key=394">공개수의협상계획</a></li>
+                                            <li><a href="/openapi/openNegoResultList.do?key=395">공개수의협상결과</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/openapi/contInfoList.do?key=396">계약정보</a>
+                                        <ul>
+                                            <li><a href="/openapi/contInfoList.do?key=397&amp;itemList=D">계약정보</a></li>
+                                            <li><a href="/openapi/privateContList.do?key=398">수의계약현황</a></li>
+                                        </ul>
+                                    </li>
+                                    <li>
+                                        <a href="/openapi/board/orderPlanList.do?key=706">국방부 사전정보 공표</a>
+                                        <ul>
+                                            <li><a href="/openapi/board/orderPlanList.do?key=707">분기별 발주계획</a></li>
+                                            <li><a href="/openapi/contInfoUpisList.do?key=709">입찰 및 계약현황</a></li>
+                                            <li><a href="/openapi/privateUpisContList.do?key=710">수의계약현황</a></li>
+                                        </ul>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                                <strong><a href="/pvb/nation/nation.do?key=533">국민신문고</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/pvb/survey/survey.do?key=703">설문조사</a></strong>
+                        </li>
+                </ul>
+            </li>
+        
+	    
+        
+        
+            <li class="allmenuGrp2">
+                <h4>국방전자조달 소개</h4>
+                <ul>
+                        <li>
+                                <strong><a href="/contents/guide/introduce.do?key=503">시스템소개</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/contents/guide/feature.do?key=504">주요특징</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/contents/guide/history.do?key=505">연혁</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/contents/guide/graphic.do?key=506">인포그래픽스</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/contents/guide/system.do?key=507">관련시스템</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/contents/guide/inquiry.do?key=508">이용문의</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="/contents/info/mobile.do?key=607">모바일앱 서비스안내</a></strong>
+                        </li>
+                </ul>
+            </li>
+        
+	    
+        
+        
+            <li class="allmenuGrp2" style="border-right: 0px;">
+                <h4>이용안내</h4>
+                <ul>
+                        <li>
+                            <strong>조달사전준비안내</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/contents/info/preparation01.do?key=511">사전준비사항</a>
+                                    </li>
+                                    <li>
+                                        <a href="/contents/info/preparation02.do?key=512">청렴계약제</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>국내조달안내</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/contents/info/domestic01.do?key=515">국방조달참여절차</a>
+                                    </li>
+                                    <li>
+                                        <a href="/contents/info/domestic02.do?key=537">전자입찰절차</a>
+                                    </li>
+                                    <li>
+                                        <a href="/contents/info/domestic03.do?key=539">전자대금청구절차</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>국외조달안내</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/contents/info/foreign01.do?key=518">국외조달원 등록절차</a>
+                                    </li>
+                                    <li>
+                                        <a href="/contents/info/foreign02.do?key=519">국외조달원 등록/변경안내</a>
+                                    </li>
+                                    <li>
+                                        <a href="/contents/info/foreign03.do?key=540">전자입찰절차</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>환경설정안내</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/contents/info/setting01.do?key=522">관련프로그램 다운로드</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>법령조회</strong>
+                            <ul>
+                                    <li>
+                                        <a href="/contents/info/ordinance.do?key=525">법령조회</a>
+                                    </li>
+                            </ul>
+                        </li>
+                        <li>
+                                <strong><a href="/contents/info/site.do?key=526">관련사이트</a></strong>
+                        </li>
+                        <li>
+                                <strong><a href="#none" onclick="javascript:window.open('/contents/info/termPop.do','용어사전','width=780px,height=770px,scrollbars=yes')">용어사전</a></strong>
+                        </li>
+                </ul>
+            </li>
+        </ul>
+	    
+        
+        <ul class="clfix two">
+            <li class="allmenuGrp2">
+                <h4>신기술 입찰공고</h4>
+                <ul>
+                        <li>
+                                <strong><a href="/techBidAnnounceList.do?key=902">신기술 입찰공고 목록</a></strong>
+                        </li>
+                </ul>
+            </li>
+        
+        
+    </ul></div>
+    <div class="bg"></div>
+</div>
+<!-- //전체메뉴 -->
+<script>
+$(document).ready(function(){
+    $('.allmenu_wrap > ul > li:nth-child(4)').css('border-right','0');
+    $('.gnball').click(function(){
+        $('html, body').scrollTop('0');
+        $(this).toggleClass('on');
+        $('.allmenuGrp, .allmenuGrp2').toggleClass('on');
+        $('#layer_allmenu').toggle();
+        var allwrapHeight = $('.allmenu_wrap').height();
+        $('.bg').css({'height':(allwrapHeight)+800+'px'});
+        var menuHeight = $('.allmenu_wrap > ul').height();
+        $('.allmenuGrp.on').css('height',menuHeight);
+        var menuHeight2 = $('.allmenu_wrap > ul.two').height();
+        $('.allmenuGrp2.on').css('height',menuHeight2);
+    });
+});
+</script>
+	
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	
+	<!-- //GNB -->
+</div>
+<!-- 차세대 나라장터 오픈으로 서비스 중단 안내 @G2BNEW_CHG@ 추후 삭제-header-->
+<script>
+function fn_blocking_g2bNew() {
+	var openAlert = false;
+	if(openAlert) {
+		var message = "차세대 나라장터 개통으로 인해\n나라장터 정보 송수신 서비스가 중단되었습니다.\n2024.12.31(화) 18:00 ~ 2025.1/6(월) 09:00";
+		alert(message);
+	}	
+	return openAlert;
+}
+</script>
+<script>
+
+
+/*
+ * 테스트계정을 위한 애니아이디 본인인증 버튼 노출/비노출
+ * AnyIdAuth.js에서도 추후 삭제 필요.
+ */
+function adminAnyIdButtonOpen(anyidAuth) {
+
+	
+	
+		anyidAuth.useAnyidAuth = false;
+	
+
+}
+
+</script>
+</div>
+
+<div id="container" class="sub">
+	<div id="content_wrap">
+		
+
+
+
+
+
+	
+	
+	
+	
+	
+	<!-- 조달업체-일반 -->
+		
+
+
+
+<div id="lnb">
+	<h2>서브메뉴 영역</h2>
+	<h3><span class="ico_sub1">공사</span></h3>
+	
+	<ul class="lnbdep1">
+				<li>
+					<h4><a href="#">공사계획</a></h4>
+					<div class="lnbdep2">
+						<ul>
+									<li>
+										<h5><a href="/peb/plan/planList.do?key=204" target="_self">공사계획</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+									<li>
+										<h5><a href="/peb/plan/preStdList.do?key=700" target="_self">사전규격(군부대)</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+						</ul>
+					</div>
+				</li>
+				<li class="on">
+					<h4 class="on"><a href="#">입찰</a></h4>
+					<div class="lnbdep2" style="display: block;">
+						<ul>
+									<li>
+										<h5><a href="/peb/bid/announceList.do?key=541" target="_self">입찰공고</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+									<li>
+										<h5><a href="/peb/bid/PQApplyList.do?key=271" target="_self">사전심사(PQ)</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+									<li>
+										<h5><a href="/peb/bid/bidApplyList.do?key=544" class="on single" target="_self">참가신청서 조회</a></h5>
+										<ul class="lnbdep3" style="display: block;">
+										</ul>
+									</li>
+									<li>
+										<h5><a href="/peb/bid/bidSubmitList.do?key=588" target="_self">입찰서제출 및 조회(경쟁입찰)</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+									<li>
+										<h5><a href="/mp/progress/openNegoList.do?key=869&amp;pageDivs=Peb" target="_self">견적서 조회(공개수의)</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+									<li>
+										<h5><a href="/peb/bid/screeningList.do?key=273" target="_self">적격심사대상</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+									<li>
+										<h5><a href="/peb/bid/screeningResultList.do?key=274" target="_self">적격심사결과</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+									<li><h5><a href="/peb/bid/techEvalResultFirmList.do?key=631&amp;pageDivs=E">기술평가결과</a></h5></li>
+									<li>
+										<h5><a href="/peb/bid/bidResultList.do?key=545" target="_self">입찰결과</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+									<li><h5><a href="/peb/bid/contNegoMnufList.do?key=728">협상에의한계약 협상대상</a></h5></li>
+									<li><h5><a href="/peb/bid/autoDelayAnnounceList.do?key=543">자동연기공고</a></h5></li>
+						</ul>
+					</div>
+				</li>
+				<li>
+					<h4><a href="#">비공개수의협상</a></h4>
+					<div class="lnbdep2">
+						<ul>
+									<li>
+										<h5><a href="/peb/nego/negoList.do?key=448&amp;list_divs=peb" target="_self">비공개수의협상</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+									<li>
+										<h5><a href="/peb/nego/negoResultList.do?key=621&amp;list_divs=peb" target="_self">비공개수의협상결과</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+						</ul>
+					</div>
+				</li>
+				<li>
+					<h4><a href="#">보증서 반려</a></h4>
+					<div class="lnbdep2">
+						<ul>
+									<li><h5><a href="/peb/bid/bidGrntRejectList.do?key=364">입찰보증수수료 반려신청</a></h5></li>
+									<li><h5><a href="/peb/bid/contGrntRejectList.do?key=365">계약/선금/하자보증서반려</a></h5></li>
+						</ul>
+					</div>
+				</li>
+				<li>
+					<h4><a href="#">계약</a></h4>
+					<div class="lnbdep2">
+						<ul>
+									<li>
+										<h5><a href="/edi/cont/pebContList.do?key=484&amp;menuOption=3" target="_self">계약</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+									<li><h5><a href="/edi/taxpymt/taxPymtList.do?key=485&amp;menuOption=3">인지세관리</a></h5></li>
+									<li>
+										<h5><a href="/peb/contract/contList.do?key=586" target="_self">계약정보</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+						</ul>
+					</div>
+				</li>
+				<li>
+					<h4><a href="#">기성 및 준공검사</a></h4>
+					<div class="lnbdep2">
+						<ul>
+									<li>
+										<h5><a href="/edi/cmpdcmpninsp/cmpdCmpnInspList.do?key=686" target="_self">기성 및 준공검사 목록</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+									<li><h5><a href="/edi/cmpdcmpninsp/hajaList.do?key=931">하자목록조회</a></h5></li>
+						</ul>
+					</div>
+				</li>
+				<li>
+					<h4><a href="#">대금청구</a></h4>
+					<div class="lnbdep2">
+						<ul>
+									<li>
+										<h5><a href="/edi/equconstbill/equConstBillList.do?key=76&amp;menuOption=3" target="_self">대금청구 목록</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+									<li><h5><a href="/peb/contract/mnufPaymentList.do?key=837">대금지불정보</a></h5></li>
+									<li><h5><a href="/pdb/contract/goodsPaymentCollectList.do?key=945">대금지불정보(반납)</a></h5></li>
+						</ul>
+					</div>
+				</li>
+				<li>
+					<h4><a href="#">세금계산서</a></h4>
+					<div class="lnbdep2">
+						<ul>
+									<li>
+										<h5><a href="/edi/electtaxbill/getElectTaxBillRegiList.do?key=302&amp;menuOption=3&amp;listOption=TL" target="_self">세금계산서목록</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+									<li>
+										<h5><a href="/edi/electtaxbill/getElectTaxBillStatusList.do?key=307&amp;menuOption=3&amp;listOption=SL" target="_self">세금계산서 진행현황</a></h5>
+										<ul class="lnbdep3">
+										</ul>
+									</li>
+						</ul>
+					</div>
+				</li>
+	</ul>
+	<button type="button" id="lnbCl" title="메뉴닫기"></button>
+</div>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+		
+		<div id="content">
+		<button type="button" id="lnbOp" title="메뉴보기"></button>
+		<h2>본문영역</h2>
+		
+		
+
+
+
+
+<div class="page_title">
+	<h4>참가신청서 작성</h4>
+	<p class="access">페이지 경로</p>
+	<div class="navi">
+		
+		<button type="button" class="btn_help" id="helpWindow" onclick="winPopup('/common/help/helpPop.do?menuNumb=757','help','700','700');">도움말</button>
+		
+		<ul>
+			<li>홈</li>
+			
+			<li>공사</li>
+			
+			<li>입찰</li>
+			
+			<li>참가신청서 조회</li>
+			
+			<li>참가신청서 작성</li>
+			
+		</ul>
+	</div>
+	
+</div>
+
+		
+		
+		
+
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" src="/js/pdb/commonPdb.js?v=1764219370237"></script>
+<script type="text/javascript" src="/js/pdb/util/code.js"></script>
+<script type="text/javascript" src="/js/pdb/util/XPage.js"></script>
+<script type="text/javascript" src="/js/pdb/util/XGrid.js"></script>
+<script type="text/javascript" src="/js/pdb/util/XCert.js"></script><script type="text/javascript" src="/js/pdb/util/XCertResult.js"></script>
+
+
+<input type="hidden" id="nowDateTime" value="202511271356" style="">
+<script src="/js/index.js?v=20210107"></script>
+
+
+
+
+<!-- DAPA JS Import -->
+<link rel="stylesheet" type="text/css" href="/SecuKitNXS/WebUI/css/base.css">
+<script type="text/javascript" src="/SecuKitNXS/KICA/config/nx_config.js"></script>
+<script type="text/javascript" src="/SecuKitNXS/KICA/config/LoadSecukitnx.js"></script><script type="text/javascript" charset="utf-8" src="/SecuKitNXS/KICA/config/nxsInterface.min.js"></script><script type="text/javascript" src="/SecuKitNXS/WebUI/js/jquery-1.8.2.min.js"></script><script type="text/javascript" src="/SecuKitNXS/WebUI/js/jquery-ui.js"></script><script type="text/javascript" src="/SecuKitNXS/WebUI/js/nx.issue.pub.ui.js"></script><script type="text/javascript" src="/SecuKitNXS/WebUI/js/placeholders.js"></script><script type="text/javascript" src="/SecuKitNXS/WebUI/js/colResizable-1.5.min.js"></script><script type="text/javascript" charset="utf-8" src="/SecuKitNXS/KICA/lang/lang.js"></script><script type="text/javascript" charset="utf-8" src="/SecuKitNXS/WebUI/js/SecuKitNX_WebUi_DIV.js"></script><script type="text/javascript" charset="utf-8" src="/SecuKitNXS/KICA/dialog/certListInfo.js"></script><script type="text/javascript" charset="utf-8" src="/SecuKitNXS/KICA/dialog/makeCertList.js"></script><script type="text/javascript" charset="utf-8" src="/SecuKitNXS/KICA/dialog/dialog.js"></script><script type="text/javascript" charset="utf-8" src="/SecuKitNXS/KICA/dialog/targetDialog.js"></script><script type="text/javascript" charset="utf-8" src="/SecuKitNXS/KICA/error/KICA_Error.js"></script><script type="text/javascript" charset="utf-8" src="/SecuKitNXS/KICA/error/error_Resource.js"></script><script type="text/javascript" charset="utf-8" src="/SecuKitNXS/KICA/common/processLogic.js"></script><script type="text/javascript" charset="utf-8" src="/SecuKitNXS/KICA/common/certInfo.js"></script><script type="text/javascript" charset="utf-8" src="/SecuKitNXS/KICA/common/validPassword.js"></script><script type="text/javascript" charset="utf-8" src="/SecuKitNXS/KICA/common/common.js"></script><script type="text/javascript" src="/SecuKitNXS/KICA/config/configSet.js"></script><script type="text/javascript" charset="utf-8" src="/SecuKitNXS/KICA/logic/D2B_OUT/branchLogic.js"></script>
+<script type="text/javascript" src="/SecuKitNXS/KICA/logic/D2B_OUT/DAPA__Result.js"></script>
+<script type="text/javascript" src="/SecuKitNXS/KICA/logic/D2B_OUT/signgate.js"></script>
+<script type="text/javascript" src="/SecuKitNXS/KICA/logic/D2B_OUT/signgate_inner.js"></script>
+<script type="text/javascript" src="/SecuKitNXS/KICA/logic/D2B_OUT/signgate_inner_vrf.js"></script>
+
+<!-- KICA WebUI DIV 영역 -->
+<div id="KICA_SECUKITNXDIV_ID"><!-- KICA Web UI START :: A타입--><div class="nx-pki-ui-wrapper" id="nx-pki-ui-wrapper" style="display: none;"><!-- 인증서 선택창 --><div class="pki-wrap typeA nx-cert-select" id="nx-cert-select" style="display: none;"><div class="pki-head2" alt="인증서 선택창 테두리"><h1>인증서 선택 <a href="javascript:void(0)" class="btn-setting" onclick="NX_Issue_pubUi.managemnetPageOpen(); NXClientGetVersion();">설정</a> </h1><!-- 추가 작업 : <a href="javascript:void(0)" class="btn-setting">설정</a>--></div><div class="logo-area" id="nx-cert-select-logo-area" style="line-height:0.7;"></div><div class="pki-body"><h3 class="tit1">인증서가 저장 된 미디어를 선택해 주세요</h3><div class="cert-location-area"><div class="cert-location-area-select-media" id="cert-location-area-select-media"></div><!-- PIN 입력창 --><div class="pki-wrap6 typeA width260"><div id="pki-extra-media-box3"><div id="pki-extra-media-box-contents3"><div class="pki-head3"><h1>PIN 번호 입력</h1><a href="javascript:void(0);" class="btn-close1" onclick="NX_Issue_pubUi.moreSaveMediaHide5();return false;">닫기</a></div><div class="pki-bottom3"><div class="gray-box2 mb10"> 보안토큰 비밀번호를 입력하십시오. </div><input id="nx_cert_pin" name="nx_cert_pin" type="password" size="20" onkeydown="NX_Issue_pubUi.EnterOnPINNumber(event)" title="보안토큰 비밀번호" style=""><button class="btn-ok" onclick="NX_Issue_pubUi.moreSaveMediaHide7();return false;">확인</button></div></div></div><div class="pki-bottom-img3"></div></div><!-- //PIN 입력창 --><!-- 추가 매체선택창 --><div class="pki-wrap3 typeA width260"><div id="pki-extra-media-box3"></div><div class="pki-bottom-img3"></div></div><!-- //추가 매체선택창 --><!-- 갱신 안내 --><div class="pki-wrap5 typeA width280" id="nx-error-cert-update"><div class="pki-head5"><h1>갱신 안내</h1></div><div id="nx-error-cert-update-msg-box"></div><div class="pki-bottom-img5"></div></div><!-- // 갱신 안내 --></div><h2 class="tit1">인증서를 선택해 주세요</h2><div class="cert-select-area"><input type="hidden" id="certId" value="" style=""><div id="select-cert-list" class="select-cert-list"></div></div><div class="cert-button-block"><!--<button type="button">인증서 찾기</button>--><button type="button" onclick="NX_Issue_pubUi.viewCertInfo();">인증서 보기</button></div><h2 class="tit1" id="pwdnoti_1"><label for="certPwd">인증서 비밀번호를 입력해 주세요</label></h2><form name="formRe" id="formReId" method="post" action="javascript:NX_Issue_pubUi.selectCertConfirm();" data-nppfs-form-id="d12dcd77cae8c24fa"><div class="nppfs-elements" style="display:none;"></div><div class="cert-password-area"><input tabindex="0" type="password" id="certPwd" style="width: 100%;" title="인증서 암호"></div></form><p class="noti" id="pwdnoti_2">인증서 비밀번호는 대소문자를 구분합니다.</p></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.selectCertConfirm();">확인</button><button class="btn-cancel" onclick="NX_Issue_pubUi.selectCertCancel();">취소</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 선택창 --><!-- 인증서 정보창 --><div class="pki-wrap typeA" id="nx-cert-detail-info" style="display: none;"><div class="pki-head"><h1>인증서 정보</h1></div><div class="pki-body"><ul class="pki-tab"><li><a href="#certContent_01" class="on" onclick="NX_Issue_pubUi.certTabClick(this);return false;">인증서 세부 정보</a></li></ul><div class="pki-tab-con"><div id="certContent_01" class="cert-content" style="display: block;"><h2 class="cert-tit">인증서 세부 정보</h2><div class="cert-info-box3"><div id="certContent_01_box"></div></div></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.viewCertInfoConfirm();">닫기</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 정보창 --><!-- 인증서 관리창 --><div class="pki-wrap typeA" id="nx-cert-managemnet" style="display: none;"><div class="pki-head"><h1>인증서 관리</h1></div><div class="pki-body"><ul class="pki-tab"><li><a href="#certContent_02" class="on" onclick="NX_Issue_pubUi.certTabClick(this);return false;">최상위 인증기관</a></li><li><a href="#certContent_03" onclick="NX_Issue_pubUi.certTabClick(this); return false;">관리</a></li></ul><div class="pki-tab-con"><div id="certContent_02" class="cert-content" style="display: block;"><h2 class="cert-tit">최상위인증기관의 인증서를 확인합니다.</h2><div class="cert-info-box"><p>최상위 인증기관의 전자서명 검증키 해쉬값(SHA-256)은 다음과 같습니다.</p><dl><dt>KISA RootCA 1 (RSA)</dt><dd>6FDB : 3F76 : C8B8 : 01A7 : 5338 : D8A5 : 0A7C : 0287 : 9F61 : 98B5 : 7E59 : 4D31 : 8D38 : 3290 : 0FED : CD79</dd></dl><dl><dt>KISA RootCA 4 (RSA)</dt><dd>A002 : FF55 : 6C60 : 1863 : B08B : 9AA3 : 3A8E : 6666 : E97E : 72BB : E552 : F66E : B9F2 : 395C : 68C7 : BC98</dd></dl><p class="go-link"><a href="http://rootca.kisa.or.kr/kor/popup/potency.jsp" target="_blank">최상위 인증기관 홈페이지</a></p></div><br><br><h2 class="cert-tit">프로그램 버전</h2><p></p><div class="version-box"><p id="client-version"></p></div></div><div id="certContent_03" class="cert-content" style="display: none;"><div class="cert-info-box2"><ul><li><span>인증서 내보내기 (PKCS#12 표준형식)</span><button tabindex="0" type="button" class="btn-style1" onclick="NX_Issue_pubUi.exportPFX();">내보내기</button></li><li><span>인증서 가져오기 (PKCS#12 표준형식)</span><button tabindex="0" type="button" class="btn-style1" onclick="NX_Issue_pubUi.importPFX();">가져오기</button></li></ul></div></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.managemnetPageOpenConfirm();">닫기</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 관리창 --><!-- 인증서 내보내기-1 --><div class="pki-wrap typeA" id="nx-cert-management-exportPFX-fileName" style="display: none;"><div class="pki-head"><h1>인증서 내보내기</h1></div><div class="pki-body"><div class="pki-con-wrap"><h2 class="tit2"><label for="exportP12Name">내보낼 파일 이름을 지정하십시오.(확장자 미포함)</label></h2><div class="gray-box"><input type="text" name="exportP12Name" id="exportP12Name" size="20" maxlength="20" style=""><br><p>인증서 내보내기 결과는 선택한 인증서 경로에 .pfx (PKCS#12)형태로 저장됩니다.</p></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.exportPFXFileNameConfirm();">확인</button><button class="btn-cancel" onclick="NX_Issue_pubUi.exportPFXFileNameCancel();">취소</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 내보내기-1 --> <!-- 인증서 내보내기-2 --><div class="pki-wrap typeA" id="nx-cert-management-exportPFX-withKm" style="display: none;"><div class="pki-head"><h1>인증서 내보내기</h1></div><div class="pki-body"><div class="pki-con-wrap"><h2 class="tit2">키분배용 인증서 내보내기</h2><div class=""><ul class="bul-list-dot"><li>전자서명 인증서와 키분배용 인증서를 함께 내보낼 수 있습니다.</li><li>고객님께서 선택하신 인증서는 키분배용 인증서를 포함하고 있습니다.</li><li>이에, 전자서명 인증서와 키분배용 인증서를 함께 내보내기 할 수 있습니다.</li></ul></div><div class="gray-box2 mt30 mb30"><dl class="dl-style1 radio"><dt>키분배용 인증서와 개인키를 함께 내보내기 하시겠습니까?</dt><dd><label><input type="radio" name="keyName" id="exportWithKm" style="">예, 키분배용 인증서와 개인키를 함께 내보내기 합니다.</label></dd><dd><label><input type="radio" name="keyName" id="exportWithoutKm" style="">아니오, 전자서명용 인증서와 개인키만 내보내기 합니다.</label></dd></dl></div><h2 class="tit2">알림</h2><div class=""><ul class="bul-list-dot"><li>키분배용 키를 함께 내보내기 할 경우 타공인인증기관의 가져오기에서 오류가 발생할 수도 있습니다.</li><li>이에 정보인증서비스를 받을 경우에 키분배용 인증서를 함께 내보내기 할 것을 권유합니다.</li></ul></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.exportPFXWithKmConfirm();">확인</button><button class="btn-cancel" onclick="NX_Issue_pubUi.exportPFXWithKmCancel();">취소</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 내보내기-2 --> <!-- 인증서 가져오기-1 --><div class="pki-wrap typeA" id="nx-cert-management-importPFX" style="display: none;"><div class="pki-head"><h1>인증서 가져오기</h1></div><div class="pki-body"><div class="pki-con-wrap"><div class="gray-box"><dl class="dl-style1"><dt><label for="importPFXFileName">가져올 인증서 파일을 선택해 주세요. (pfx형식)</label></dt><dd><div class="file-type-wrap w75"><input type="text" readonly="readonly" title="파일명" id="importPFXFileName" style=""><span class="btn-file"><button class="btn-style1" onclick="NXGetPFXFilePath();">찾아보기</button></span> </div></dd></dl><dl class="dl-style1"><dt><label for="importPFXPwd">가져올 인증서 비밀번호를 입력하세요.</label></dt><dd><input type="password" id="importPFXPwd" style="width: 239px;"></dd></dl></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.importPFXConfirm();">확인</button><button class="btn-cancel" onclick="NX_Issue_pubUi.importPFXCancel();">취소</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 가져오기-1 --> <!-- 인증서 폐지-1 --><div class="pki-wrap typeA" style="display: none;"><div class="pki-head"><h1>인증서 폐지</h1></div><div class="pki-body"><div class="pki-con-wrap"><div class="bg-img-area"><img src="/SecuKitNXS/WebUI/images/img_revoke.png" alt="인증서 폐지 아이콘"></div><div class="gray-box2"><p class="txt-c"><span class="inline-tit">선택하신 인증서를 폐지하시겠습니까?</span></p></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="">예</button><button class="btn-cancel" onclick="">아니오</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 폐지-1 --> <!-- 인증서 폐지-2 --><div class="pki-wrap typeA" style="display: none;"><div class="pki-head"><h1>인증서 폐지</h1></div><div class="pki-body"><div class="pki-con-wrap"><h2 class="tit2">인증서 <strong class="red">폐지</strong>사유를 선택하십시오.</h2><div class="gray-box"><dl class="dl-style1 radio"><dd><label><input type="radio" name="revokeReason" id="revokeReason_Km" style="">개인키의 신뢰손상</label></dd><dd><label><input type="radio" name="revokeReason" id="revokeReason_reName" style="">소속이나 이름의 변경</label></dd><dd><label><input type="radio" name="revokeReason" id="revokeReason_noUse" style="">인증서를 더 이상 사용하지 않음</label></dd></dl></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="">확인</button><button class="btn-cancel" onclick="">취소</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 폐지-2 --> <!-- 인증서 비밀번호 변경 --><div class="pki-wrap typeA" style="display: none;"><div class="pki-head"><h1>인증서 비밀번호 변경</h1></div><div class="pki-body"><div class="pki-con-wrap">	<p class="txt2">인증서 비밀번호는 10자 이상의 길이로 하나 이상의 영문자, 숫자 및 특수문자를 포함해야 합니다.</p><p class="txt2">인증서 비밀번호는 연속된 3개의 문자 또는 숫자가 포함될 수 없고, 같은 3개의 문자는 사용 불가능 합니다.</p><div class="gray-box mb30"><table class="tbl-style"><caption></caption><colgroup><col style="width:170px;"></colgroup><tbody><tr><th><label for="makeNewPwd">새로운 인증서 비밀번호 입력</label></th><td><input type="password" id="makeNewPwd" style=""></td></tr><tr><th><label for="makeNewPwdConfirm">새로운 인증서 비밀번호 확인</label></th><td><input type="password" id="makeNewPwdConfirm" style=""></td></tr></tbody></table></div><h2 class="tit2">인증서 비밀번호 입력시 주의사항</h2><div class=""><ol class="decimal"><li>인증서 비밀번호는 적어도 6개월마다 변경하고 저장된 매체별로 모두 변경 권고 (예:하드디스크, 이동식디스크, 저장토큰 등 변경)</li><li>일부 특수문자는 인증서 비밀번호로 사용 불가능<br>(예 : ’,”,\ ,| 는 사용 불가능)</li><li>연속된 3개의 문자 및 3개의 같은 문자는 사용 불가능<br>(예 : 123, abc, 321, cba 등 사용 불가능)<br>(예 : 111, aaa 등 사용 불가능)</li></ol></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="">확인</button><button class="btn-cancel" onclick="">취소</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 비밀번호 변경 --> <!-- 신원확인 식별번호 입력 --><div class="pki-wrap typeA" id="nx-cert-VerifyIdentify" style="display: none;"><div class="pki-head"><h1>신원확인 식별번호 입력</h1></div><div class="pki-body"><div class="pki-con-wrap"><p class="txt2">개인의 경우 주민등록번호를 입력하십시오.</p><p class="txt2">법인의 경우 사업자등록번호를 입력하십시오. (" -" 제외)</p><div class="gray-box mb30"><table class="tbl-style"><caption></caption><colgroup><col style="width:140px;"></colgroup><tbody><tr><th><label for="chkSSN">신원확인 식별번호</label></th><td><input type="password" id="chkSSN" style=""></td></tr></tbody></table></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.VerifyIdentifyConfirm();">확인</button><button class="btn-cancel" onclick="NX_Issue_pubUi.VerifyIdentifyCancel();">취소</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //신원확인 식별번호 입력 --> <!-- 인증서 복사 --><div class="pki-wrap typeA" id="nx-cert-copy-duplication" style="display: none;"><div class="pki-head"><h1>인증서 보기</h1></div><div class="pki-body"><div class="pki-con-wrap"><h2 class="tit2"><strong class="red">동일한</strong><strong>인증서</strong>가 해당 저장매체에 있습니다. 바꾸시겠습니까?</h2><div class="gray-box"><dl class="dl-style1 radio"><dd><label><input tabindex="0" type="radio" name="certCopy" id="certChangeYes" style="">예, 새로운 인증서로 바꾸겠습니다.</label></dd><dd><label><input tabindex="0" type="radio" name="certCopy" id="certChangeNo" style="">아니오, 바꾸지 않고 그대로 두겠습니다.</label></dd></dl></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.copyCertDuplicationConfirm();">확인</button><button class="btn-cancel" onclick="NX_Issue_pubUi.copyCertDuplicationCancel();">취소</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 복사 --> <!-- 인증서 비밀번호 확인 --><div class="pki-wrap typeA" id="nx-cert-checkPassword" style="display: none;"><div class="pki-head"><h1>인증서 비밀번호 확인</h1></div><div class="pki-body"><div class="pki-con-wrap"><div class="bg-img-area"><img src="/SecuKitNXS/WebUI/images/img_pwok.png" alt="인증서 비밀번호 확인 아이콘"></div><div class="gray-box2"><p class="txt-c"><span class="inline-tit">인증서 비밀번호 확인 성공</span></p></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.checkPasswordConfirm();">확인</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 비밀번호 확인 --> <!-- 매체 선택 --><div class="pki-wrap typeA" id="nx-targetMedia-select" style="display: none;"><div class="pki-head"><h1>매체 선택<span>인증서를 어디에 저장하시겠습니까?</span></h1></div><div class="logo-area" id="nx-targetMedia-select-logo-area" style="height:99px;"></div><div class="pki-body"><h2 class="tit1">인증서 저장 위치를 선택해 주세요</h2><div class="cert-location-area"><div class="cert-location-area-targetMedia" id="cert-location-area-targetMedia"></div><!-- 추가 매체선택창 --><div class="pki-wrap4 typeA width260"><div id="pki-extra-media-box4"></div><div class="pki-bottom-img4"></div></div><!-- 추가 매체선택창 --><div class="noti-box"><p class="noti-txt" id="targetMedia_noti">선택된 저장매체 :  </p></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.selectMediaConfirm();">확인</button><button class="btn-cancel" onclick="NX_Issue_pubUi.selectMediaCancel();">취소</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //매체 선택 --><!-- 인증서 발급 --><!--<div class="pki-wrap typeA" id="nx-retCode-insert" ><div class="pki-head"><h1>인증서 발급</h1></div><div class="pki-body"><div class="pki-con-wrap"><h2 class="tit2">등록번호를 입력하세요</h2><div class="gray-box"><table class="tbl-style"><caption></caption><colgroup><col style="width:70px;" /></colgroup><tbody><tr><th>인가코드</th><td><input type="text" name="nx_authCode" id="nx_authCode" placeholder="2345AB (영문, 숫자 19자리)" /></td></tr><tr><th>참조번호</th><td><input type="text" name="nx_refCode" id="nx_refCode" placeholder="2345 (숫자 8자리)" /></td></tr></tbody></table></div></div></div><div class="pki-bottom"><button class="btn-ok">확인</button><button class="btn-cancel">취소</button></div><div class="pki-bottom-img" alt ="인증서 선택창 테두리"></div></div>--><!-- //인증서 발급 --><!-- 인증서 암호입력 --><div class="pki-wrap typeA" id="nx-pwd-insert" style="display: none;"><div class="pki-head"><h1>인증서 비밀번호 입력</h1></div><div class="pki-body"><div class="pki-con-wrap"><p class="txt2">인증서 비밀번호는 10자 이상의 길이로 하나 이상의 영문자, 숫자 및 특수문자를 포함해야 합니다.</p><p class="txt2">인증서 비밀번호는 연속된 3개의 문자 또는 숫자가 포함될 수 없고, 같은 3개의 문자는 사용 불가능 합니다.</p><div class="gray-box mb30"><table class="tbl-style"><caption></caption><colgroup><col style="width: 120px;"></colgroup><tbody><tr><th><label for="nx_issue_cert_pw">인증서 비밀번호 입력</label></th><td><input type="password" name="nx_issue_cert_pw" id="nx_issue_cert_pw" style=""></td></tr><tr><th><label for="nx_issue_cert_pw_confirm">인증서 비밀번호 확인</label></th><td><form action="javascript:NX_Issue_pubUi.insertPWConfirm();" name="d751605f55e4f1ab0" data-nppfs-form-id="d751605f55e4f1ab0"><div class="nppfs-elements" style="display:none;"></div><input type="password" name="nx_issue_cert_pw_confirm" id="nx_issue_cert_pw_confirm" style=""></form></td></tr></tbody></table></div><h2 class="tit2">인증서 비밀번호 입력시 주의사항</h2><div class=""><ol class="decimal"><li>인증서 비밀번호는 적어도 6개월마다 변경하고 저장된 매체별로 모두 변경 권고 (예:하드디스크, 이동식디스크, 저장토큰 등 변경)</li><li>일부 특수문자는 인증서 비밀번호로 사용 불가능<br>(예 : ’,”,\ ,| 는 사용 불가능)</li><li>연속된 3개의 문자 및 3개의 같은 문자는 사용 불가능<br>(예 : 123, abc, 321, cba 등 사용 불가능)<br>(예 : 111, aaa 등 사용 불가능)</li></ol></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.insertPWConfirm();">확인</button><button class="btn-cancel" onclick="NX_Issue_pubUi.insertPWCancel();">취소</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 암호입력 --><!-- 보안토큰 비밀번호 --><div class="pki-wrap typeA" id="nx-secureToken-pin-insert" style="display: none;"><div class="pki-head"><h1>보안토큰 비밀번호(PIN)</h1></div><div class="pki-body"><div class="pki-con-wrap"><div class="gray-box"><dl class="dl-style1"><dt class="typ2"><label for="nx_issue_cert_pin">보안토큰 비밀번호(PIN)를 입력하세요.</label></dt><dd><form action="javascript:NX_Issue_pubUi.insertPINConfirm();" name="ddf7a5ab13e7a66a4" data-nppfs-form-id="ddf7a5ab13e7a66a4"><div class="nppfs-elements" style="display:none;"></div><input type="password" name="nx_issue_cert_pin" id="nx_issue_cert_pin" style=""></form></dd></dl></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.insertPINConfirm();">확인</button><button class="btn-cancel" onclick="NX_Issue_pubUi.insertPINCancel();">취소</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //보안토큰 비밀번호 --><!-- 인증서 발급&재발급&갱신 중 알림 --><div class="pki-wrap typeA" id="nx-issue-ing-alert" style="display: none; margin-top:10%;"><div class="pki-head" id="nx-issue-ing-alert-head"></div><div class="pki-body"><div id="loading_progress" alt="로딩 중 아이콘"></div><div class="pki-con-wrap" id="nx-issue-ing-alert-box"></div></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 발급&재발급&갱신 중 알림 --><!-- 인증서 발급&재발급&갱신 성공 알림 --><div class="pki-wrap typeA" id="nx-issue-success-alert" style="display: none;"><div class="pki-head" id="nx-issue-success-alert-head"></div><div class="pki-body"><div class="pki-con-wrap" id="nx-issue-succes-alert-box"></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.issueCertConfirm();">확인</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 발급&재발급&갱신 성공 알림 --><!-- 인증서 발급&재발급&갱신 실패 알림 --><div class="pki-wrap typeA" id="nx-issue-fail-alert" style="display: none;"><div class="pki-head" id="nx-issue-fail-alert-head"><!--<div class="nx-issue-fail-alert-head-msg"></div>--></div><div class="pki-body"><div class="pki-con-wrap" id="nx-issue-fail-alert-box"></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.issueCertFailConfirm();">확인</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 발급&재발급&갱신 실패 알림 --><!-- 인증서 삭제 --><div class="pki-wrap typeA" id="nx-cert-delete" style="display: none;"><div class="pki-head"><h1>인증서 삭제</h1></div><div class="pki-body"><div class="pki-con-wrap"><h2 class="tit2">선택하신 인증서를 <strong class="red">삭제</strong>하시겠습니까?</h2><div class="gray-box"><div id="nx-cert-delete-box"></div></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.deleteCertConfirm();">예</button><button class="btn-cancel" onclick="NX_Issue_pubUi.deleteCertCancel();">아니오</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 삭제 --><!-- 인증서 폐지 --><div class="pki-wrap typeA" id="nx-cert-revoke" style="display: none;"><div class="pki-head"><h1>인증서 폐지</h1></div><div class="pki-body"><div class="pki-con-wrap"><h2 class="tit2">선택하신 인증서를 <strong class="red">폐지</strong>하시겠습니까?</h2><div class="gray-box"><div id="nx-cert-revoke-box"></div></div></div></div><div class="pki-bottom"><button class="btn-ok" onclick="NX_Issue_pubUi.revokeCertConfirm();">예</button><button class="btn-cancel" onclick="NX_Issue_pubUi.revokeCertCancel();">아니오</button></div><div class="pki-bottom-img" alt="인증서 선택창 테두리"></div></div><!-- //인증서 폐지--></div><div id="nxs_loading_block" class="nxs_loading_block" style="display: none;"></div><!-- //KICA Web UI END :: 기본타입(시안B) --></div> 
+<script type="text/javascript" src="/js/peb/bid/bidApplyRegi.js"></script>
+
+	<div class="post">
+		<p class="post_tit"><span class="fgray">[공사명]</span> 25-A-00부대 전기공사(1456)</p>
+
+		<p class="post_stit">공고일반</p>
+		<!-- tbl_data -->
+		<div class="tbl_data bd">
+			<table summary="상세테이블">
+				<colgroup>
+					<col width="14%">
+					<col>
+					<col width="13%">
+					<col>
+					<col width="13%">
+					<col>
+				</colgroup>
+				<tbody>
+					<tr>
+						<th scope="row">공고번호</th>
+						<td>
+							긴급공고 UMM1524-1
+						</td>
+						<th scope="row">공사번호</th>
+						<td>2025-23171</td>
+						<th scope="row">발주기관</th>
+						<td>국군재정관리단</td>
+					</tr>
+					<tr>
+						<th scope="row">통합참조번호</th>
+						<td>2025UMM2025-23171</td>
+						<th scope="row">공사구분</th>
+						<td>일반공사</td>
+						<th scope="row">입찰일시</th>
+						<td>
+							
+							2025-12-02 11:00
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">계약방법</th>
+						<td>제한경쟁</td>
+						<th scope="row">입찰방법</th>
+						<td>총액제</td>
+						<th scope="row">예산금액</th>
+						<td class="taR">656,255,000원</td>
+					</tr>
+					<tr>
+						<th scope="row">사전심사</th>
+						<td>
+						   
+							  
+							  비대상
+							  
+								
+						</td>
+						<th scope="row">낙찰자결정방법</th>
+						<td>	
+							적격심사제
+															
+						</td>
+						<th scope="row">적격심사 여부</th>
+						<td colspan="3">
+							대상
+							
+						</td>
+					</tr>
+						
+				</tbody>
+			</table>
+		</div>
+		
+		<!-- //tbl_data -->
+		<p class="post_stit">업체내역</p>
+		<!-- tbl_data -->
+		<div class="tbl_data bd">
+			<table summary="상세테이블">
+				<colgroup>
+					<col width="14%">
+					<col>
+					<col width="14%">
+					<col>
+					<col width="13%">
+					<col>
+				</colgroup>
+				<tbody>
+					<tr>
+						<th scope="row">업체코드</th>
+						<td>J541B</td>
+						<th scope="row">업체명</th>
+						<td>주식회사 지음쏠라테크</td>
+						<th scope="row">대표자</th>
+						<td>박성균</td>
+					</tr>
+					<tr>
+						<th scope="row">주민등록번호</th>
+						<td>650508-1******</td>
+						<th scope="row">사업자등록번호</th>
+						<td>407-87-00819</td>
+						<th scope="row">전화번호</th>
+						<td>07046102635</td>
+					</tr>
+					<tr>
+						<th scope="row">주소</th>
+						<td colspan="5">인천광역시 연수구 송도과학로80, 21층 102-2113호 (송도동,송도에이티센터)</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		
+		
+		<p class="post_stit">공종 및 면허정보</p>
+		
+		<div class="cnt_boxG">
+			<ul>
+				<li>* 아래 시공능력 평가액은 G2B(나라장터)에서 제공하는 자료입니다.</li>
+				<li>* 시공능력평가액이 틀릴 경우 먼저 G2B(<a href="http://www.g2b.go.kr" target="_blank" onfocus="this.blur()">www.g2b.go.kr</a>)에서 확인 후 수정 ☞ 방위사업청은 익일 반영 <a href="http://www.g2b.go.kr" target="_blank" onfocus="this.blur()">나라장터바로가기</a></li>
+				<li>* G2B(나라장터)와 방위사업청이 틀릴 경우 방위사업청(1577-1118(①))으로 연락 해 주시기 바랍니다.</li>
+			</ul>
+		</div>
+		
+		<div id="sbGridArea" class="grid_wrap"><div id="SBHE_datagrid1" class="sbgrid_boxsizing sbgrid_datagrid" style="width: 100%; height: 200px; outline: none;" tabindex="0" title="" onscroll="SBGrid.DEF._W_onProcessEvent(window.event, 'onscroll', this.id.replace('SBHE_', ''))"><div id="SBHE_datagrid1_HLine" class="sbgrid_datagrid_HLine"></div><div id="SBHE_datagrid1_VLine" class="sbgrid_datagrid_VLine"></div><div id="SBHE_datagrid1_MoveColBar" onselectstart="return false;" class="sbgrid_datagrid_MoveColBar"></div><div id="SBHE_DATAGRID_WHOLE_datagrid1" onselectstart="return false" class="sbgrid_datagrid_GridWhole sbgrid_scroll" style="overflow: auto;"><table id="SBHE_DATAGRID_WHOLE_TABLE_datagrid1" onselectstart="return false" cellpadding="0" cellspacing="0" border="0" width="730px" class="sbgrid_datagrid_GridWhole_table" summary="" style="top: 0px;"><colgroup id="SBHE_DATAGRID_WHOLE_COLGROUP_datagrid1"><col style="width:190px" colnum="datagrid1_0" targetcol="who"><col style="width:120px" colnum="datagrid1_1" targetcol="who"><col style="width:100px" colnum="datagrid1_2" targetcol="who"><col style="width:120px" colnum="datagrid1_3" targetcol="who"><col style="width:120px" colnum="datagrid1_4" targetcol="who"><col style="width:80px" colnum="datagrid1_5" targetcol="who"></colgroup><tbody id="SBHE_DATAGRID_WHOLE_TBODY_datagrid1"><tr rownum="datagrid1_0" targetcell="who"><td sbgrid_select="false" rownum="datagrid1_0" colnum="datagrid1_0" cellid="datagrid1.0.0" targetcell="who" cellname="datagrid1_fc " class="sbgrid_datagrid_FixedCell_Temp " style="height:27px;"><span style="border-color:transparent"></span></td><td sbgrid_select="false" rownum="datagrid1_0" colnum="datagrid1_1" cellid="datagrid1.0.1" targetcell="who" cellname="datagrid1_fc " class="sbgrid_datagrid_FixedCell_Temp " style="height:27px;"><span style="border-color:transparent"></span></td><td sbgrid_select="false" rownum="datagrid1_0" colnum="datagrid1_2" cellid="datagrid1.0.2" targetcell="who" cellname="datagrid1_fc " class="sbgrid_datagrid_FixedCell_Temp " style="height:27px;"><span style="border-color:transparent"></span></td><td sbgrid_select="false" rownum="datagrid1_0" colnum="datagrid1_3" cellid="datagrid1.0.3" targetcell="who" cellname="datagrid1_fc " class="sbgrid_datagrid_FixedCell_Temp " style="height:27px;"><span style="border-color:transparent"></span></td><td sbgrid_select="false" rownum="datagrid1_0" colnum="datagrid1_4" cellid="datagrid1.0.4" targetcell="who" cellname="datagrid1_fc " class="sbgrid_datagrid_FixedCell_Temp " style="height:27px;"><span style="border-color:transparent"></span></td><td sbgrid_select="false" rownum="datagrid1_0" colnum="datagrid1_5" cellid="datagrid1.0.5" targetcell="who" cellname="datagrid1_fc " class="sbgrid_datagrid_FixedCell_Temp " style="height:27px;"><span style="border-color:transparent"></span></td></tr><tr rownum="datagrid1_1" targetcell="who"><td sbgrid_select="false" rownum="datagrid1_1" colnum="datagrid1_0" cellid="datagrid1.1.0" targetcell="who" id="SBHE_datagrid1_1_0" cellname="datagrid1_dc " class="sbgrid_datagrid_DataCell sbgrid_datagrid1_col_datagrid1_col0 sbgrid_datagrid1_data   sbgrid_output_column" style="height:19px;"><div class="sbgrid_datagrid_Output" id="datagrid1_1_0_data" style="word-wrap:normal;"><span style="white-space:nowrap;">전기공사업/[0037]</span></div></td><td sbgrid_select="false" rownum="datagrid1_1" colnum="datagrid1_1" cellid="datagrid1.1.1" targetcell="who" id="SBHE_datagrid1_1_1" cellname="datagrid1_dc " class="sbgrid_datagrid_DataCell sbgrid_datagrid1_col_datagrid1_col1 sbgrid_datagrid1_data   sbgrid_output_column" style="height:19px;"><div class="sbgrid_datagrid_Output" id="datagrid1_1_1_data" style="word-wrap:normal;"><span style="white-space:nowrap;">광주제01036호</span></div></td><td sbgrid_select="false" rownum="datagrid1_1" colnum="datagrid1_2" cellid="datagrid1.1.2" targetcell="who" id="SBHE_datagrid1_1_2" cellname="datagrid1_dc " class="sbgrid_datagrid_DataCell sbgrid_datagrid1_col_datagrid1_col2 sbgrid_datagrid1_data   sbgrid_output_column" style="height:19px;"><div class="sbgrid_datagrid_Output" id="datagrid1_1_2_data" style="word-wrap:normal;"><span style="white-space:nowrap;"></span></div></td><td sbgrid_select="false" rownum="datagrid1_1" colnum="datagrid1_3" cellid="datagrid1.1.3" targetcell="who" id="SBHE_datagrid1_1_3" cellname="datagrid1_dc " class="sbgrid_datagrid_DataCell sbgrid_datagrid1_col_datagrid1_col3 sbgrid_datagrid1_data   sbgrid_output_column" style="height:19px;"><div class="sbgrid_datagrid_Output" id="datagrid1_1_3_data" style="word-wrap:normal;"><span style="white-space:nowrap;">2018-03-09</span></div></td><td sbgrid_select="false" rownum="datagrid1_1" colnum="datagrid1_4" cellid="datagrid1.1.4" targetcell="who" id="SBHE_datagrid1_1_4" cellname="datagrid1_dc " class="sbgrid_datagrid_DataCell sbgrid_datagrid1_col_datagrid1_col4 sbgrid_datagrid1_data   sbgrid_output_column" style="height:19px;"><div class="sbgrid_datagrid_Output" id="datagrid1_1_4_data" style="word-wrap:normal;"><span style="white-space:nowrap;">9,429,402,000</span></div></td><td sbgrid_select="false" rownum="datagrid1_1" colnum="datagrid1_5" cellid="datagrid1.1.5" targetcell="who" id="SBHE_datagrid1_1_5" cellname="datagrid1_dc " class="sbgrid_datagrid_DataCell sbgrid_datagrid1_col_datagrid1_col5 sbgrid_datagrid1_data   sbgrid_output_column" style="height:19px;"><div class="sbgrid_datagrid_Output" id="datagrid1_1_5_data" style="word-wrap:normal;"><span style="white-space:nowrap;">2025</span></div></td></tr><tr rownum="datagrid1_2" targetcell="who"><td sbgrid_select="false" rownum="datagrid1_2" colnum="datagrid1_0" cellid="datagrid1.2.0" targetcell="who" id="SBHE_datagrid1_2_0" cellname="datagrid1_dc " class="sbgrid_datagrid_DataCell sbgrid_datagrid1_col_datagrid1_col0 sbgrid_datagrid1_data   sbgrid_output_column" style="height:19px;"><div class="sbgrid_datagrid_Output" id="datagrid1_2_0_data" style="word-wrap:normal;"><span style="white-space:nowrap;">전문소방시설공사업/[0040]</span></div></td><td sbgrid_select="false" rownum="datagrid1_2" colnum="datagrid1_1" cellid="datagrid1.2.1" targetcell="who" id="SBHE_datagrid1_2_1" cellname="datagrid1_dc " class="sbgrid_datagrid_DataCell sbgrid_datagrid1_col_datagrid1_col1 sbgrid_datagrid1_data   sbgrid_output_column" style="height:19px;"><div class="sbgrid_datagrid_Output" id="datagrid1_2_1_data" style="word-wrap:normal;"><span style="white-space:nowrap;">서울제2019-02-00420호</span></div></td><td sbgrid_select="false" rownum="datagrid1_2" colnum="datagrid1_2" cellid="datagrid1.2.2" targetcell="who" id="SBHE_datagrid1_2_2" cellname="datagrid1_dc " class="sbgrid_datagrid_DataCell sbgrid_datagrid1_col_datagrid1_col2 sbgrid_datagrid1_data   sbgrid_output_column" style="height:19px;"><div class="sbgrid_datagrid_Output" id="datagrid1_2_2_data" style="word-wrap:normal;"><span style="white-space:nowrap;"></span></div></td><td sbgrid_select="false" rownum="datagrid1_2" colnum="datagrid1_3" cellid="datagrid1.2.3" targetcell="who" id="SBHE_datagrid1_2_3" cellname="datagrid1_dc " class="sbgrid_datagrid_DataCell sbgrid_datagrid1_col_datagrid1_col3 sbgrid_datagrid1_data   sbgrid_output_column" style="height:19px;"><div class="sbgrid_datagrid_Output" id="datagrid1_2_3_data" style="word-wrap:normal;"><span style="white-space:nowrap;">2019-08-26</span></div></td><td sbgrid_select="false" rownum="datagrid1_2" colnum="datagrid1_4" cellid="datagrid1.2.4" targetcell="who" id="SBHE_datagrid1_2_4" cellname="datagrid1_dc " class="sbgrid_datagrid_DataCell sbgrid_datagrid1_col_datagrid1_col4 sbgrid_datagrid1_data   sbgrid_output_column" style="height:19px;"><div class="sbgrid_datagrid_Output" id="datagrid1_2_4_data" style="word-wrap:normal;"><span style="white-space:nowrap;">2,745,500,000</span></div></td><td sbgrid_select="false" rownum="datagrid1_2" colnum="datagrid1_5" cellid="datagrid1.2.5" targetcell="who" id="SBHE_datagrid1_2_5" cellname="datagrid1_dc " class="sbgrid_datagrid_DataCell sbgrid_datagrid1_col_datagrid1_col5 sbgrid_datagrid1_data   sbgrid_output_column" style="height:19px;"><div class="sbgrid_datagrid_Output" id="datagrid1_2_5_data" style="word-wrap:normal;"><span style="white-space:nowrap;">2025</span></div></td></tr></tbody></table><div class="sbgrid_ScrollDiv" style="height: 68px;"></div></div><div id="SBHE_DATAGRID_EMPTY_RECORDS_datagrid1" class="sbgrid_datagrid_GridWhole" style="background-color: white; height: 152px; top: 28px; overflow: hidden; display: none;"><table id="SBHE_DATAGRID_EMPTY_RECORDS_TABLE_datagrid1" style="width:100%; height:100%; text-align:center"><tbody><tr><td>표시할 데이터가 없습니다.</td></tr></tbody></table></div><div id="SBHE_DATAGRID_FIXED_FROZEN_SCROLLING_ROW_datagrid1" onselectstart="return false;" class="sbgrid_datagrid_GridFFS sbgrid_datagrid_LayoutDiv" style="width: 937px; height: 28px;"><table id="SBHE_DATAGRID_FFS_TABLE_datagrid1" onselectstart="return false" cellpadding="0" cellspacing="0" border="0" width="730px" class="sbgrid_datagrid_GridFFS_table"><colgroup id="SBHE_DATAGRID_FFS_COLGROUP_datagrid1"><col style="width:190px" colnum="datagrid1_0" targetcol="ffs"><col style="width:120px" colnum="datagrid1_1" targetcol="ffs"><col style="width:100px" colnum="datagrid1_2" targetcol="ffs"><col style="width:120px" colnum="datagrid1_3" targetcol="ffs"><col style="width:120px" colnum="datagrid1_4" targetcol="ffs"><col style="width:80px" colnum="datagrid1_5" targetcol="ffs"></colgroup><tbody id="SBHE_DATAGRID_FFS_TBODY_datagrid1"><tr rownum="datagrid1_0" targetcell="ffs"><td sbgrid_select="false" rownum="datagrid1_0" colnum="datagrid1_0" cellid="datagrid1.0.0" targetcell="ffs" id="SBHE_datagrid1_0_0" cellname="datagrid1_fc " class="sbgrid_datagrid_FixedCell sbgrid_datagrid1_fixed " style="height:27px;"><span style="border-color: transparent;"><span style="white-space:nowrap;">공종명/[업종코드]</span></span></td><td sbgrid_select="false" rownum="datagrid1_0" colnum="datagrid1_1" cellid="datagrid1.0.1" targetcell="ffs" id="SBHE_datagrid1_0_1" cellname="datagrid1_fc " class="sbgrid_datagrid_FixedCell sbgrid_datagrid1_fixed " style="height:27px;"><span style="border-color: transparent;"><span style="white-space:nowrap;">면허정보</span></span></td><td sbgrid_select="false" rownum="datagrid1_0" colnum="datagrid1_2" cellid="datagrid1.0.2" targetcell="ffs" id="SBHE_datagrid1_0_2" cellname="datagrid1_fc " class="sbgrid_datagrid_FixedCell sbgrid_datagrid1_fixed " style="height:27px;"><span style="border-color: transparent;"><span style="white-space:nowrap;">행정처분기관구분</span></span></td><td sbgrid_select="false" rownum="datagrid1_0" colnum="datagrid1_3" cellid="datagrid1.0.3" targetcell="ffs" id="SBHE_datagrid1_0_3" cellname="datagrid1_fc " class="sbgrid_datagrid_FixedCell sbgrid_datagrid1_fixed " style="height:27px;"><span style="border-color: transparent;"><span style="white-space:nowrap;">등록일자</span></span></td><td sbgrid_select="false" rownum="datagrid1_0" colnum="datagrid1_4" cellid="datagrid1.0.4" targetcell="ffs" id="SBHE_datagrid1_0_4" cellname="datagrid1_fc " class="sbgrid_datagrid_FixedCell sbgrid_datagrid1_fixed " style="height:27px;"><span style="border-color: transparent;"><span style="white-space:nowrap;">시공능력평가액</span></span></td><td sbgrid_select="false" rownum="datagrid1_0" colnum="datagrid1_5" cellid="datagrid1.0.5" targetcell="ffs" id="SBHE_datagrid1_0_5" cellname="datagrid1_fc " class="sbgrid_datagrid_FixedCell sbgrid_datagrid1_fixed " style="height:27px;"><span style="border-color: transparent;"><span style="white-space:nowrap;">기준년도</span></span></td></tr></tbody></table></div><div id="SBHE_DATAGRID_FIXED_FROZEN_NOSCROLLING_ROW_datagrid1" onselectstart="return false;" class="sbgrid_datagrid_GridFFS sbgrid_datagrid_LayoutDiv" style="width: 1px; height: 28px;"><table id="SBHE_DATAGRID_FFNS_TABLE_datagrid1" onselectstart="return false" cellpadding="0" cellspacing="0" border="0" width="1px" height="100%" class="sbgrid_datagrid_GridFFS_table"><colgroup id="SBHE_DATAGRID_FFN_COLGROUP_datagrid1"></colgroup><tbody id="SBHE_DATAGRID_FFN_TBODY_datagrid1"><tr rownum="datagrid1_0" targetcell="ffn"></tr></tbody></table></div><div id="SBHE_DATAGRID_FIXED_FROZEN_COL_datagrid1" onselectstart="return false;" class="sbgrid_datagrid_GridFFC sbgrid_datagrid_LayoutDiv" style="top: 28px; width: 1px; height: 170px;"><table id="SBHE_DATAGRID_FFC_TABLE_datagrid1" onselectstart="return false" cellpadding="0" cellspacing="0" border="0" width="1px" class="sbgrid_datagrid_GridWhole_table" style="top: 0px;"><colgroup id="SBHE_DATAGRID_FFCOL_COLGROUP_datagrid1"></colgroup><tbody id="SBHE_DATAGRID_FFCOL_TBODY_datagrid1"><tr rownum="datagrid1_1" targetcell="ffc"></tr><tr rownum="datagrid1_2" targetcell="ffc"></tr></tbody></table><div class="sbgrid_ScrollDiv" style="height: 40px;"></div></div><div id="scrollTopIcon_datagrid1" class="sbgrid_scrollVIcon_UP" style="margin-top: 30px; margin-left: 448.5px;"></div><div id="scrollBottomIcon_datagrid1" class="sbgrid_scrollVIcon_DOWN" style="margin-top: 130px; margin-left: 448.5px;"></div><div id="scrollLeftIcon_datagrid1" class="sbgrid_scrollHIcon_LEFT" style="margin-top: 83px; margin-left: 15px;"></div><div id="scrollRightIcon_datagrid1" class="sbgrid_scrollHIcon_RIGHT" style="margin-top: 83px; margin-left: 887px;"></div><input id="SBHE_datagrid1_input" decimalformatinsert="false" class="sbgrid_datagrid_Input" title="" maxlength="2147483647" style="visibility: hidden;" type="text"><textarea id="SBHE_datagrid1_textarea" col="10" row="2" class="sbgrid_datagrid_Textarea sbgrid_scroll" title="" onscroll="SBGrid.DEF._W_onProcessEvent(window.event, 'onscroll', this.id.replace('SBHE_', ''))" style="height: 30px; visibility: hidden;"></textarea><img alt="" src="/sbGrid/kr/co/softbowl/image/datagrid/wait.gif" class="sbgrid_datagrid_LoadingImg" style="left: 439.5px; top: 83px;"><div class="sbgrid_datagrid_MergeTable"><table><tbody><tr><td></td></tr></tbody></table></div><div id="SBHE_DATAGRID_FIXED_FROZEN_BOTTOM_SCROLLING_ROW_datagrid1" class="sbgrid_datagrid_GridFFB sbgrid_datagrid_LayoutDiv" style="width: 937px; top: 198px; height: 0px;"><table onselectstart="return false" cellpadding="0" cellspacing="0" border="0" class="sbgrid_datagrid_GridFFS_table" style="width:730px" width="730pxpx"><colgroup id="SBHE_DATAGRID_FFBS_COLGROUP_datagrid1"><col style="width:190px" colnum="datagrid1_0" targetcol="ffbs"><col style="width:120px" colnum="datagrid1_1" targetcol="ffbs"><col style="width:100px" colnum="datagrid1_2" targetcol="ffbs"><col style="width:120px" colnum="datagrid1_3" targetcol="ffbs"><col style="width:120px" colnum="datagrid1_4" targetcol="ffbs"><col style="width:80px" colnum="datagrid1_5" targetcol="ffbs"></colgroup><tbody><tr><td></td></tr></tbody></table></div><div id="SBHE_DATAGRID_FIXED_FROZEN_BOTTOM_NOSCROLLING_ROW_datagrid1" class="sbgrid_datagrid_GridFFB sbgrid_datagrid_LayoutDiv" style="width: 1px; height: 0px; top: 198px;"><table onselectstart="return false" cellpadding="0" cellspacing="0" border="0" class="sbgrid_datagrid_GridFFBN_table" width="1px"><colgroup id="SBHE_DATAGRID_FFBN_COLGROUP_datagrid1"></colgroup><tbody id="SBHE_DATAGRID_FFBN_TBODY_datagrid1"><tr><td></td></tr></tbody></table></div></div><div id="SBHE_DATAGRID_PARENT_FOOTER_SCROLLING_ROW_datagrid1" class="sbgrid_boxsizing sbgrid_Footer_div" tabindex="0" style="width: 100%; display: none; outline: none; height: 0px;"><div id="SBHE_DATAGRID_FOOTER_SCROLLING_ROW_datagrid1" class="sbgrid_datagrid_GridFS sbgrid_datagrid_LayoutDiv" style="width: 937px;"><table onselectstart="return false" id="SBHE_DATAGRID_FOOTER_TABLE_datagrid1" cellpadding="0" cellspacing="0" border="0" class="sbgrid_datagrid_GridFFS_table" width="730px"><colgroup id="SBHE_DATAGRID_FS_COLGROUP_datagrid1"><col style="width:190px" colnum="datagrid1_0" targetcol="who"><col style="width:120px" colnum="datagrid1_1" targetcol="who"><col style="width:100px" colnum="datagrid1_2" targetcol="who"><col style="width:120px" colnum="datagrid1_3" targetcol="who"><col style="width:120px" colnum="datagrid1_4" targetcol="who"><col style="width:80px" colnum="datagrid1_5" targetcol="who"></colgroup><tbody></tbody></table></div></div></div>
+		
+		
+		
+		
+			
+	
+
+
+	<p class="post_stit">첨부서류</p>
+	<div class="tbl_list bd taC">
+		<table summary="목록테이블">
+			<colgroup>
+				<col width="10%">
+				<col>
+				<col>
+			</colgroup>
+			<thead>
+				<tr>
+					<th scope="col">순번</th>
+					<th scope="col">첨부서류명</th>
+					<th scope="col">첨부파일명</th>
+				</tr>
+			</thead>
+			<tbody>
+				
+					<tr>
+						<td>1</td>
+						<td class="taL">공고문안</td>
+						<td class="taL">
+							<a href="/common/downloadSes.do?fileIdxx=UP20250023242207">
+							입찰공고문(25-1456)전기.zip
+						</a></td>
+					</tr>
+				
+					<tr>
+						<td>2</td>
+						<td class="taL">기타첨부1</td>
+						<td class="taL">
+							<a href="/common/downloadSes.do?fileIdxx=UP20250023242208">
+							참고자료(25-1456)전기공사.zip
+						</a></td>
+					</tr>
+				
+			</tbody>	
+		</table>
+	</div>
+
+
+		
+		
+	<p class="post_stit">보증금 내역</p>
+	<p class="data_desc" id="GN_INFO"></p>	
+		
+	<div class="tbl_data bd">
+		<table summary="상세테이블">
+			<colgroup>
+				<col width="17%">
+				<col>
+				<col width="17%">
+				<col>
+			</colgroup>
+			<tbody>
+				<tr>
+					<th scope="row"><font color="red">*</font> 보증금납부방법</th>
+					<td>
+						<select name="grnt_mthd" id="grnt_mthd" title="보증금납부방법 선택하세요">
+							<option value="" selected="selected">선택</option><option value="A">보증보험</option><option value="B">주식</option><option value="C">증권</option><option value="D">채권</option><option value="E">전자보증서</option><option value="F">예금증서</option><option value="G">금융기관지급보증서</option><option value="H">세입세출외현금</option><option value="I">자본재공제조합</option><option value="J">Stand By L/C</option><option value="K">공제조합보증서 </option><option value="L">신용보증기금</option><option value="M">보증금면제</option><option value="N">방진회</option><option value="Q">중소기업중앙회</option>
+						</select>
+					</td>
+					<th scope="row">증권번호</th>
+					<td id="GN">
+
+
+
+
+						<input type="text" name="bond_numb" id="bond_numb" title="증권번호" maxlength="30" style="">
+
+						
+						
+					</td>
+				</tr>
+					
+				<tr>
+					<th scope="row">보증금면제사유</th>
+					<td colspan="3">
+						<select name="gram_excd" id="gram_excd" title="보증금면제사유 선택하세요" disabled="disabled">
+							<option value="" selected="selected">선택</option><option value="A">1호:국가기관및지방자치단체</option><option value="B">2호:공공기관</option><option value="C">3호:정부출연법인</option><option value="D">4호:농협,수협,산림조합,중소기업의 협동조합 및 중앙회, 한국농어촌공사</option><option value="E">5호:건설산업기본법 등에 따른 등록법인, 저탄소녹색성장기본법 해당</option><option value="F">6호:낙찰자로 결정된 후 계약체결을 기피할 우려가 없다고 인정되는 자</option><option value="G">[방위사업청] 입찰참가등록 마감일 현재 1년 이상 당해 사업을 영위함</option><option value="H">물품구매(제조)입찰유의서 제6조 ④항 2호에 해당하는 법인</option><option value="I">공사입찰유의서 제7조 ⑤항 2호에 해당하는 법인</option><option value="J">용역입찰유의서 제6조 ④항 2호에 해당하는 법인</option><option value="K">입찰보증금 면제사유 확약서 제출</option>
+						</select>
+						<button class="btn_tbGray" id="btn_gram_excd_detail">면제여부상세설명</button>
+					</td>
+				</tr>
+				<tr>
+					<th scope="row"><font color="red">*</font> 입찰보증금</th>
+					<td><input type="text" name="bidx_gram" id="bidx_gram" title="입찰보증금" maxlength="15" value="" class="w85p" style=""> 원</td>
+					<td colspan="2"><input type="text" name="han_money" id="han_money" title="입찰보증금" class="w85p" readonly="readonly" style=""></td>
+				</tr>
+				<tr>
+					<th scope="row">투찰가능금액</th>
+					<td colspan="3" id="test"><input type="text" name="bid_range_money" id="bid_range_money" title="투찰가능금액" readonly="readonly" disabled="disabled" style=""> 원</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	
+	<div class="cnt_boxG">
+		<ul>
+			<li>※ 입찰보증금 면제사유 선택 시 입찰공고문 및 관련 법규를 반드시 확인하시고, 관련 사항은 발주기관에 문의하시기 바랍니다.</li>
+			<li>전자보증서를 신청하신 경우, 납부방법을 전자보증서로 선택하면 전자보증서가 자동으로 입력됩니다.</li>
+			<li>(여러개의 보증서를 신청하신 경우 그 중 한개를 선택하셔야 합니다.)</li>
+			<li>전자보증서 발급 이후, 해당 전자보증서 정보에 대한 수신은 약 15분정도 소요됩니다.</li>
+			<li>전자보증서가 아닌경우에는 보증금 납부방법을 보증보험으로 선택하시고 증권번호와 입찰보증금을 직접 입력하시면 됩니다.</li>
+		</ul>
+	</div>
+	
+	<p class="post_stit">
+		첨부서류
+		<span class="fz12 ml10">※ 첨부서류 찾아보기 후 추가 버튼을 눌러주셔야 합니다. (건당 크기 10MB 미만 파일만 첨부가능합니다.) ※ 스캔 파일은 파일압축해서 업로드 부탁드립니다.</span>
+	</p>
+	
+	<form id="frm_file" method="post" enctype="multipart/form-data" name="db5231e936edbcf65" data-nppfs-form-id="db5231e936edbcf65"><div class="nppfs-elements" style="display:none;"></div>
+	
+
+
+	
+	
+		
+	
+
+
+<div class="tbl_data bd">
+	<table summary="상세테이블">
+		<colgroup>
+			<col width="20%">
+			<col>
+		</colgroup>
+		<tbody>
+			<tr>
+				<th scope="row">첨부파일</th>
+				<td>
+					<ul>
+						<li>
+                               <select name="select_atchCode" id="select_atchCode" style="display: none"></select>
+                                <input type="file" name="atchmnfl" id="input_file_basic1" title="첨부파일" style="">
+						</li>											
+					</ul>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+<div class="tbl_list bd taC">
+	<table summary="목록테이블">
+		<colgroup>
+			<col width="46%">
+			<col width="46%">
+			<col width="8%"><!-- 삭제버튼 -->
+		</colgroup>
+		<thead>
+			<tr>
+				<th scope="col">첨부서류명</th>
+				<th scope="col">첨부파일명</th>
+				<th scope="col">삭제</th>
+			</tr>
+		</thead>
+		<!-- 파일첨부 조회 데이터 -->
+		<tbody id="files_list_basic1">
+			
+		</tbody>
+		<!-- MultiSelector 사용 HTML -->
+		<tbody style="display:none">
+			<tr>
+				<td><input type="text" name="newFileKonm" title="첨부서류명" class="w100p" value="" style=""></td>
+				<td name="fileName"></td>
+				<!-- 삭제버튼은 자동추가 -->
+			</tr>
+		</tbody>	
+	</table>
+</div>
+	</form>
+	
+	<p class="post_stit">문의처</p>
+	<!-- tbl_list -->
+	<div class="tbl_list bd taC">
+		<table summary="목록테이블">
+			<colgroup>
+<!-- 				<col> -->
+				<col>
+				<col>
+			</colgroup>
+			<thead>
+				<tr>
+<!-- 					<th scope="col">부서명</th> -->
+					<th scope="col">담당자</th>
+					<th scope="col">연락처</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+
+					<td>권명진</td>
+
+
+
+					<td>00-0000-0000</td>
+	
+						
+					
+				</tr>
+			</tbody>	
+		</table>
+	</div>
+	
+	<p class="post_stit">약관동의</p>
+	<div class="cnt_boxG">
+		<p class="mb5">
+			 <input type="checkbox" name="bidAttention_check" id="bidAttention_check" title="선택" style=""> 
+			 <span class="fblue fwb">
+<!-- 			 	<a href="javascript:fn_bidAttention1();">국방전자조달시스템 이용에 관한 약관</a>,  -->
+<!-- 			    <a href="javascript:fn_bidAttention2();">국방전자조달시스템 전자입찰 특별유의서</a>,  -->
+			    <a href="http://www.law.go.kr/행정규칙/국방전자조달시스템이용에관한약관" target="_blank" title="이용약관">국방전자조달시스템 이용에 관한 약관</a>,
+				<a href="http://www.law.go.kr/행정규칙/국방전자조달시스템전자입찰특별유의서" target="_blank" title="특별유의서">국방전자조달시스템 전자입찰 특별유의서</a>,
+			    <a href="javascript:fn_bidAttention3();">행정정보 공동이용 사전동의서</a></span>에 동의함 
+		</p>
+	</div>
+	
+	<div class="cnt_boxG">
+		<ul>
+			<li><font color="blue">※ 유의사항 : 인증확인은 <font color="red">법인인증서</font>만 사용가능합니다.(로그인시 사용  <font color="red">인증서(법인인증서)</font>로 모든 인증을 하셔야 합니다.)</font></li>
+			<li><font color="red">(** 입찰참가신청이 되지 않거나 문의 사항은 도움말버튼을 클릭하세요.) </font></li>
+
+		</ul>
+	</div>
+		
+		
+		
+	<!-- btn_area -->
+	<div class="btn_wrapR">
+		<button type="button" class="btn_lGray" id="btn_wrt">신청</button>
+		<button type="button" class="btn_lGray back" id="btn_cancel">취소</button>
+	</div>
+	<!-- //btn_area -->
+</div>
+
+
+<div class="layer_wrap" tabindex="0" id="comfort_confirm_add" style="display: none;">
+	<div class="bg"></div>
+	<div id="layer" class="pop_layer w630">
+		<div class="pop_header"><p>보증금 동의문</p></div>
+		<div class="pop_container">
+			<div class="pop_content">
+				<!-- contents -->
+				<div class="pop_post">
+					<p class="post_stit">입찰보증금 지급확약서</p>
+					<div class="cnt_boxG">
+						<ul class="list_dot">
+							<li>상기 입찰에 참여함에 있어 낙찰된 이후 정당한 의무를 이행하지 못하여 입찰보증금을 국고에 귀속하여야
+							할 사유가 발생하였을 경우에는 국가를 당사자로 하는 계약에 관한 법률 시행령 제38조제2항에 의거 입찰
+							보증금을 지체없이 현금으로 귀 부대(기관)에 납부할 것을 확약합니다.</li>
+							<li>만일 귀 부대(기관)에서 지정하는 기일까지 입찰보증금을 납부하지 아니 할 경우에는 귀 부대(기관)의
+							일방적인 공제조치는 물론 어떠한 법적 구상 및 제재 조치에도 하등의 이의가 없음을 확약합니다.</li>
+						</ul>
+					</div>
+					<p class="taR"><input type="checkbox" name="a2" id="c_box2" title="선택" style=""><label for="a2">동의함</label></p>
+					<p class="post_stit">입찰보증금 면제사유 확약서</p>
+					<!-- tbl_data -->
+					<div class="tbl_data">
+						<table summary="상세테이블">
+							<colgroup>
+								<col width="25%">
+								<col>
+							</colgroup>
+							<tbody>
+								<tr>
+									<th scope="row">시행령 37조 3항</th>
+									<td>
+									1. 국가기관 및 지방자치단체
+          <br>2. 「공공기관의 운영에 관한 법률」에 따른 공공기관
+	      <br>3.  국가 또는 지방자치단체가 기본재산의 100분의 50이상을 출연 또는 출자(법률의 규정에 의하여 귀속시킨 경우를 포함한다. 이하 같다)한 법인
+	      <br>4. 「농업협동조합법」에 의한 조합 · 조합공동사업법인 및 그 중앙회(농협경제지주회사 및 그 자회사를 포함한다), 「수산업협동조합법」에 따른 어촌계 · 수산업협동조합 및 그 중앙회, 「산림조합법」에 따른 산림조합 및 그 중앙회, 「중소기업협동조합법」에 따른 중소기업협동조합 및 그 중앙회
+	      <br>5. 「건설산업기본법」 · 「전기공사업법」 · 「정보통신공사업법」 · 「건설폐기물의 재활용촉진에 관한 법률」 · 「골재채취법」 또는 「문화재수리 등에 관한 법률」 등의 법령에 의하여 등록등을 한 자로서 기획재정부장관이 정하는 기준에 해당되는 자
+	      <br>5의2. 「저탄소 녹색성장 기본법」 제32조제2항에 따라 녹색기술 · 녹색사업에 대한 적합성 인증을 받거나 녹색전문기업으로 확인을 받은 자 중 기획재정부장관이 정하는 기준에 해당하는 자
+	      <br>6. 기타 경쟁입찰에서 낙찰자로 결정된 후 계약체결을 기피할 우려가 없다고 인정되는 자
+									</td>
+								</tr>
+								<tr>
+									<th scope="row">계약예규<br>(공사입찰유의서)</th>
+									<td>
+									1. 시행령 제37조제3항제1호 내지 제4호 및 제6호에 정한 자가 입찰에 참가하는 경우
+          <br>2. 「건설산업기본법」·「전기공사업법」·「정보통신공사업법」 또는 「소방시설공사업법」등에 의하여 국가 또는 지방자치단체(이하 "국가기관 등"이라 한다)로부터 등록 등을 받아 입찰신청마감일 현재 해당 공사관련법령에 의한 사업을 영위하고 있는 법인이 입찰에 참가하는 경우 단, 입찰신청마감일 현재 사업영위기간이 1년 미만인 법인은 입찰참가자격제한 조치를 받은 사실이 없어야 함.
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<!-- //tbl_data -->
+					<p class="taR">본사(인)은 위의 입찰보증금 면제 사유에 해당됨을 확인 및 서약합니다. <input type="checkbox" name="a3" id="c_box3" title="선택" style=""><label for="a3">동의함</label></p>
+					<!-- btn_area -->
+					<div class="btn_wrapC">
+						<button type="button" class="btn_lGray conf" name="btn_pop_conf">확인</button>
+						<button type="button" class="btn_lGray clo comfort_confirm">닫기</button>
+					</div>
+					<!-- //btn_area -->
+				</div>
+				<!-- //contents -->
+			</div>
+		</div>
+		<button type="button" title="창 닫기" class="ico_lpx comfort_confirm"></button>
+	</div>
+</div>
+
+<div class="layer_wrap" tabindex="0" id="applInsp_confirm" style="display: none;">
+	<div class="bg"></div>
+	<div id="layer" class="pop_layer w450">
+		<div class="pop_header"><p>사후심사대상 입찰안내</p></div>
+		<div class="pop_container">
+			<div class="pop_content">
+				<!-- contents -->
+				<div class="pop_post">
+					<p class="post_ssti big">사후심사대상 입찰안내</p>
+					<div class="cnt_boxG">
+						<ul class="list_dot">
+							<li>해당입찰 건은 [입찰서제출 마감] 후 [등록심사]를 진행하는 입찰건으로 참가신청서 작성 후 등록심사 없이 입찰서를 제출합니다.</li>
+							<li>[공동이행방식]의 입찰은 [협정서제출] 시 입찰서를 제출할 수 있습니다.</li>
+							<li><font color="red">주의) 입찰서를 제출 후에는 참가신청서, 공동수급협정서, 입찰서를 변경 할 수 없습니다.</font></li>
+							<li>입찰서제출이 마감 후에 등록심사에서 탈락 시 개찰대상에서 제외됩니다.</li>
+							<li>-문의 :1577-1118(①) (전자입찰서비스 데스크)</li>
+						</ul>
+					</div>
+					<!-- btn_area -->
+					<div class="btn_wrapC">
+						<button type="button" class="btn_lGray" id="btn_apply_list">참가신청서작성목록</button>
+						<button type="button" class="btn_lGray" id="btn_submit_list">입찰서제출목록</button>
+						<button type="button" class="btn_lGray applInsp_confirm">닫기</button>
+					</div>
+					<!-- //btn_area -->
+				</div>
+				<!-- //contents -->
+			</div>
+		</div>
+		<button type="button" title="창 닫기" class="ico_lpx applInsp_confirm"></button>
+	</div>
+</div>
+
+<input type="hidden" id="commandMap" value="{&quot;ordr_year&quot;:&quot;2025&quot;,&quot;dprt_code&quot;:&quot;UMM&quot;,&quot;csrt_numb&quot;:&quot;2025-23171&quot;,&quot;dcsn_numb&quot;:&quot;2025-23171&quot;,&quot;anmt_numb&quot;:&quot;UMM1524&quot;,&quot;rqst_degr&quot;:&quot;1&quot;,&quot;popn_seqn&quot;:&quot;&quot;,&quot;ptcp_bidx_date&quot;:&quot;&quot;,&quot;pageDivs&quot;:&quot;E1&quot;,&quot;pageDivs2&quot;:&quot;ANNOUNCE&quot;,&quot;lv1_divs&quot;:&quot;PEB&quot;,&quot;subcont_dir_pay_yn&quot;:&quot;N&quot;,&quot;mnuf_code&quot;:&quot;J541B&quot;,&quot;pubKey&quot;:&quot;-----BEGIN CERTIFICATE-----\nMIIELjCCA5egAwIBAgICIiQwDQYJKoZIhvcNAQEFBQAwSDELMAkGA1UEBhMCS1Ix\nDTALBgNVBAoTBEtJQ0ExEzARBgNVBAsTCmxpY2Vuc2VkQ0ExFTATBgNVBAMTDFNp\nZ25HYXRlRlRDQTAeFw0wMjExMDQwMjUyMDBaFw0wMzAxMDQwMjUxNTlaMIGVMQsw\nCQYDVQQGEwJLUjENMAsGA1UEChMES0lDQTETMBEGA1UECxMKbGljZW5zZWRDQTEV\nMBMGA1UECwwM7YWM7Iqk7Yq4IFJBMRswGQYDVQQLDBLtlZzqta3soJXrs7Tsnbjs\npp0xEzARBgNVBAsMCuyXsOq1rDLtjIAxGTAXBgNVBAMMEO2FjOyKpO2KuOyEnOuy\nhDEwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAM8Ca9r4AuOXrUnO2TRkYBom\nonvYeIGCgaFsadGdvjUqWnA6n7EChJ6p1iyP4Y1cO29gI/97XcSGNYddkVy+6rmq\n/ihVT7Nny1Qt9aknjgYOOL9mAGSJotDluYfYEUswuu2zvlWwJgMMF12aGFEqGGVM\n8u0q/YVGaDGEJNP/96UzAgMBAAGjggHXMIIB0zAfBgNVHSMEGDAWgBQRvsna3HAZ\nZ1NQ51pdFfFlkTvqPDAdBgNVHQ4EFgQU8dLGs7zyQz4ZVxyJMdKuCcMwG4UwDgYD\nVR0PAQH/BAQDAgUgMAwGA1UdEwEB/wQCMAAwFwYDVR0gBBAwDjAMBgoqgxqMmkQF\nAgEUMIG6BgNVHREEgbIwga+kHTAbMRkwFwYDVQQDDBDthYzsiqTtirjshJzrsoQx\noDgGA1UEBKAxEy9zbj0rYmNoSnljQUZadStqemZVak1nSVBUUlkxbmpWVGcxRDRm\nOUhzRmZ0dkIwPaBUBgkqgxqMmkQKAQGgRzBFDBDthYzsiqTtirjshJzrsoQxMDEw\nLwYKKoMajJpECgEBATAhMAcGBSsOAwIaoBYEFEWKcT4n5Pxr5B86vl7Zzv4wKloQ\nMFUGA1UdHwROMEwwSqBIoEaGRGxkYXA6Ly9tb29uLnNpZ25nYXRlLmNvbS9vdT1k\ncDZwMyxvdT1jcmxkcCxvdT1saWNlbnNlZENBLG89S0lDQSxjPUtSMEYGCCsGAQUF\nBwEBBDowODA2BggrBgEFBQcwAYYqaHR0cDovL3NhdHVybi5zaWduZ2F0ZS5jb206\nOTAyMC9PQ1NQU2VydmVyMA0GCSqGSIb3DQEBBQUAA4GBAFeJI3o+0t+lhxRleLU1\ngJIYfiei9KHBh1cCSiXUAZMhZFV/jTJJha+CT6Sy0s0gKLmZ8zc3k+PQFAKGCAVH\nMmK4Y1SAbwi2x5JhRYncGXTKrR/rDQIzS1GoXHczmsy6ozlHtxRkO5Q9UAjGD4nR\nnKD6MtxCAYC9d26E7BTVGDWz\n-----END CERTIFICATE-----\n&quot;,&quot;pkiExpt&quot;:&quot;&quot;,&quot;bionCert&quot;:&quot;0&quot;,&quot;excpCode&quot;:&quot;&quot;,&quot;frgnYsno&quot;:&quot;N&quot;,&quot;bidnType&quot;:&quot;2&quot;,&quot;userIden&quot;:&quot;4078700819lhj97&quot;,&quot;userName&quot;:&quot;이휘재&quot;,&quot;admLogin&quot;:&quot;&quot;,&quot;notComBio&quot;:&quot;20291231&quot;,&quot;loginTime&quot;:&quot;20251127135519&quot;,&quot;userKmCert&quot;:&quot;-----BEGIN CERTIFICATE-----\r\nMIIFnzCCBIegAwIBAgIEB4y+izANBgkqhkiG9w0BAQsFADBKMQswCQYDVQQGEwJL\r\nUjENMAsGA1UECgwES0lDQTEVMBMGA1UECwwMQWNjcmVkaXRlZENBMRUwEwYDVQQD\r\nDAxzaWduR0FURSBDQTYwHhcNMjUwMzE4MDczMTEzWhcNMjYwMzIxMTQ1OTU5WjCB\r\nrTELMAkGA1UEBhMCS1IxDTALBgNVBAoMBEtJQ0ExFTATBgNVBAsMDEFjY3JlZGl0\r\nZWRDQTEXMBUGA1UECwwOY29ycG9yYXRpb240RUMxDDAKBgNVBAsMA0hOQjELMAkG\r\nA1UECwwCamkxRDBCBgNVBAMMO+yjvOyLne2ajOyCrCDsp4DsnYzsj6DrnbzthYzt\r\ngawoamkpMDA4MTA1MTIwMjIwMzIxNTgxMDAwNzQyMIIBIjANBgkqhkiG9w0BAQEF\r\nAAOCAQ8AMIIBCgKCAQEAv1z4EE10nQGtMsfjqC6/WSMIfRxZT+p1sZ2hnKxzSVWH\r\nRF9KHMkW1HJdi/ywWXo0OG2wkn80v01wbtUMMi4/48Nc+w41ClbxU9wuGrsQHrK/\r\neBZSl9n9/AUUyQv8enQIUtj9W5WQrol8asmunvEWJJ5a7ym7uetWHnvROwLKZJGh\r\nDYr1tNmytkOIrAK2UhsqAWi9lKS5WHLGhSmmq/5Vs6wPHOvEVaw2YIIItz7dYDgr\r\nmSvlv9FCkY2BVMTvcqk1FMOBuBHgDLzZWmsPNdZWrrpmw+afiP2zssyh5DxavTk1\r\ns+2PvR1aHG/faZ3/kRkGZ0tD5I+o4HrUFUbgAPTPlQIDAQABo4ICJzCCAiMwgY8G\r\nA1UdIwSBhzCBhIAUQSUB2+0OyDMrie9KatwQBdLJom+haKRmMGQxCzAJBgNVBAYT\r\nAktSMQ0wCwYDVQQKDARLSVNBMS4wLAYDVQQLDCVLb3JlYSBDZXJ0aWZpY2F0aW9u\r\nIEF1dGhvcml0eSBDZW50cmFsMRYwFAYDVQQDDA1LSVNBIFJvb3RDQSA0ggIQMTAd\r\nBgNVHQ4EFgQU44VWgXdXFw9+YQOr+gLd8mF3Y1YwDgYDVR0PAQH/BAQDAgUgMBcG\r\nA1UdIAQQMA4wDAYKKoMajJpEBQIBATCBnwYDVR0RBIGXMIGUoIGRBgkqgxqMmkQK\r\nAQGggYMwgYAMO+yjvOyLne2ajOyCrCDsp4DsnYzsj6DrnbzthYztgawoamkpMDA4\r\nMTA1MTIwMjIwMzIxNTgxMDAwNzQyMEEwPwYKKoMajJpECgEBATAxMAsGCWCGSAFl\r\nAwQCAaAiBCBPJqUCX3Ygqz797nU2EoMWM8E88LQemzw7RzB0R3X5CDBfBgNVHR8E\r\nWDBWMFSgUqBQhk5sZGFwOi8vbGRhcC5zaWduZ2F0ZS5jb206Mzg5L291PWRwOHAx\r\nOTE2NSxvdT1jcmxkcCxvdT1BY2NyZWRpdGVkQ0Esbz1LSUNBLGM9S1IwRAYIKwYB\r\nBQUHAQEEODA2MDQGCCsGAQUFBzABhihodHRwOi8vb2NzcC5zaWduZ2F0ZS5jb206\r\nOTAyMC9PQ1NQU2VydmVyMA0GCSqGSIb3DQEBCwUAA4IBAQB+yt1nRJDK7cFQtwCk\r\nQxO+BUXIdjCd9/hqMnul+RMyraPZm/TOUptWm57vQY43Y5nmBsEx/IBi8AvlMGir\r\nq4lOILE0uabO2vpKShJFtJ4fzfErRBZZGz87UFpD7eGw+b6MIDV9RjrGTpy+dfo3\r\nVdDrTQV0nw9XCd+z06e9srhfdPlSL5Pd0ydtH+SLmlXtEkqOvdfgIzgePds8HDNX\r\nn0Doru48dGN9ivF28+1faUNCt4e1vv8v8FKBxJHXoA1nK8Tw+JgOKvc6A6nvI78V\r\nNDmxqmOynjUH3E4kBBwxtcPLztUW6byqFnTLsasXe/a3FtfyCcjfKcISMMvpca7F\r\nLfGh\r\n-----END CERTIFICATE-----&quot;,&quot;notComBioYyyymmdd&quot;:&quot;2029/12/31 00:00&quot;,&quot;fingYsnoComBio&quot;:&quot;P&quot;,&quot;boolNotComBio&quot;:true,&quot;mbct_bdnb&quot;:&quot;2025UMM15242025-23171&quot;,&quot;bzns_rgnb&quot;:&quot;4078700819&quot;,&quot;rsdt_rgnb&quot;:&quot;6505081923912&quot;,&quot;gongJong&quot;:true,&quot;query_date&quot;:&quot;0000&quot;,&quot;user_iden&quot;:&quot;gongsa11&quot;,&quot;rqst_year&quot;:&quot;2025&quot;,&quot;anmt_divs&quot;:&quot;B&quot;,&quot;docm_numb&quot;:&quot;20251126_1524&quot;,&quot;mfkr_name&quot;:&quot;주식회사 지음쏠라테크&quot;}" style="">
+<input type="hidden" id="decisionInfo" value="{&quot;ordrYear&quot;:&quot;2025&quot;,&quot;anmtDate&quot;:&quot;20251126&quot;,&quot;fstAnmtDate&quot;:&quot;20251126&quot;,&quot;anmtDivs&quot;:&quot;B&quot;,&quot;codeVld6&quot;:&quot;긴급공고&quot;,&quot;anmtNumb&quot;:&quot;UMM1524&quot;,&quot;rqstDegr&quot;:&quot;1&quot;,&quot;bidxDate&quot;:&quot;20251202&quot;,&quot;bidxTime&quot;:&quot;1100&quot;,&quot;bidxCldt&quot;:&quot;20251201&quot;,&quot;bidxCltm&quot;:&quot;1100&quot;,&quot;bidxQlfy&quot;:&quot;Y&quot;,&quot;userIden&quot;:&quot;gongsa11&quot;,&quot;dprtCode&quot;:&quot;UMM&quot;,&quot;codeVld8&quot;:&quot;국군재정관리단&quot;,&quot;csrtName&quot;:&quot;25-A-00부대 전기공사(1456)&quot;,&quot;csrtBudi&quot;:&quot;1&quot;,&quot;codeVld1&quot;:&quot;일반공사&quot;,&quot;bidtCode&quot;:&quot;A&quot;,&quot;codeVld2&quot;:&quot;총액제&quot;,&quot;bidDecsMthd&quot;:null,&quot;codeVld9&quot;:null,&quot;contMthd&quot;:&quot;C&quot;,&quot;codeVld3&quot;:&quot;제한경쟁&quot;,&quot;bidnMthd&quot;:&quot;J&quot;,&quot;codeVld4&quot;:&quot;제한적최저가격제&quot;,&quot;pdgnYsno&quot;:&quot;N&quot;,&quot;jdgnYsno&quot;:&quot;Y&quot;,&quot;jdgnYsno1&quot;:&quot;적격심사제&quot;,&quot;bugtAmnt&quot;:656255000,&quot;bidmDivs&quot;:&quot;E&quot;,&quot;codeVld5&quot;:&quot;전자입찰 &quot;,&quot;gongDong&quot;:&quot;N&quot;,&quot;csrtOvvw&quot;:&quot;행정시설 신축 등 3개동&quot;,&quot;scleName&quot;:&quot;3개동/㎡&quot;,&quot;loctFild&quot;:&quot;인천광역시 부평구 일신동&quot;,&quot;csrtProd&quot;:&quot;20211228~20251031&quot;,&quot;calcYsno&quot;:&quot;N&quot;,&quot;applInsp&quot;:&quot;Y&quot;,&quot;bidxStrt&quot;:null,&quot;bidxEndt&quot;:&quot;202512021000&quot;,&quot;cnt302&quot;:&quot;N&quot;,&quot;referNumb&quot;:&quot;2025UMM2025-23171&quot;,&quot;rebidYsno&quot;:&quot;N&quot;,&quot;chgeEndt&quot;:null,&quot;chgeBxdt&quot;:null,&quot;chgeBxtm&quot;:null,&quot;bidxDegr&quot;:&quot;01&quot;,&quot;gongQnty&quot;:null,&quot;edpsDttm&quot;:null,&quot;bidnYsno&quot;:&quot;N&quot;,&quot;minInveRate&quot;:null,&quot;appyDttm&quot;:null}" style="">
+<input type="hidden" id="firmInfo" value="{mnufCode=J541B, mfkrName=주식회사 지음쏠라테크, mbtc=null, mbtcName=null, rptrKore=박성균, rsdtRgnb=TqxI1N7zCBREnYg6LKTIVw==, bznsRgnb=4078700819, siteCode=14, siteName=인천광역시, emplNumb=6, selfFund=null, postNumh=21984, mfkrAddr=인천광역시 연수구 송도과학로80, 21층 102-2113호 (송도동,송도에이티센터), telpNumb=07046102635, corpRgnb=1101117756228, corpRdat=null, openDate=20180105, faxxNumb=0317712635, mnufMail=qpark0508@kakao.com, estbDate=20180105, firmRestrict=[], firmGongJong=[{mnufDivs=0037, statName=전기공사업, licnNumb=광주제01036호, cablAmnt=9429402000, crtrYear=2025, licnFrom=20180309, licnUntl=null, licnYsno=Y, codeVld2=null, usexYsno=null}, {mnufDivs=0040, statName=전문소방시설공사업, licnNumb=서울제2019-02-00420호, cablAmnt=2745500000, crtrYear=2025, licnFrom=20190826, licnUntl=null, licnYsno=N, codeVld2=null, usexYsno=null}], firmSilJuk=[]}" style="">
+<input type="hidden" id="applInsp" value="Y" style="">
+<input type="hidden" id="subcont_dir_pay_yn" value="N" style="">
+
+<input type="hidden" id="bid_deposit_len" value="0" style="">
+
+<input type="hidden" id="mnuf_count" value="6" style="">
+<input type="hidden" id="certInfo" value="" style="">
+<input type="hidden" id="userIden" value="4078700819lhj97" style="">
+
+
+<input type="hidden" id="bid_msg9" value="선택하신 입찰건의 입찰참가등록 마감일시가 지났습니다. 
+입찰참가등록이 불가능합니다." style="">
+<input type="hidden" id="bid_msg24" value="보증금납부방법을 선택하십시요." style="">
+<input type="hidden" id="bid_msg25" value="보증금납부방법이 면제인 경우 보증금면제사유를 선택하셔야 합니다." style="">
+<input type="hidden" id="bid_msg26" value="보증금납부방법이 면제인 경우에만 보증금면제사유를 선택하셔야 합니다." style="">
+<input type="hidden" id="bid_msg28" value="증권번호를 반드시 입력하셔야 합니다." style="">
+<input type="hidden" id="bid_msg56" value="선택하신 입찰건의 입찰참가등록 마감일시가 지났습니다. 
+입찰참가신청서 작성/수정이 불가능합니다." style="">
+<input type="hidden" id="bid_msg57" value="입찰참가신청서를 성공적으로 제출하였습니다.
+입찰참가신청 마감시간까지는 수정가능합니다." style="">
+<input type="hidden" id="bid_msg58" value="입찰참가신청서 입력/수정에 실패하였습니다.
+담당자에게 문의 바랍니다." style="">
+<input type="hidden" id="bid_msg46" value="입찰보증금액을 입력하세요." style="">
+<input type="hidden" id="anmt_date" value="20251126" style="">
+<input type="hidden" id="min_inve_rate" value="null" style="">
+
+<!-- 인증서 -->
+<input type="hidden" id="dn" value="" style="">
+<input type="hidden" id="certNo" value="" style="">
+			
+		
+		</div>
+
+		<div id="qmenu_wrap">
+			<h5><span>Quick</span>menu</h5>
+			<ul>
+				<li style="height: 85px;"><a href="/contents/info/domestic01.do?key=515" title="국내조달이용안내 새창열림">국내<br>조달<br>이용<br>안내</a></li>
+				<li style="padding-top: 15px;"><a href="#none" onclick="javascript:mockBidWindowOpen();" title="모의입찰 새창열림">모의<br>입찰</a></li>
+				<li style="padding-top: 13px;"><a href="#none" onclick="javascript:onlineEduWindowOpen();" title="전자입찰 온라인교육">온라인<br>교육</a></li>
+				<li style="padding-top: 10px;"><a href="http://kdsis.dapa.go.kr/" target="_blank" title="국방표준종합 새창열림">국방<br>표준<br>종합</a></li>
+				<li style="padding-top: 19px;"><a href="https://vpn.dapa.go.kr/" target="_blank" title="국방통합원가 새창열림">국방<br>통합<br>원가</a></li>
+				<li style="min-height: 30px; padding-top: 15px;"><a href="#none" class="quick_top" title="상단으로가기"></a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+
+
+<div id="SBHE_DATAGRID_SEARCHING_DATA_datagrid1" class="sbgrid_datagrid_SearchingData sbgrid_datagrid_SearchingData_LayoutDiv" style="left: 544.5px; top: 679px; border: 1px solid rgb(64, 64, 64); background-color: rgb(234, 239, 243); display: none;"><font size="2" style="margin-left:5px; margin-top:15px;">Find</font><input type="text" id="datagrid1_searchingData_inputtext" value="" style="width: 200px; margin-top: 5px; margin-left: 6px;"><input type="checkbox" id="datagrid1_searchingData_checkbox" style="border-style: none; margin-top: 10px; margin-left: 120px;"><font size="2">Match case(C)</font><input type="text" id="datagrid1_searchingData_resultTxt" value="Search result : " style="margin-left: 5px; width: 200px; background-color: rgb(234, 239, 243); border: none;" disabled="disabled"><input type="button" id="datagrid1_searchingData_NextSearchingBtn" class="sbgrid_datagrid_searchingdata_bnt" value="Find next(M)" style="margin-top: 14px; width: 115px; margin-left: 5px; background-color: rgb(135, 160, 187); color: rgb(255, 255, 255);"><input type="button" id="datagrid1_searchingData_CloseBtn" class="sbgrid_datagrid_searchingdata_bnt" value="Close" style="width: 115px; margin-left: 8px; background-color: rgb(135, 160, 187); color: rgb(255, 255, 255);"></div></body></html>
