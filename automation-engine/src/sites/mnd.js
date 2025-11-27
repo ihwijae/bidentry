@@ -1439,41 +1439,6 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   return { ok: true, page: workPage };
 }
 
-async function ensureMndRowSelection(page, emit) {
-  const rowSelectors = [
-    '#SBHE_DATAGRID_WHOLE_TABLE_datagrid1 tbody tr[rownum^="datagrid1_"]',
-    '#sbGridArea table tbody tr'
-  ];
-  let row = null;
-  for (const ratio of [0, 0.3, 0.6, 0.9]) {
-    if (!row) {
-      try {
-        await page.evaluate((r) => {
-          const doc = document.documentElement || document.body;
-          const h = doc?.scrollHeight || document.body?.scrollHeight || 0;
-          window.scrollTo?.(0, Math.max(0, Math.min(1, r)) * h);
-        }, ratio);
-      } catch {}
-      try { await page.waitForTimeout?.(200); } catch {}
-      row = await waitForMndElement(page, rowSelectors, { timeoutMs: 1500, visibleOnly: true });
-    }
-  }
-  if (!row) {
-    await dumpMndState(page, emit, 'apply_row_missing');
-    return null;
-  }
-  try {
-    const checkbox = await row.$('input[type="checkbox"], input[type="radio"]');
-    if (checkbox) {
-      const checked = await checkbox.isChecked?.().catch(() => false);
-      if (!checked) await checkbox.check?.({ force:true }).catch(() => checkbox.click({ force:true }));
-    } else {
-      await row.click({ force:true }).catch(() => {});
-    }
-  } catch {}
-  return row;
-}
-
 async function handleAgreementConfirmation(page, emit) {
   const agreementModal = await waitForMndElement(page, [
     '.layer-pop', '.modal', '.dialog', 'div[role="dialog"]', '.pop-layer'
@@ -1515,10 +1480,6 @@ async function handleAgreementConfirmation(page, emit) {
 
 async function applyMndAgreementAfterSearch(page, emit) {
   const log = (level, msg) => emit && emit({ type:'log', level, msg });
-  const row = await ensureMndRowSelection(page, emit);
-  if (!row) {
-    throw new Error('[MND] 협정자동신청 대상 목록을 찾지 못했습니다.');
-  }
   const scrollToSection = async (ratio = 1) => {
     try {
       await page.evaluate((r) => {
@@ -1530,14 +1491,27 @@ async function applyMndAgreementAfterSearch(page, emit) {
     } catch {}
     try { await page.waitForTimeout?.(200); } catch {}
   };
-  await scrollToSection(0.4);
-const selectDepositWaiver = async () => {
-  const waiverSelectors = [
-    'select[name*="guar" i]',
-    'select#grnt_mthd',
-    'select[id*="guar" i]',
-    'select:has(option:has-text("\uBAA8\uB4DD\uAE08\uBA74\uC81C"))'
-  ];
+  const ensureVisible = async (selectors, fallbackRatio = 0.5) => {
+    for (const sel of selectors) {
+      const handle = await page.$(sel).catch(() => null);
+      if (handle) {
+        try { await handle.scrollIntoViewIfNeeded?.(); }
+        catch { await handle.evaluate(el => el && el.scrollIntoView({ block: 'center', behavior: 'instant' })); }
+        await page.waitForTimeout?.(200).catch(() => {});
+        return handle;
+      }
+    }
+    await scrollToSection(fallbackRatio);
+    return null;
+  };
+  await ensureVisible(['p:has-text("\uBCF4\uC99D\uAE08 \uB0B4\uC5ED")', '#grnt_mthd', '#SBHE_datagrid1'], 0.4);
+  const selectDepositWaiver = async () => {
+    const waiverSelectors = [
+      'select[name*="guar" i]',
+      'select#grnt_mthd',
+      'select[id*="guar" i]',
+      'select:has(option:has-text("\uBAA8\uB4DD\uAE08\uBA74\uC81C"))'
+    ];
     const select = await waitForMndElement(page, waiverSelectors, { timeoutMs: 5000, visibleOnly: true });
     if (!select) {
       await dumpMndState(page, emit, 'deposit_select_missing');
@@ -1611,7 +1585,7 @@ const selectDepositWaiver = async () => {
       '#bidAttention_check',
       '#agreeTerms',
       'input[name*="terms" i]',
-      'input[type="checkbox"]:near(:text("약관"))'
+      'label:has-text("\uC57D\uAD00") input[type="checkbox"]'
     ];
     const checkbox = await waitForMndElement(page, termBoxes, { timeoutMs: 4000, visibleOnly: false });
     if (checkbox) {
@@ -1626,12 +1600,12 @@ const selectDepositWaiver = async () => {
     }
   };
   await ensureDepositWaiverPopup();
-  await scrollToSection(0.8);
+  await ensureVisible(['p:has-text("\uC57D\uAD00\uB3D9\uC758")', '#bidAttention_check', '#agreeTerms'], 0.8);
   await ensureTermsAgreement();
-  await scrollToSection(0.95);
+  await ensureVisible(['#btn_wrt', 'button:has-text("\uC2E0\uCCAD")'], 0.95);
   const applySelectors = [
-    'button:has-text("\uD611\uC815\uC790\uB3D9\uC2E0\uCCAD")',
-    'button:has-text("\uC790\uB3D9\uC2E0\uCCAD")',
+    '#btn_wrt',
+    'button:has-text("\uC2E0\uCCAD")',
     'a:has-text("\uC2E0\uCCAD")',
     '[role="button"]:has-text("\uC2E0\uCCAD")'
   ];
