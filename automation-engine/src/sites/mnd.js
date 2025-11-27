@@ -1441,8 +1441,8 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
 
 async function ensureMndRowSelection(page, emit) {
   const rowSelectors = [
-    'table tbody tr td:has-text("\uBB3C\uD488\uBA85")',
-    'table tbody tr'
+    '#SBHE_DATAGRID_WHOLE_TABLE_datagrid1 tbody tr[rownum^="datagrid1_"]',
+    '#sbGridArea table tbody tr'
   ];
   let row = null;
   for (const ratio of [0, 0.3, 0.6, 0.9]) {
@@ -1534,7 +1534,7 @@ async function applyMndAgreementAfterSearch(page, emit) {
   const selectDepositWaiver = async () => {
     const waiverSelectors = [
       'select[name*="guar" i]',
-      'select#guarDivs',
+      'select#grnt_mthd',
       'select[id*="guar" i]',
       'select:has(option:has-text("\uBAA8\uB4DD\uAE08\uBA74\uC81C"))'
     ];
@@ -1545,10 +1545,19 @@ async function applyMndAgreementAfterSearch(page, emit) {
     }
     try {
       await select.scrollIntoViewIfNeeded?.().catch(() => {});
-      await select.selectOption?.({ label: '보증금면제' }).catch(async () => {
-        await select.selectOption?.({ value: 'E' }).catch(() => select.type?.('보증금면제', { delay: 20 }));
-      });
+      const chosen = await select.selectOption?.({ value: 'M' }).catch(() => select.selectOption?.({ label: '보증금면제' }));
+      if (!chosen) {
+        await select.selectOption?.({ label: '보증금면제' }).catch(() => select.type?.('보증금면제', { delay: 20 }));
+      }
       await select.dispatchEvent?.('change').catch(() => {});
+      await page.evaluate(() => {
+        const reason = document.getElementById('gram_excd');
+        if (reason) {
+          reason.disabled = false;
+          if (!reason.value) reason.value = 'K';
+          reason.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      });
       log('info', '[MND] 보증금면제 옵션을 선택했습니다.');
     } catch (err) {
       log('warn', `[MND] 보증금면제 선택 실패: ${(err && err.message) || err}`);
@@ -1556,43 +1565,50 @@ async function applyMndAgreementAfterSearch(page, emit) {
     return true;
   };
   const ensureDepositWaiverPopup = async () => {
-    await selectDepositWaiver();
-    const ctx = typeof page.context === 'function' ? page.context() : null;
-    const popup = ctx ? ctx.pages().find(pg => {
-      try {
-        const url = typeof pg.url === 'function' ? pg.url() : '';
-        const title = typeof pg.title === 'function' ? pg.title().catch(() => '') : '';
-        return /guar|deposit|보증금/.test(url || '') || /보증금/.test(title || '');
-      } catch { return false; }
-    }) : null;
-    if (popup) {
-      try { await popup.waitForLoadState?.('domcontentloaded', { timeout: 5000 }); } catch {}
-      try { await popup.bringToFront?.(); } catch {}
-      try { await page.waitForTimeout?.(200); } catch {}
-      try {
-        await popup.evaluate(() => {
-          const mark = (el) => {
-            if (!el) return;
-            if (el.type === 'checkbox' || el.type === 'radio') {
-              el.checked = true;
-              el.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-          };
-          document.querySelectorAll('input[type="checkbox"]').forEach(mark);
-        });
-        const confirm = await popup.$('button:has-text("확인"), #btn_confirm');
-        if (confirm) {
-          await confirm.click({ force:true }).catch(() => confirm.evaluate(el => el && el.click()));
-        }
-      } catch (err) {
-        log('warn', `[MND] 보증금면제 팝업 처리 실패: ${(err && err.message) || err}`);
-      }
-      try { await popup.close?.({ runBeforeUnload: true }); } catch {}
-      await page.bringToFront?.().catch(() => {});
+    const selected = await selectDepositWaiver();
+    if (!selected) return;
+    const layerSel = '#comfort_confirm_add';
+    let layer = await page.$(layerSel);
+    const deadline = Date.now() + 4000;
+    while (layer && Date.now() < deadline) {
+      const visible = await layer.evaluate(el => {
+        const style = window.getComputedStyle(el);
+        return style && style.display !== 'none' && style.visibility !== 'hidden';
+      }).catch(() => false);
+      if (visible) break;
+      await page.waitForTimeout?.(200).catch(() => {});
+      layer = await page.$(layerSel);
     }
+    if (!layer) {
+      await dumpMndState(page, emit, 'deposit_popup_missing');
+      log('warn', '[MND] 보증금 면제 동의 팝업을 찾지 못했습니다.');
+      return;
+    }
+    try {
+      await page.evaluate(() => {
+        ['#c_box2', '#c_box3'].forEach(sel => {
+          const el = document.querySelector(sel);
+          if (el) {
+            el.checked = true;
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        });
+      });
+    } catch {}
+    const confirm = await waitForMndElement(page, [
+      '#comfort_confirm_add button[name="btn_pop_conf"]',
+      '#comfort_confirm_add button:has-text("\uD655\uC778")'
+    ], { timeoutMs: 4000, visibleOnly: true });
+    if (confirm) {
+      try { await confirm.scrollIntoViewIfNeeded?.(); } catch {}
+      try { await confirm.click({ force:true }); }
+      catch { await confirm.evaluate(el => el && el.click()); }
+    }
+    await page.waitForTimeout?.(200).catch(() => {});
   };
   const ensureTermsAgreement = async () => {
     const termBoxes = [
+      '#bidAttention_check',
       '#agreeTerms',
       'input[name*="terms" i]',
       'input[type="checkbox"]:near(:text("약관"))'
