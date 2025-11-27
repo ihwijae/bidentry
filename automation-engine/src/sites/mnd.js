@@ -916,6 +916,36 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     workPage = nextPage;
     try { await installMndPopupGuards(workPage, emit); } catch {}
   };
+  const ensureWorkPageAlive = async () => {
+    if (workPage) {
+      try {
+        if (typeof workPage.isClosed === 'function' && !workPage.isClosed()) return workPage;
+      } catch {}
+    }
+    const resolved = await resolveWorkPage() || page;
+    if (resolved && resolved !== workPage) {
+      workPage = resolved;
+      try { await installMndPopupGuards(workPage, emit); } catch {}
+    }
+    return workPage;
+  };
+  const prepareWorkPage = async ({ scrollBottom = false } = {}) => {
+    const current = await ensureWorkPageAlive();
+    if (!current) return null;
+    try { await current.waitForLoadState?.('domcontentloaded', { timeout: 6000 }); } catch {}
+    try { await current.waitForTimeout?.(250); } catch {}
+    if (scrollBottom) {
+      try {
+        await current.evaluate(() => {
+          try {
+            const height = document.body?.scrollHeight || document.documentElement?.scrollHeight || 0;
+            window.scrollTo?.(0, height);
+          } catch {}
+        });
+      } catch {}
+    }
+    return current;
+  };
   const openBidDetailViaController = async ({ rowOffset = 0 } = {}) => {
     if (!workPage) return false;
     const popupPromise = typeof workPage.waitForEvent === 'function'
@@ -1238,7 +1268,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     try { await input.press('Enter'); } catch {}
   }
   try { await workPage.waitForTimeout(400); } catch {}
-  await waitForMndResults(workPage);
+  await prepareWorkPage();
 
   const firstRowSelectors = [
     '.table tbody tr:not(.empty) td a',
@@ -1285,13 +1315,16 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     'button:has-text("\uC2E0\uCCAD\uC11C \uC791\uC131")',
     'a:has-text("\uC2E0\uCCAD\uC11C \uC791\uC131")'
   ];
-  const detailButton = await waitForMndElement(workPage, detailButtonSelectors, { timeoutMs: 8000, visibleOnly: false });
-  let resolvedDetail = detailButton;
+  let resolvedDetail = await waitForMndElement(workPage, detailButtonSelectors, { timeoutMs: 8000, visibleOnly: false });
+  if (!resolvedDetail) {
+    await prepareWorkPage({ scrollBottom: true });
+    resolvedDetail = await waitForMndElement(workPage, detailButtonSelectors, { timeoutMs: 6000, visibleOnly: false });
+  }
   if (!resolvedDetail) {
     log('warn', '[MND] 상세페이지 전환이 감지되지 않아 SBGrid 컨트롤러를 호출합니다.');
     const fallback = await openBidDetailViaController({ rowOffset: 0 });
     if (fallback) {
-      await waitForMndResults(workPage);
+      await prepareWorkPage({ scrollBottom: true });
       resolvedDetail = await waitForMndElement(workPage, detailButtonSelectors, { timeoutMs: 8000, visibleOnly: false });
     }
   }
@@ -1300,6 +1333,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     throw new Error('[MND] 입찰공고 상세의 "입찰참가신청서 작성" 버튼을 찾지 못했습니다.');
   }
 
+  await prepareWorkPage({ scrollBottom: true });
   try {
     await resolvedDetail.scrollIntoViewIfNeeded?.().catch(() => {});
     await resolvedDetail.focus?.().catch(() => {});
