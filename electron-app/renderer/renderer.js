@@ -75,14 +75,25 @@ function renderCompanyList() {
 
 function renderCompanySelect(){
   const sel = document.getElementById('companySelect');
+  if (!sel) return;
   sel.innerHTML = '';
-  (settingsCache.companies || []).forEach((c, i) => {
-    const opt = document.createElement('option');
-    opt.value = String(i);
-    opt.textContent = `${c.name} (${c.bizNo})`;
-    sel.appendChild(opt);
-  });
-  if (sel.options.length > 0) sel.selectedIndex = 0;
+  const companies = settingsCache.companies || [];
+  if (!companies.length) {
+    const placeholder = document.createElement('option');
+    placeholder.textContent = '회사 정보를 설정에서 먼저 추가해 주세요';
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    sel.appendChild(placeholder);
+  } else {
+    companies.forEach((c, i) => {
+      ensureCompanyDefaults(c);
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = `${c.name} (${c.bizNo})`;
+      sel.appendChild(opt);
+    });
+    sel.selectedIndex = 0;
+  }
   renderCompanyAuthSelect();
 }
 
@@ -193,6 +204,9 @@ async function loadSettings() {
   renderCompanySelect();
   renderCompanyCertSelect();
   renderCompanyAuthSelect();
+  if (!(settingsCache.companies || []).length) {
+    toast('회사 정보를 먼저 등록해 주세요. (설정 > 회사 관리)');
+  }
 }
 
 
@@ -751,8 +765,6 @@ function handleBidStatusEvent(evt) {
   if (!evt || !bidProgressState.length) return;
   updateBidProgressItem(evt);
 }
-
-
 
 
 
