@@ -1254,30 +1254,45 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     await dumpMndState(workPage, emit, 'bid_results_missing');
     throw new Error('[MND] 공고 검색 결과를 찾지 못했습니다.');
   }
+  let detailOpened = false;
   try {
-    try { await first.click({ clickCount: 2, delay: 50 }); } catch {}
-    await clickAndAdopt(first, { waitMs: 8000, mouseClick: true, clickCount: 2 });
-    log('info', '[MND] 공고 검색 결과의 공사명을 클릭했습니다.');
+    const viaController = await openBidDetailViaController({ rowOffset: 0 });
+    if (viaController) {
+      detailOpened = true;
+      log('info', '[MND] SBGrid 컨트롤러를 통해 상세 페이지를 열었습니다.');
+    }
   } catch (err) {
-    log('warn', `[MND] 검색 결과 클릭 실패: ${(err && err.message) || err}`);
-    throw err;
+    log('debug', `[MND] SBGrid 컨트롤러 직접 호출 실패: ${(err && err.message) || err}`);
+  }
+  if (!detailOpened) {
+    try {
+      try { await first.click({ clickCount: 2, delay: 50 }); } catch {}
+      await clickAndAdopt(first, { waitMs: 8000, mouseClick: true, clickCount: 2 });
+      log('info', '[MND] 공고 검색 결과의 공사명을 클릭했습니다.');
+      detailOpened = true;
+    } catch (err) {
+      log('warn', `[MND] 검색 결과 클릭 실패: ${(err && err.message) || err}`);
+      throw err;
+    }
   }
   await waitForMndResults(workPage);
 
   const detailButtonSelectors = [
+    '#btn_join',
+    'button#btn_join',
     'button:has-text("\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD\uC11C \uC791\uC131")',
     'a:has-text("\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD\uC11C \uC791\uC131")',
     'button:has-text("\uC2E0\uCCAD\uC11C \uC791\uC131")',
     'a:has-text("\uC2E0\uCCAD\uC11C \uC791\uC131")'
   ];
-  const detailButton = await waitForMndElement(workPage, detailButtonSelectors, { timeoutMs: 8000, visibleOnly: true });
+  const detailButton = await waitForMndElement(workPage, detailButtonSelectors, { timeoutMs: 8000, visibleOnly: false });
   let resolvedDetail = detailButton;
   if (!resolvedDetail) {
     log('warn', '[MND] 상세페이지 전환이 감지되지 않아 SBGrid 컨트롤러를 호출합니다.');
     const fallback = await openBidDetailViaController({ rowOffset: 0 });
     if (fallback) {
       await waitForMndResults(workPage);
-      resolvedDetail = await waitForMndElement(workPage, detailButtonSelectors, { timeoutMs: 8000, visibleOnly: true });
+      resolvedDetail = await waitForMndElement(workPage, detailButtonSelectors, { timeoutMs: 8000, visibleOnly: false });
     }
   }
   if (!resolvedDetail) {
