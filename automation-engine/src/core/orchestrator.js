@@ -85,6 +85,9 @@ async function run(job, emit) {
           if (webCert.page && webCert.page !== openRes.page) {
             openRes.page = webCert.page;
           }
+          if (webCert.selection) {
+            job.__mndLastCertSelection = webCert.selection;
+          }
           emit && emit({ type: 'log', level: 'info', msg: '[MND] Web certificate automation completed' });
         } else if (webCert?.error) {
           emit && emit({ type: 'log', level: 'warn', msg: `[MND] Web certificate attempt: ${webCert.error}` });
@@ -272,10 +275,14 @@ async function run(job, emit) {
             cert: job?.cert || {},
             company: job?.company || {},
             options: job?.options || {},
-            hasMoreBids
+            hasMoreBids,
+            certSelectionHint: job?.__mndLastCertSelection
           });
           if (applyRes?.page && applyRes.page !== openRes.page) {
             openRes.page = applyRes.page;
+          }
+          if (applyRes?.selection) {
+            job.__mndLastCertSelection = applyRes.selection;
           }
         } catch (e) {
           const msg = `[MND] 공고번호 ${bid} 참가신청 실패: ${(e && e.message) || e}`;

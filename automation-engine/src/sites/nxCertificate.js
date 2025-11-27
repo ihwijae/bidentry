@@ -241,7 +241,9 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
     issuer: preferIssuer,
     serial: preferSerial,
     bizNo: preferBizNo,
-    rowSelectors
+    rowSelectors,
+    hintText: (extra?.selectionHint?.text || ''),
+    hintCells: Array.isArray(extra?.selectionHint?.cells) ? extra.selectionHint.cells : []
   };
 
   const attemptSelection = async (ctx) => ctx.evaluate((prefs) => {
@@ -290,6 +292,8 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
     if (!rows.length) {
       return { ok: false, reason: 'no_rows' };
     }
+    const hintText = norm(prefs.hintText || '');
+    const hintCells = Array.isArray(prefs.hintCells) ? prefs.hintCells.map(norm) : [];
     let bestIdx = -1;
     let bestScore = -Infinity;
     rows.forEach((row, idx) => {
@@ -301,6 +305,14 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
       if (wantSubject && ntext.includes(wantSubject)) score += 220;
       if (wantIssuer && ntext.includes(wantIssuer)) score += 80;
       if (wantBiz && rowDigits.includes(wantBiz)) score += 400;
+      if (hintText) {
+        if (ntext === hintText) score += 1500;
+        else if (ntext.includes(hintText)) score += 600;
+      }
+      if (hintCells.length) {
+        const matches = hintCells.reduce((acc, cell) => acc + (cell && ntext.includes(cell) ? 1 : 0), 0);
+        if (matches) score += matches * 200;
+      }
       if (!wantSerial && !wantSubject && !wantIssuer && !wantBiz) {
         score += Math.max(0, rows.length - idx);
       }
@@ -346,6 +358,7 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
     return { ok: false, error: 'No certificate entries available' };
   }
   log('info', `Certificate row selected index=${selection.index}`);
+  const selectionSummary = { index: selection.index, text: selection.text, cells: selection.cells };
 
   if (!pinValue) {
     log('error', 'Certificate PIN value is empty');
@@ -537,7 +550,7 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
   if (!nextPage) nextPage = page;
   try { await nextPage.waitForLoadState('domcontentloaded', { timeout: 10000 }); } catch {}
   log('info', 'Certificate dialog completed successfully');
-  return { ok: true, page: nextPage, certPageClosed: closed };
+  return { ok: true, page: nextPage, certPageClosed: closed, selection: selectionSummary };
 }
 
 module.exports = { handleNxCertificate };

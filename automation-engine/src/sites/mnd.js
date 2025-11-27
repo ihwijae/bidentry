@@ -1713,7 +1713,8 @@ async function applyMndAgreementAfterSearch(page, emit, opts = {}) {
     }
     const certRes = await handleMndCertificate(page, emit, certOptions, {
       company: companyInfo,
-      timeoutMs: derivedCertTimeout
+      timeoutMs: derivedCertTimeout,
+      selectionHint: certSelectionHint
     }).catch((err) => ({ ok: false, error: (err && err.message) || String(err || '') }));
     if (!certRes?.ok) {
       throw new Error(`[MND] 참가신청 인증서 처리 실패: ${certRes?.error || '알 수 없는 오류'}`);
@@ -1722,6 +1723,7 @@ async function applyMndAgreementAfterSearch(page, emit, opts = {}) {
       page = certRes.page;
       try { await installMndPopupGuards(page, emit); } catch {}
     }
+    return certRes.selection || null;
   };
   await ensureDepositWaiverPopup();
   await ensureVisible(['p:has-text("\uC57D\uAD00\uB3D9\uC758")', '#bidAttention_check', '#agreeTerms'], 0.8);
@@ -1746,38 +1748,48 @@ async function applyMndAgreementAfterSearch(page, emit, opts = {}) {
     log('warn', `[MND] 협정자동신청 버튼 클릭 실패: ${(err && err.message) || err}`);
     throw err;
   }
-  await maybeHandleFinalCertificate();
+  const finalSelection = await maybeHandleFinalCertificate();
   await handleAgreementConfirmation(page, emit);
   await closeSubmissionCompletionPopup(page, emit);
   await closePostReviewPopupWindows(page, emit);
   if (hasMoreBids) {
     await returnToMndHome(page, log);
   }
-  return { ok: true, page };
+  return { ok: true, page, selection: finalSelection };
 }
 
 async function closeSubmissionCompletionPopup(page, emit) {
   if (!page) return false;
   const clicked = await page.evaluate(() => {
-    const selectors = [
-      '#comfort_confirm_add button.clo',
-      '#comfort_confirm_add button[name="btn_pop_conf"]',
-      '#comfort_confirm_add .btn_wrapC button',
-      '#applInsp_confirm button.applInsp_confirm',
-      '#applInsp_confirm .btn_wrapC button'
-    ];
-    for (const sel of selectors) {
-      const btn = document.querySelector(sel);
-      if (btn) {
-        btn.click();
-        return true;
-      }
-    }
-    const fallback = Array.from(document.querySelectorAll('button, a')).find(el => /닫기|확인/.test((el.innerText || '').trim()));
-    if (fallback) {
-      fallback.click();
+    const preferred = (
+      document.querySelector('#applInsp_confirm button.applInsp_confirm')
+      || document.querySelector('#applInsp_confirm .btn_lGray.applInsp_confirm')
+    );
+    if (preferred) {
+      preferred.click();
       return true;
     }
+    const comfortClose = document.querySelector('#comfort_confirm_add button.clo.comfort_confirm');
+    if (comfortClose) {
+      comfortClose.click();
+      return true;
+    }
+    const byText = (rootId) => {
+      const root = document.getElementById(rootId);
+      if (!root) return false;
+      const btns = Array.from(root.querySelectorAll('button, a'));
+      for (const btn of btns) {
+        const text = (btn.innerText || btn.textContent || '').replace(/\s+/g, '');
+        if (!text) continue;
+        if (/닫기/.test(text)) {
+          btn.click();
+          return true;
+        }
+      }
+      return false;
+    };
+    if (byText('applInsp_confirm')) return true;
+    if (byText('comfort_confirm_add')) return true;
     return false;
   }).catch(() => false);
   if (!clicked) {
