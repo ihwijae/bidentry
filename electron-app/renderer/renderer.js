@@ -76,6 +76,7 @@ function renderCompanyList() {
 function renderCompanySelect(){
   const sel = document.getElementById('companySelect');
   if (!sel) return;
+  const prev = sel.value;
   sel.innerHTML = '';
   const companies = settingsCache.companies || [];
   if (!companies.length) {
@@ -92,7 +93,11 @@ function renderCompanySelect(){
       opt.textContent = `${c.name} (${c.bizNo})`;
       sel.appendChild(opt);
     });
-    sel.selectedIndex = 0;
+    if (prev && Array.from(sel.options).some(o => o.value === prev)) {
+      sel.value = prev;
+    } else {
+      sel.selectedIndex = 0;
+    }
   }
   renderCompanyAuthSelect();
 }
@@ -765,7 +770,6 @@ function handleBidStatusEvent(evt) {
   if (!evt || !bidProgressState.length) return;
   updateBidProgressItem(evt);
 }
-
 
 
 
