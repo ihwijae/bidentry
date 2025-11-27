@@ -14,6 +14,17 @@ tabs.forEach(btn => btn.addEventListener('click', () => {
 
 // Settings load/save (URLs, companies, accounts)
 let settingsCache = { urls:{}, companies:[], options:{ certTimeoutSec:60 } };;
+
+function normalizeCompanyList(raw) {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === 'object') {
+    return Object.keys(raw)
+      .map(key => raw[key])
+      .filter(item => item && typeof item === 'object');
+  }
+  return [];
+}
 let lastErrorToastMessage = '';
 let toastOverlay = null;
 let isEngineRunning = false;
@@ -184,9 +195,10 @@ function fillCompanyAuthForm(){
 async function loadSettings() {
   const s = await window.api.loadSettings();
   const legacyAccounts = s.accounts || {};
+  const normalizedCompanies = normalizeCompanyList(s.companies);
   settingsCache = {
     urls: { kepco: '', mnd: '', ...(s.urls || {}) },
-    companies: Array.isArray(s.companies) ? s.companies.map((company) => {
+    companies: normalizedCompanies.map((company) => {
       const clone = { ...company };
       ensureCompanyDefaults(clone);
       if (legacyAccounts.kepco) {
@@ -770,8 +782,6 @@ function handleBidStatusEvent(evt) {
   if (!evt || !bidProgressState.length) return;
   updateBidProgressItem(evt);
 }
-
-
 
 
 
