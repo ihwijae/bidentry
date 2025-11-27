@@ -16,6 +16,33 @@ function runBidGuideGuardClient() {
   window.__mndBidGuideGuardInstalled = true;
   const maskSelectors = ['#mask', '.x-mask', '.layer_dim', '.dim', '.bg_dim', '.layer_pop', '.layer_pop_box', '.modal', '.layer'];
   const targetText = /\uC785\uCC30\uC11C\s*\uC791\uC131\uC548\uB0B4/;
+  const buttonSelector = 'button, a, [role="button"], .btn';
+  const normalizeText = (node) => ((node && (node.innerText || node.textContent)) || '').replace(/\s+/g, '');
+  const isCloseText = (text) => /\uB2EB\uAE30|\uCDE8\uC18C|close|\uC885\uB8CC|\uCC29\uB958|X/i.test(text);
+  const isConfirmText = (text) => /\uD655\uC778|\uC608|ok|confirm/i.test(text);
+  const clickPreferredButton = (root) => {
+    if (!root) return false;
+    const seen = new Set();
+    const buttons = [];
+    const add = (el) => {
+      if (!el || seen.has(el)) return;
+      seen.add(el);
+      buttons.push(el);
+    };
+    if (root.matches && root.matches(buttonSelector)) add(root);
+    if (typeof root.querySelectorAll === 'function') {
+      root.querySelectorAll(buttonSelector).forEach(add);
+    }
+    if (!buttons.length) return false;
+    const pick = buttons.find(btn => isCloseText(normalizeText(btn)))
+      || buttons.find(btn => isConfirmText(normalizeText(btn)))
+      || buttons[0];
+    if (pick && typeof pick.click === 'function') {
+      pick.click();
+      return true;
+    }
+    return false;
+  };
   const hideNodes = () => {
     let touched = false;
     maskSelectors.forEach(sel => {
@@ -30,10 +57,11 @@ function runBidGuideGuardClient() {
       const text = (node.innerText || node.textContent || '').replace(/\s+/g, '');
       if (!text) continue;
       if (targetText.test(text) || node.id === 'alertLayer') {
-        const btn = node.querySelector('button, a, [role="button"], .btn');
-        if (btn && typeof btn.click === 'function') {
-          btn.click();
-        } else if (typeof node.remove === 'function') {
+        if (clickPreferredButton(node)) {
+          touched = true;
+          continue;
+        }
+        if (typeof node.remove === 'function') {
           node.remove();
         } else {
           node.style.display = 'none';
@@ -529,6 +557,33 @@ async function closeMndBidGuideModal(page, emit, opts = {}) {
       } catch {}
     }
     const handled = await evaluateInMndContexts(page, () => {
+      const buttonSelector = 'button, a, [role="button"], .btn';
+      const normalizeText = (node) => ((node && (node.innerText || node.textContent)) || '').replace(/\s+/g, '');
+      const isCloseText = (text) => /\uB2EB\uAE30|\uCDE8\uC18C|close|\uC885\uB8CC|\uCC29\uB958|X/i.test(text);
+      const isConfirmText = (text) => /\uD655\uC778|\uC608|ok|confirm/i.test(text);
+      const clickPreferredButton = (root) => {
+        if (!root) return false;
+        const seen = new Set();
+        const buttons = [];
+        const add = (el) => {
+          if (!el || seen.has(el)) return;
+          seen.add(el);
+          buttons.push(el);
+        };
+        if (root.matches && root.matches(buttonSelector)) add(root);
+        if (typeof root.querySelectorAll === 'function') {
+          root.querySelectorAll(buttonSelector).forEach(add);
+        }
+        if (!buttons.length) return false;
+        const pick = buttons.find(btn => isCloseText(normalizeText(btn)))
+          || buttons.find(btn => isConfirmText(normalizeText(btn)))
+          || buttons[0];
+        if (pick && typeof pick.click === 'function') {
+          pick.click();
+          return true;
+        }
+        return false;
+      };
       const scheduleWatcher = () => {
         if (window.__autoCloseBidGuide) return '';
         const closer = () => {
@@ -543,15 +598,13 @@ async function closeMndBidGuideModal(page, emit, opts = {}) {
           const dialog = document.querySelector('#alertLayer, #alertModal, .alertLayer, .layer_pop, .layer_pop_box');
           if (dialog) {
             dialog.style.display = 'none';
-            const btn = dialog.querySelector('button, a');
-            if (btn) btn.click();
+            clickPreferredButton(dialog);
           }
           const nodes = Array.from(document.querySelectorAll('div, section, article'));
           for (const node of nodes) {
             const txt = (node.textContent || '').replace(/\s+/g, '');
             if (guidetext.test(txt)) {
-              const btn = node.querySelector('button, a, [role="button"]');
-              if (btn) { btn.click(); return; }
+              if (clickPreferredButton(node)) { return; }
               if (typeof node.remove === 'function') node.remove();
               node.style.display = 'none';
               return;
@@ -565,24 +618,25 @@ async function closeMndBidGuideModal(page, emit, opts = {}) {
       const killNodes = () => {
         const layers = Array.from(document.querySelectorAll('div, section, article, .layer, .modal, .layer_pop, #mask, .x-mask'));
         let hit = '';
-        layers.forEach(el => {
+        for (const el of layers) {
           const txt = (el.textContent || '').replace(/\s+/g, '');
           if (/입찰서\s*작성안내/.test(txt) || el.id === 'mask') {
             el.style.display = 'none';
+            if (clickPreferredButton(el)) {
+              return 'button';
+            }
             if (typeof el.remove === 'function') el.remove();
             hit = 'removed';
           }
-        });
-        const dialog = document.querySelector('#alertLayer, #alertModal, .alertLayer');
-        if (dialog) {
+        }
+        const dialogs = Array.from(document.querySelectorAll('#alertLayer, #alertModal, .alertLayer, .layer_pop, .layer_pop_box'));
+        for (const dialog of dialogs) {
           dialog.style.display = 'none';
+          if (clickPreferredButton(dialog)) {
+            return 'button';
+          }
           if (typeof dialog.remove === 'function') dialog.remove();
           hit = 'removed';
-        }
-        const btn = document.querySelector('#alertLayer button, #alertLayer a, .alertLayer button, .alertLayer a');
-        if (btn) {
-          btn.click();
-          hit = 'button';
         }
         return hit;
       };
@@ -601,18 +655,25 @@ async function closeMndBidGuideModal(page, emit, opts = {}) {
         return '';
       };
       const clickByText = () => {
-        const texts = ['닫기', '확인', '확인하기', '예'];
+        const closers = [];
+        const fallbacks = [];
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_ELEMENT);
         while (walker.nextNode()) {
           const el = walker.currentNode;
           const text = (el.innerText || el.textContent || '').replace(/\s+/g, '');
           if (!text) continue;
-          if (/입찰서.*작성안내/.test(text) || texts.some(t => text.includes(t))) {
-            if (typeof el.click === 'function') {
-              el.click();
-              return 'text';
-            }
+          if (isCloseText(text)) {
+            if (typeof el.click === 'function') closers.push(el);
+            continue;
           }
+          if (/입찰서.*작성안내/.test(text) || isConfirmText(text)) {
+            if (typeof el.click === 'function') fallbacks.push(el);
+          }
+        }
+        const target = closers[0] || fallbacks[0];
+        if (target && typeof target.click === 'function') {
+          target.click();
+          return closers.includes(target) ? 'text-close' : 'text';
         }
         return '';
       };
