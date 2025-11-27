@@ -916,6 +916,107 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     workPage = nextPage;
     try { await installMndPopupGuards(workPage, emit); } catch {}
   };
+  const openBidDetailViaController = async ({ rowOffset = 0 } = {}) => {
+    if (!workPage) return false;
+    const popupPromise = typeof workPage.waitForEvent === 'function'
+      ? workPage.waitForEvent('popup', { timeout: 5000 }).catch(() => null)
+      : Promise.resolve(null);
+    const navPromise = typeof workPage.waitForNavigation === 'function'
+      ? workPage.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 8000 }).catch(() => null)
+      : Promise.resolve(null);
+    const result = await workPage.evaluate(({ rowOffset }) => {
+      try {
+        const viewObj = window.view;
+        const controllerObj = window.controller;
+        const gridWrapper = viewObj && viewObj.grid ? viewObj.grid : null;
+        const grid = gridWrapper && gridWrapper.ID ? gridWrapper.ID : null;
+        if (!grid || typeof grid.getRows !== 'function' || typeof grid.getFixedRows !== 'function') {
+          return { ok: false, reason: 'missing-grid' };
+        }
+        const totalRows = Number(grid.getRows());
+        const fixedRows = Number(grid.getFixedRows());
+        if (!(totalRows > fixedRows)) {
+          return { ok: false, reason: 'no-data', details: { totalRows, fixedRows } };
+        }
+        const offset = Number.isFinite(rowOffset) ? rowOffset : 0;
+        const targetRow = Math.min(Math.max(fixedRows + offset, fixedRows), totalRows - 1);
+        const rowData = typeof grid.getRowData === 'function' ? grid.getRowData(targetRow) : null;
+        if (!rowData) {
+          return { ok: false, reason: 'missing-row-data', details: { row: targetRow } };
+        }
+        const searchInput = document.querySelector('#searchData');
+        let searchData = {};
+        if (searchInput) {
+          try { searchData = JSON.parse(searchInput.value || '{}'); } catch {}
+        }
+        searchData.idx_row = targetRow;
+        const payload = {
+          dprt_code: rowData.dprtCode,
+          anmt_divs: rowData.anmtDivs,
+          anmt_numb: rowData.anmtNumb,
+          rqst_degr: rowData.rqstDegr,
+          dcsn_numb: rowData.dcsnNumb,
+          rqst_year: rowData.rqstYear,
+          bsic_stat: rowData.bsicStat,
+          dmst_itnb: rowData.dmstItnb,
+          anmt_date: rowData.anmtDate,
+          csrt_numb: rowData.dcsnNumb,
+          lv2Divs: rowData.lv2Divs,
+          cont_mthd: rowData.contMthd,
+          pageDivs: 'E1',
+          lv1_divs: rowData.lv1Divs,
+          searchData: JSON.stringify(searchData)
+        };
+        const level = String(rowData.lv2Divs ?? '');
+        if (level === '2') {
+          const ctrl = controllerObj;
+          if (ctrl && typeof ctrl.goOpenNegoDetail === 'function') {
+            ctrl.goOpenNegoDetail({
+              csrt_numb: rowData.dcsnNumb,
+              negn_pldt: rowData.anmtDate,
+              dprt_code: rowData.dprtCode,
+              ordr_year: rowData.rqstYear,
+              negn_degr: rowData.rqstDegr,
+              anmt_numb: rowData.anmtNumb,
+              searchData: JSON.stringify(searchData)
+            });
+            return { ok: true, mode: 'goOpenNegoDetail', row: targetRow };
+          }
+        }
+        const ctrl = controllerObj;
+        if (ctrl && typeof ctrl.goBidDetail === 'function') {
+          ctrl.goBidDetail(payload);
+          return { ok: true, mode: 'goBidDetail', row: targetRow };
+        }
+        if (typeof window.goBidDetail === 'function') {
+          window.goBidDetail(payload);
+          return { ok: true, mode: 'window-goBidDetail', row: targetRow };
+        }
+        return { ok: false, reason: 'missing-goBidDetail' };
+      } catch (err) {
+        return { ok: false, error: (err && err.message) || String(err || '') };
+      }
+    }, { rowOffset }).catch(err => ({ ok: false, error: (err && err.message) || String(err || '') }));
+    const popup = await popupPromise;
+    let opened = false;
+    if (popup) {
+      opened = true;
+      log('info', '[MND] SBGrid 상세 팝업이 새 창으로 열렸습니다.');
+      await popup.waitForLoadState('domcontentloaded').catch(() => {});
+      await adoptWorkPage(popup);
+    }
+    const navResult = await navPromise;
+    if (navResult) opened = true;
+    if (result?.ok) opened = true;
+    if (result?.error) {
+      log('warn', `[MND] SBGrid 컨트롤러 호출 오류: ${result.error}`);
+    } else if (result?.reason && !opened) {
+      log('debug', `[MND] SBGrid 컨트롤러 호출 실패: ${result.reason}`);
+    } else if (result?.mode) {
+      log('info', `[MND] SBGrid 컨트롤러 호출 성공(${result.mode}).`);
+    }
+    return opened;
+  };
   const clickAndAdopt = async (handle, { waitMs = 8000, mouseClick = false, clickCount = 1 } = {}) => {
     if (!handle) return null;
     const popupPromise = typeof workPage.waitForEvent === 'function'
@@ -1170,12 +1271,21 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     'a:has-text("\uC2E0\uCCAD\uC11C \uC791\uC131")'
   ];
   const detailButton = await waitForMndElement(workPage, detailButtonSelectors, { timeoutMs: 8000, visibleOnly: true });
-  if (!detailButton) {
+  let resolvedDetail = detailButton;
+  if (!resolvedDetail) {
+    log('warn', '[MND] 상세페이지 전환이 감지되지 않아 SBGrid 컨트롤러를 호출합니다.');
+    const fallback = await openBidDetailViaController({ rowOffset: 0 });
+    if (fallback) {
+      await waitForMndResults(workPage);
+      resolvedDetail = await waitForMndElement(workPage, detailButtonSelectors, { timeoutMs: 8000, visibleOnly: true });
+    }
+  }
+  if (!resolvedDetail) {
     await dumpMndState(workPage, emit, 'bid_detail_missing');
     throw new Error('[MND] 입찰공고 상세의 "입찰참가신청서 작성" 버튼을 찾지 못했습니다.');
   }
 
-  await clickAndAdopt(detailButton, { waitMs: 8000 });
+  await clickAndAdopt(resolvedDetail, { waitMs: 8000 });
   try { await closeMndBidGuideModal(workPage, emit, { timeoutMs: 4000 }); } catch {}
 
   const agreementPresence = await waitForMndElement(workPage, [
