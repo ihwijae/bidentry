@@ -84,8 +84,8 @@ if (app && typeof app.whenReady === 'function') {
   app.whenReady().then(() => {
     // Create BrowserWindow (UI)
     const win = new BrowserWindow({
-      width: 980,
-      height: 700,
+      width: 1180,
+      height: 820,
       webPreferences: {
         preload: path.join(__dirname, 'preload.js'),
         contextIsolation: true,

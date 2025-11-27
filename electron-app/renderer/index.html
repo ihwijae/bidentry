@@ -75,11 +75,9 @@
             <li class="bid-progress-empty">공고번호를 추가하면 진행상황이 표시됩니다.</li>
           </ul>
         </div>
-      </div>
-
-      <div class="card">
-        <h2>로그</h2>
-        <pre id="log" class="log"></pre>
+        <div class="log-actions">
+          <button id="toggleLogBtn" type="button" class="secondary">로그 보기</button>
+        </div>
       </div>
     </section>
 
@@ -183,6 +181,16 @@
       </div>
     </section>
   </main>
+
+  <div id="logModal" class="log-modal" aria-hidden="true">
+    <div class="log-modal-content">
+      <div class="log-modal-header">
+        <h3>실시간 로그</h3>
+        <button id="closeLogBtn" type="button" class="icon-btn">닫기</button>
+      </div>
+      <pre id="log" class="log"></pre>
+    </div>
+  </div>
 
   <footer class="footer">© 2025 Bid Automation</footer>
 

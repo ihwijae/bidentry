@@ -307,6 +307,34 @@ ensureBidInputs();
 const runBtn = document.getElementById('runBtn');
 const stopBtn = document.getElementById('stopBtn');
 const logEl = document.getElementById('log');
+const logModal = document.getElementById('logModal');
+const toggleLogBtn = document.getElementById('toggleLogBtn');
+const closeLogBtn = document.getElementById('closeLogBtn');
+
+function openLogModal(){
+  if (!logModal) return;
+  logModal.classList.add('open');
+  logModal.setAttribute('aria-hidden', 'false');
+}
+
+function closeLogModal(){
+  if (!logModal) return;
+  logModal.classList.remove('open');
+  logModal.setAttribute('aria-hidden', 'true');
+}
+
+if (toggleLogBtn) toggleLogBtn.addEventListener('click', openLogModal);
+if (closeLogBtn) closeLogBtn.addEventListener('click', closeLogModal);
+if (logModal) {
+  logModal.addEventListener('click', (evt) => {
+    if (evt.target === logModal) closeLogModal();
+  });
+  window.addEventListener('keydown', (evt) => {
+    if (evt.key === 'Escape' && logModal.classList.contains('open')) {
+      closeLogModal();
+    }
+  });
+}
 
 // (Global cert fields removed)
 
@@ -710,7 +738,6 @@ function handleBidStatusEvent(evt) {
   if (!evt || !bidProgressState.length) return;
   updateBidProgressItem(evt);
 }
-
 
 
 

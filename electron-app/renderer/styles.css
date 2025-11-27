@@ -69,3 +69,11 @@ button.secondary{ background:#eef2ff; border-color:#c7d2fe; color:#1d4ed8; }
 .bid-progress-item.error{ border-color:#fca5a5; background:#fef2f2; }
 .bid-progress-item.error .bid-status{ color:#b91c1c; }
 .bid-progress-empty{ padding:10px; border:1px dashed var(--border); border-radius:8px; color:#6b7280; font-size:13px; background:#f9fafb; }
+.log-actions{ display:flex; justify-content:flex-end; margin-top:8px; }
+.log-modal{ position:fixed; inset:0; background:rgba(15,23,42,0.55); display:none; align-items:center; justify-content:center; z-index:2000; padding:24px; }
+.log-modal.open{ display:flex; }
+.log-modal-content{ width:min(920px,90vw); height:min(520px,80vh); background:#fff; border-radius:16px; box-shadow:0 24px 64px rgba(0,0,0,0.25); display:flex; flex-direction:column; border:1px solid var(--border); }
+.log-modal-header{ display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border); }
+.log-modal-header h3{ margin:0; font-size:16px; }
+.log-modal .log{ flex:1; margin:0; border:none; border-radius:0 0 16px 16px; }
+.icon-btn{ background:#fee2e2; color:#991b1b; border-color:#fecaca; padding:8px 12px; }
