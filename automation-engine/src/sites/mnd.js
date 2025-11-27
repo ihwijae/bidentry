@@ -1504,7 +1504,7 @@ async function applyMndAgreementAfterSearch(page, emit) {
     await scrollToSection(fallbackRatio);
     return null;
   };
-  await ensureVisible(['p:has-text("\uBCF4\uC99D\uAE08 \uB0B4\uC5ED")', '#grnt_mthd', '#SBHE_datagrid1'], 0.4);
+  await ensureVisible(['#grnt_mthd', '#SBHE_datagrid1'], 0.4);
   const selectDepositWaiver = async () => {
     const waiverSelectors = [
       'select[name*="guar" i]',
