@@ -1515,6 +1515,7 @@ async function applyMndAgreementAfterSearch(page, emit, opts = {}) {
   const certOptions = opts?.cert;
   const companyInfo = opts?.company || {};
   const hasMoreBids = opts?.hasMoreBids === true;
+  const certSelectionHint = opts?.certSelectionHint || opts?.selectionHint || null;
   const derivedCertTimeout = Number(opts?.certTimeoutMs)
     || (jobOptions?.certTimeoutSec ? Number(jobOptions.certTimeoutSec) * 1000 : 20000);
   const baseContext = (page && typeof page.context === 'function') ? page.context() : null;
