@@ -1441,12 +1441,23 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
 
 async function ensureMndRowSelection(page) {
   const rowSelectors = [
-    '.table tbody tr:not(.empty)',
-    '.tb_list tbody tr',
-    'table tbody tr',
-    '.grid-body tr'
+    'table tbody tr td:has-text("\uBB3C\uD488\uBA85")',
+    'table tbody tr'
   ];
-  const row = await waitForMndElement(page, rowSelectors, { timeoutMs: 7000, visibleOnly: true });
+  let row = null;
+  for (const ratio of [0, 0.3, 0.6, 0.9]) {
+    if (!row) {
+      try {
+        await page.evaluate((r) => {
+          const doc = document.documentElement || document.body;
+          const h = doc?.scrollHeight || document.body?.scrollHeight || 0;
+          window.scrollTo?.(0, Math.max(0, Math.min(1, r)) * h);
+        }, ratio);
+      } catch {}
+      try { await page.waitForTimeout?.(200); } catch {}
+      row = await waitForMndElement(page, rowSelectors, { timeoutMs: 1500, visibleOnly: true });
+    }
+  }
   if (!row) return null;
   try {
     const checkbox = await row.$('input[type="checkbox"], input[type="radio"]');
