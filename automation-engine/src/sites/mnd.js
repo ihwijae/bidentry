@@ -1716,7 +1716,7 @@ async function applyMndAgreementAfterSearch(page, emit, opts = {}) {
   }
   await maybeHandleFinalCertificate();
   await handleAgreementConfirmation(page, emit);
-  await closeSubmissionCompletionPopup();
+  await closeSubmissionCompletionPopup(page, emit);
   if (hasMoreBids) {
     await returnToMndHome(page, log);
   }
