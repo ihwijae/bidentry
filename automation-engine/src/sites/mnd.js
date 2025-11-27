@@ -1531,13 +1531,13 @@ async function applyMndAgreementAfterSearch(page, emit) {
     try { await page.waitForTimeout?.(200); } catch {}
   };
   await scrollToSection(0.4);
-  const selectDepositWaiver = async () => {
-    const waiverSelectors = [
-      'select[name*="guar" i]',
-      'select#grnt_mthd',
-      'select[id*="guar" i]',
-      'select:has(option:has-text("\uBAA8\uB4DD\uAE08\uBA74\uC81C"))'
-    ];
+const selectDepositWaiver = async () => {
+  const waiverSelectors = [
+    'select[name*="guar" i]',
+    'select#grnt_mthd',
+    'select[id*="guar" i]',
+    'select:has(option:has-text("\uBAA8\uB4DD\uAE08\uBA74\uC81C"))'
+  ];
     const select = await waitForMndElement(page, waiverSelectors, { timeoutMs: 5000, visibleOnly: true });
     if (!select) {
       await dumpMndState(page, emit, 'deposit_select_missing');
