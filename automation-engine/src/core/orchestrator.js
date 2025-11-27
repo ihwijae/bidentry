@@ -257,9 +257,17 @@ async function run(job, emit) {
         }
         try { await sweepPopups(openRes.page.context?.(), emit); } catch {}
         try { await dismissCommonOverlays(openRes.page, emit); } catch {}
+        emit({ type:'progress', step:'search_bid', pct: 88 });
+        try {
+          await applyMndAgreementAfterSearch(openRes.page, emit);
+        } catch (e) {
+          const msg = `[MND] 공고번호 ${bid} 참가신청 실패: ${(e && e.message) || e}`;
+          emit({ type:'log', level:'error', msg });
+          throw new Error(msg);
+        }
         processed += 1;
       }
-      emit && emit({ type:'log', level:'info', msg:`[MND] 입찰공고 검색 완료: ${processed}/${bidQueue.length}` });
+      emit && emit({ type:'log', level:'info', msg:`[MND] 입찰공고 검색 및 신청 완료: ${processed}/${bidQueue.length}` });
     }
   } finally {
     const keepOnError = job?.options?.keepBrowserOnError === true;
