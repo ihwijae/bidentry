@@ -1478,8 +1478,13 @@ async function handleAgreementConfirmation(page, emit) {
   }
 }
 
-async function applyMndAgreementAfterSearch(page, emit) {
+async function applyMndAgreementAfterSearch(page, emit, opts = {}) {
   const log = (level, msg) => emit && emit({ type:'log', level, msg });
+  const jobOptions = opts?.options || {};
+  const certOptions = opts?.cert;
+  const companyInfo = opts?.company || {};
+  const derivedCertTimeout = Number(opts?.certTimeoutMs)
+    || (jobOptions?.certTimeoutSec ? Number(jobOptions.certTimeoutSec) * 1000 : 20000);
   const baseContext = (page && typeof page.context === 'function') ? page.context() : null;
   const applyUrlRegex = /\/bid\/bidApply/i;
   const applyTitleRegex = /\uCC38\uAC00\uC2E0\uCCAD/i;
@@ -1541,6 +1546,7 @@ async function applyMndAgreementAfterSearch(page, emit) {
   await ensureApplyPage();
   try { await page?.bringToFront?.(); } catch {}
   try { await page?.waitForLoadState?.('domcontentloaded', { timeout: 6000 }); } catch {}
+  try { await installMndPopupGuards(page, emit); } catch {}
   try {
     const currentUrl = typeof page?.url === 'function' ? page.url() : '';
     if (currentUrl) log('debug', `[MND] 참가신청 페이지 URL: ${currentUrl}`);
@@ -1667,6 +1673,23 @@ async function applyMndAgreementAfterSearch(page, emit) {
       }
     }
   };
+  const maybeHandleFinalCertificate = async () => {
+    if (!certOptions || Object.keys(certOptions).length === 0) {
+      log('warn', '[MND] 참가신청 인증서 정보가 없어 추가 인증 단계를 건너뜁니다.');
+      return;
+    }
+    const certRes = await handleMndCertificate(page, emit, certOptions, {
+      company: companyInfo,
+      timeoutMs: derivedCertTimeout
+    }).catch((err) => ({ ok: false, error: (err && err.message) || String(err || '') }));
+    if (!certRes?.ok) {
+      throw new Error(`[MND] 참가신청 인증서 처리 실패: ${certRes?.error || '알 수 없는 오류'}`);
+    }
+    if (certRes.page && certRes.page !== page) {
+      page = certRes.page;
+      try { await installMndPopupGuards(page, emit); } catch {}
+    }
+  };
   await ensureDepositWaiverPopup();
   await ensureVisible(['p:has-text("\uC57D\uAD00\uB3D9\uC758")', '#bidAttention_check', '#agreeTerms'], 0.8);
   await ensureTermsAgreement();
@@ -1690,7 +1713,9 @@ async function applyMndAgreementAfterSearch(page, emit) {
     log('warn', `[MND] 협정자동신청 버튼 클릭 실패: ${(err && err.message) || err}`);
     throw err;
   }
+  await maybeHandleFinalCertificate();
   await handleAgreementConfirmation(page, emit);
+  return { ok: true, page };
 }
 
 module.exports = {

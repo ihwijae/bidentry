@@ -259,7 +259,14 @@ async function run(job, emit) {
         try { await dismissCommonOverlays(openRes.page, emit); } catch {}
         emit({ type:'progress', step:'search_bid', pct: 88 });
         try {
-          await applyMndAgreementAfterSearch(openRes.page, emit);
+          const applyRes = await applyMndAgreementAfterSearch(openRes.page, emit, {
+            cert: job?.cert || {},
+            company: job?.company || {},
+            options: job?.options || {}
+          });
+          if (applyRes?.page && applyRes.page !== openRes.page) {
+            openRes.page = applyRes.page;
+          }
         } catch (e) {
           const msg = `[MND] 공고번호 ${bid} 참가신청 실패: ${(e && e.message) || e}`;
           emit({ type:'log', level:'error', msg });
