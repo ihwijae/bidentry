@@ -211,13 +211,16 @@ async function run(job, emit) {
       }
       let processed = 0;
       for (const bid of bidQueue) {
-        emit && emit({ type:'log', level:'info', msg:`[KEPCO] 공고번호 처리 (${processed + 1}/${bidQueue.length}): ${bid}` });
+        const ordinal = processed + 1;
+        emit && emit({ type:'log', level:'info', msg:`[KEPCO] 공고번호 처리 (${ordinal}/${bidQueue.length}): ${bid}` });
+        emit && emit({ type:'bid_status', site:'kepco', bidId: bid, status:'start', index: ordinal, total: bidQueue.length });
         emit({ type:'progress', step:'navigate_bid', pct: 82 });
         try {
           await goToBidApplyAndSearch(openRes.page, emit, bid);
         } catch (e) {
           const msg = `[KEPCO] 공고번호 ${bid} 이동 실패: ${(e && e.message) || e}`;
           emit({ type:'log', level:'error', msg });
+          emit && emit({ type:'bid_status', site:'kepco', bidId: bid, status:'error', index: ordinal, total: bidQueue.length, error: (e && e.message) || e });
           throw new Error(msg);
         }
         try { await sweepPopups(openRes.page.context?.(), emit); } catch {}
@@ -228,9 +231,11 @@ async function run(job, emit) {
         } catch (e) {
           const msg = `[KEPCO] 공고번호 ${bid} 참가신청 실패: ${(e && e.message) || e}`;
           emit({ type:'log', level:'error', msg });
+          emit && emit({ type:'bid_status', site:'kepco', bidId: bid, status:'error', index: ordinal, total: bidQueue.length, error: (e && e.message) || e });
           throw new Error(msg);
         }
         processed += 1;
+        emit && emit({ type:'bid_status', site:'kepco', bidId: bid, status:'done', index: ordinal, total: bidQueue.length });
       }
       emit && emit({ type:'log', level:'info', msg:`[KEPCO] 공고번호 처리 완료: ${processed}/${bidQueue.length}` });
     }
@@ -243,7 +248,9 @@ async function run(job, emit) {
       }
       let processed = 0;
       for (const bid of bidQueue) {
-        emit && emit({ type:'log', level:'info', msg:`[MND] 입찰공고 검색 (${processed + 1}/${bidQueue.length}): ${bid}` });
+        const ordinal = processed + 1;
+        emit && emit({ type:'log', level:'info', msg:`[MND] 입찰공고 검색 (${ordinal}/${bidQueue.length}): ${bid}` });
+        emit && emit({ type:'bid_status', site:'mnd', bidId: bid, status:'start', index: ordinal, total: bidQueue.length });
         emit({ type:'progress', step:'navigate_bid', pct: 82 });
         try {
           const navRes = await goToMndAgreementAndSearch(openRes.page, emit, bid);
@@ -253,6 +260,7 @@ async function run(job, emit) {
         } catch (e) {
           const msg = `[MND] 공고번호 ${bid} 입찰공고 검색 실패: ${(e && e.message) || e}`;
           emit({ type:'log', level:'error', msg });
+          emit && emit({ type:'bid_status', site:'mnd', bidId: bid, status:'error', index: ordinal, total: bidQueue.length, error: (e && e.message) || e });
           throw new Error(msg);
         }
         try { await sweepPopups(openRes.page.context?.(), emit); } catch {}
@@ -270,9 +278,11 @@ async function run(job, emit) {
         } catch (e) {
           const msg = `[MND] 공고번호 ${bid} 참가신청 실패: ${(e && e.message) || e}`;
           emit({ type:'log', level:'error', msg });
+          emit && emit({ type:'bid_status', site:'mnd', bidId: bid, status:'error', index: ordinal, total: bidQueue.length, error: (e && e.message) || e });
           throw new Error(msg);
         }
         processed += 1;
+        emit && emit({ type:'bid_status', site:'mnd', bidId: bid, status:'done', index: ordinal, total: bidQueue.length });
       }
       emit && emit({ type:'log', level:'info', msg:`[MND] 입찰공고 검색 및 신청 완료: ${processed}/${bidQueue.length}` });
     }

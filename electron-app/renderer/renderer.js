@@ -16,6 +16,8 @@ tabs.forEach(btn => btn.addEventListener('click', () => {
 let settingsCache = { urls:{}, companies:[], options:{ certTimeoutSec:60 } };;
 let lastErrorToastMessage = '';
 let toastOverlay = null;
+let isEngineRunning = false;
+let bidProgressState = [];
 
 function ensureCompanyDefaults(company) {
   if (!company) return;
@@ -248,17 +250,22 @@ function createBidInput(value = '') {
   input.type = 'text';
   input.placeholder = '공고번호를 입력하세요';
   input.value = value || '';
+  input.addEventListener('input', () => {
+    if (!isEngineRunning) syncBidProgressPreviewFromInputs();
+  });
   const removeBtn = document.createElement('button');
   removeBtn.type = 'button';
   removeBtn.textContent = '삭제';
   removeBtn.addEventListener('click', () => {
     if (bidListEl.children.length > 1) {
       wrapper.remove();
+      if (!isEngineRunning) syncBidProgressPreviewFromInputs();
     }
   });
   wrapper.appendChild(input);
   wrapper.appendChild(removeBtn);
   bidListEl.appendChild(wrapper);
+  if (!isEngineRunning) syncBidProgressPreviewFromInputs();
 }
 
 function ensureBidInputs() {
@@ -266,6 +273,28 @@ function ensureBidInputs() {
   if (!bidListEl.children.length) {
     createBidInput('');
   }
+}
+
+function collectBidValues() {
+  return Array.from(bidListEl?.querySelectorAll('input') || [])
+    .map(input => input.value.trim())
+    .filter(Boolean);
+}
+
+function resetBidProgressList(bids = []) {
+  bidProgressState = bids.map((code, idx) => ({
+    bidId: code,
+    order: idx + 1,
+    status: 'pending',
+    error: ''
+  }));
+  renderBidProgressList();
+}
+
+function syncBidProgressPreviewFromInputs() {
+  if (isEngineRunning) return;
+  const bids = collectBidValues();
+  resetBidProgressList(bids);
 }
 
 if (addBidBtn) {
@@ -392,9 +421,7 @@ runBtn.addEventListener('click', async () => {
   const url = siteEl.value === 'kepco' ? (s.urls.kepco || '') : (s.urls.mnd || '');
   if (!url) { toast('설정에서 사이트 URL을 먼저 입력해 주세요.'); return; }
   const authSet = siteEl.value === 'kepco' ? (company.auth.kepco || {}) : (company.auth.mnd || {});
-  const rawBidInput = Array.from(bidListEl?.querySelectorAll('input') || [])
-    .map(input => input.value.trim())
-    .filter(Boolean);
+  const rawBidInput = collectBidValues();
   if (rawBidInput.length === 0) {
     toast('공고번호를 한 개 이상 입력해 주세요.');
     return;
@@ -435,6 +462,7 @@ runBtn.addEventListener('click', async () => {
     toast('인증서 비밀번호를 먼저 입력하고 저장해 주세요.');
     return;
   }
+  resetBidProgressList(rawBidInput);
   // Reset UI
   lastErrorToastMessage = '';
   resetProgressUI();
@@ -443,7 +471,14 @@ runBtn.addEventListener('click', async () => {
   logLine({ type:'info', msg:'Stopped by user request.' });
   runBtn.disabled = true;
   stopBtn.disabled = false;
-  await window.api.runEngine(job);
+  const startRes = await window.api.runEngine(job);
+  if (!startRes || startRes.ok !== true) {
+    toast(startRes?.error || '엔진 실행을 시작하지 못했습니다.');
+    runBtn.disabled = false;
+    stopBtn.disabled = true;
+    return;
+  }
+  isEngineRunning = true;
 });
 
 stopBtn.addEventListener('click', async () => {
@@ -452,6 +487,7 @@ stopBtn.addEventListener('click', async () => {
   document.getElementById('progressStep').textContent = 'waiting';
   document.getElementById('progressPct').textContent = '0%';
   logLine({ type:'info', msg:'Stopped by user request.' });
+  isEngineRunning = false;
   await window.api.stopEngine();
 });
 
@@ -467,6 +503,8 @@ window.api.onEngineEvent(evt => {
       toast(msg);
       lastErrorToastMessage = msg;
     }
+  } else if (evt.type === 'bid_status') {
+    handleBidStatusEvent(evt);
   } else if (evt.type === 'done') {
     updateProgress(100, 'done');
   }
@@ -476,6 +514,7 @@ window.api.onEngineExit(({ code }) => {
   logLine({ type:'exit', code });
   runBtn.disabled = false;
   stopBtn.disabled = true;
+  isEngineRunning = false;
 });
 
 // Small toast
@@ -599,10 +638,78 @@ function updateSummary(job){
   if (bidSummaryEl) bidSummaryEl.textContent = bidSummary;
 }
 
+function renderBidProgressList() {
+  const list = document.getElementById('bidProgressList');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!bidProgressState.length) {
+    const empty = document.createElement('li');
+    empty.className = 'bid-progress-empty';
+    empty.textContent = '공고번호를 추가하면 진행상황이 표시됩니다.';
+    list.appendChild(empty);
+    return;
+  }
+  bidProgressState.forEach(item => {
+    const li = document.createElement('li');
+    li.className = `bid-progress-item ${item.status}`;
+    const code = document.createElement('span');
+    code.className = 'bid-code';
+    code.textContent = `${item.order}. ${item.bidId}`;
+    const status = document.createElement('span');
+    status.className = 'bid-status';
+    status.textContent = bidStatusLabel(item.status);
+    if (item.status === 'error' && item.error) {
+      status.title = item.error;
+    }
+    li.appendChild(code);
+    li.appendChild(status);
+    list.appendChild(li);
+  });
+}
 
+function bidStatusLabel(state) {
+  switch (state) {
+    case 'active': return '진행 중';
+    case 'done': return '완료';
+    case 'error': return '오류';
+    default: return '대기 중';
+  }
+}
 
+function mapBidStage(stage) {
+  switch (stage) {
+    case 'start': return 'active';
+    case 'done': return 'done';
+    case 'error': return 'error';
+    default: return stage || 'pending';
+  }
+}
 
+function updateBidProgressItem(evt) {
+  if (!bidProgressState.length) return;
+  const idx = typeof evt.index === 'number' ? (evt.index - 1) : -1;
+  let target = (idx >= 0 && idx < bidProgressState.length) ? bidProgressState[idx] : null;
+  if (!target && evt.bidId) {
+    target = bidProgressState.find(item => item.bidId === evt.bidId);
+  }
+  if (!target) return;
+  const nextStatus = mapBidStage(evt.status);
+  if (nextStatus === 'active') {
+    bidProgressState.forEach(item => {
+      if (item !== target && item.status === 'active') {
+        item.status = 'pending';
+      }
+    });
+  }
+  target.status = nextStatus;
+  target.error = nextStatus === 'error' ? (evt.error || '') : '';
+  renderBidProgressList();
+}
 
+function handleBidStatusEvent(evt) {
+  if (!evt || !bidProgressState.length) return;
+  updateBidProgressItem(evt);
+}
 
 
 

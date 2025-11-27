@@ -55,3 +55,17 @@ button.secondary{ background:#eef2ff; border-color:#c7d2fe; color:#1d4ed8; }
 .badge.current{ border-color:#2563eb; background:#e0e7ff; color:#1e3a8a; }
 .badge.done{ border-color:#10b981; background:#ecfdf5; color:#065f46; }
 .badge.error{ border-color:#dc2626; background:#fee2e2; color:#991b1b; }
+.bid-progress-panel{ margin-top:8px; padding-top:10px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:8px; }
+.bid-progress-title{ font-weight:600; color:#1f2937; }
+.bid-progress-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.bid-progress-item{ display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border:1px solid var(--border); border-radius:8px; background:#f9fafb; font-size:13px; }
+.bid-progress-item .bid-code{ font-weight:600; color:#111827; }
+.bid-progress-item .bid-status{ font-weight:500; }
+.bid-progress-item.pending .bid-status{ color:var(--muted); }
+.bid-progress-item.active{ border-color:#c7d2fe; background:#eef2ff; }
+.bid-progress-item.active .bid-status{ color:#4338ca; }
+.bid-progress-item.done{ border-color:#10b981; background:#ecfdf5; }
+.bid-progress-item.done .bid-status{ color:#047857; }
+.bid-progress-item.error{ border-color:#fca5a5; background:#fef2f2; }
+.bid-progress-item.error .bid-status{ color:#b91c1c; }
+.bid-progress-empty{ padding:10px; border:1px dashed var(--border); border-radius:8px; color:#6b7280; font-size:13px; background:#f9fafb; }
