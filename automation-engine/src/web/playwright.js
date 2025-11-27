@@ -15,6 +15,21 @@ const os = require('os');
 const path = require('path');
 const { attachPopupAutoCloser, dismissCommonOverlays } = require('./popups');
 
+async function closeContextBlankPages(ctx, emit) {
+  if (!ctx || typeof ctx.pages !== 'function') return;
+  const pages = ctx.pages() || [];
+  for (const pg of pages) {
+    if (!pg) continue;
+    let url = '';
+    try { url = typeof pg.url === 'function' ? pg.url() : ''; } catch {}
+    if (!url || url === 'about:blank') {
+      try { await pg.close({ runBeforeUnload: true }); }
+      catch {}
+      emit && emit({ type:'log', level:'debug', msg:'[browser] about:blank 탭을 닫았습니다.' });
+    }
+  }
+}
+
 function ensureCleanProfileExitFlags(profileDir, emit){
   if (!profileDir) return;
   const patchFile = (fileName) => {
@@ -184,6 +199,8 @@ async function openAndPrepareLogin(job, emit, outDirProvider){
     browser = await tryBrowserLaunch(browserChannel);
     ctx = await browser.newContext({ viewport });
   }
+
+  try { await closeContextBlankPages(ctx, emit); } catch {}
 
   // auto-close notice/event popups across the context
   attachPopupAutoCloser(ctx, emit);

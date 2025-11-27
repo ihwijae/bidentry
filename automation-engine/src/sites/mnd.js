@@ -1800,11 +1800,25 @@ async function closeSubmissionCompletionPopup(page, emit) {
   const closedNaturally = await waitUntilClosed();
   if (!closedNaturally) {
     await dumpMndState(page, emit, 'post_review_popup_stuck');
+    await dumpMndState(page, emit, 'post_review_popup_forced');
     await page.evaluate(() => {
       document.querySelectorAll('#applInsp_confirm, #comfort_confirm_add').forEach(el => {
         if (typeof el.remove === 'function') el.remove();
       });
     }).catch(() => {});
+    // also close any popup windows with the same title
+    try {
+      const ctx = page?.context?.();
+      const pages = ctx?.pages?.() || [];
+      for (const pg of pages) {
+        if (pg === page) continue;
+        let title = '';
+        try { title = await pg.title(); } catch {}
+        if (title && /사후.*입찰안내/.test(title.replace(/\s+/g,''))) {
+          await pg.close({ runBeforeUnload: true });
+        }
+      }
+    } catch {}
   }
   emit && emit({ type:'log', level:'info', msg:'[MND] 참가신청 완료 팝업 닫기 시도 완료' });
   return true;
@@ -1820,6 +1834,7 @@ async function closePostReviewPopupWindows(page, emit) {
     try { title = await pg.title(); } catch {}
     if (title && /사후.*입찰안내/i.test(title.replace(/\s+/g,''))) {
       emit && emit({ type:'log', level:'info', msg:`[MND] 사후심사 안내 보조 팝업을 닫습니다. (title='${title}')` });
+      try { await dumpMndState(pg, emit, 'post_review_popup_window'); } catch {}
       try { await pg.close({ runBeforeUnload: true }); }
       catch {}
     }
