@@ -938,6 +938,20 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     }
     return null;
   };
+  const closeBlankTabs = async () => {
+    const ctx = (workPage && typeof workPage.context === 'function' && workPage.context())
+      || (page && typeof page.context === 'function' && page.context());
+    if (!ctx || typeof ctx.pages !== 'function') return;
+    for (const pg of ctx.pages()) {
+      if (!pg) continue;
+      let url = '';
+      try { url = typeof pg.url === 'function' ? pg.url() : ''; } catch {}
+      if (url === 'about:blank') {
+        try { await pg.close({ runBeforeUnload: true }); } catch {}
+      }
+    }
+  };
+  await closeBlankTabs();
   const ensureWorkPageAlive = async () => {
     if (workPage) {
       try {
