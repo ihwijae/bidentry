@@ -388,6 +388,17 @@ if (devToolsBtn) {
   });
 }
 
+window.addEventListener('keydown', async (evt) => {
+  const isAltF12 = evt.altKey && evt.code === 'F12';
+  if (isAltF12) {
+    evt.preventDefault();
+    const res = await window.api.openDevTools();
+    if (!res?.ok) {
+      toast(res?.error || 'DevTools를 열 수 없습니다.');
+    }
+  }
+});
+
 // (Global cert fields removed)
 
 // Company cert browse
@@ -792,5 +803,4 @@ function handleBidStatusEvent(evt) {
   if (!evt || !bidProgressState.length) return;
   updateBidProgressItem(evt);
 }
-
 
