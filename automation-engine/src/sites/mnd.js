@@ -1505,6 +1505,83 @@ async function applyMndAgreementAfterSearch(page, emit) {
   if (!row) {
     throw new Error('[MND] 협정자동신청 대상 목록을 찾지 못했습니다.');
   }
+  const selectDepositWaiver = async () => {
+    const waiverSelectors = [
+      'select[name*="guar" i]',
+      'select#guarDivs',
+      'select[id*="guar" i]',
+      'select:has(option:has-text("\uBAA8\uB4DD\uAE08\uBA74\uC81C"))'
+    ];
+    const select = await waitForMndElement(page, waiverSelectors, { timeoutMs: 5000, visibleOnly: true });
+    if (!select) return false;
+    try {
+      await select.scrollIntoViewIfNeeded?.().catch(() => {});
+      await select.selectOption?.({ label: '보증금면제' }).catch(async () => {
+        await select.selectOption?.({ value: 'E' }).catch(() => select.type?.('보증금면제', { delay: 20 }));
+      });
+      await select.dispatchEvent?.('change').catch(() => {});
+      log('info', '[MND] 보증금면제 옵션을 선택했습니다.');
+    } catch (err) {
+      log('warn', `[MND] 보증금면제 선택 실패: ${(err && err.message) || err}`);
+    }
+    return true;
+  };
+  const ensureDepositWaiverPopup = async () => {
+    await selectDepositWaiver();
+    const ctx = typeof page.context === 'function' ? page.context() : null;
+    const popup = ctx ? ctx.pages().find(pg => {
+      try {
+        const url = typeof pg.url === 'function' ? pg.url() : '';
+        const title = typeof pg.title === 'function' ? pg.title().catch(() => '') : '';
+        return /guar|deposit|보증금/.test(url || '') || /보증금/.test(title || '');
+      } catch { return false; }
+    }) : null;
+    if (popup) {
+      try { await popup.waitForLoadState?.('domcontentloaded', { timeout: 5000 }); } catch {}
+      try { await popup.bringToFront?.(); } catch {}
+      try { await page.waitForTimeout?.(200); } catch {}
+      try {
+        await popup.evaluate(() => {
+          const mark = (el) => {
+            if (!el) return;
+            if (el.type === 'checkbox' || el.type === 'radio') {
+              el.checked = true;
+              el.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+          };
+          document.querySelectorAll('input[type="checkbox"]').forEach(mark);
+        });
+        const confirm = await popup.$('button:has-text("확인"), #btn_confirm');
+        if (confirm) {
+          await confirm.click({ force:true }).catch(() => confirm.evaluate(el => el && el.click()));
+        }
+      } catch (err) {
+        log('warn', `[MND] 보증금면제 팝업 처리 실패: ${(err && err.message) || err}`);
+      }
+      try { await popup.close?.({ runBeforeUnload: true }); } catch {}
+      await page.bringToFront?.().catch(() => {});
+    }
+  };
+  const ensureTermsAgreement = async () => {
+    const termBoxes = [
+      '#agreeTerms',
+      'input[name*="terms" i]',
+      'input[type="checkbox"]:near(:text("약관"))'
+    ];
+    const checkbox = await waitForMndElement(page, termBoxes, { timeoutMs: 4000, visibleOnly: false });
+    if (checkbox) {
+      try {
+        await checkbox.scrollIntoViewIfNeeded?.().catch(() => {});
+        const checked = await checkbox.isChecked?.().catch(() => false);
+        if (!checked) await checkbox.check?.({ force:true }).catch(() => checkbox.click({ force:true }));
+        log('info', '[MND] 약관 동의 체크 완료');
+      } catch (err) {
+        log('warn', `[MND] 약관 동의 체크 실패: ${(err && err.message) || err}`);
+      }
+    }
+  };
+  await ensureDepositWaiverPopup();
+  await ensureTermsAgreement();
   const applySelectors = [
     'button:has-text("\uD611\uC815\uC790\uB3D9\uC2E0\uCCAD")',
     'button:has-text("\uC790\uB3D9\uC2E0\uCCAD")',
