@@ -1300,6 +1300,10 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     throw new Error('[MND] 입찰공고 상세의 "입찰참가신청서 작성" 버튼을 찾지 못했습니다.');
   }
 
+  try {
+    await resolvedDetail.scrollIntoViewIfNeeded?.().catch(() => {});
+    await resolvedDetail.focus?.().catch(() => {});
+  } catch {}
   await clickAndAdopt(resolvedDetail, { waitMs: 8000 });
   try { await closeMndBidGuideModal(workPage, emit, { timeoutMs: 4000 }); } catch {}
 
