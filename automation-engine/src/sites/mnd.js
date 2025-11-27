@@ -1750,15 +1750,26 @@ async function closeSubmissionCompletionPopup(page, emit) {
   if (!clicked) {
     try { await page.keyboard?.press('Escape'); } catch {}
   }
-  try { await page.waitForTimeout?.(600); } catch {}
-  const stillVisible = await page.evaluate(() => {
-    const wrap = document.getElementById('applInsp_confirm') || document.getElementById('comfort_confirm_add');
-    return wrap && wrap.style.display !== 'none';
-  }).catch(() => false);
-  if (stillVisible) {
+  const waitUntilClosed = async () => {
+    const deadline = Date.now() + 4000;
+    while (Date.now() < deadline) {
+      const visible = await page.evaluate(() => {
+        const wrap = document.getElementById('applInsp_confirm') || document.getElementById('comfort_confirm_add');
+        if (!wrap) return false;
+        const style = window.getComputedStyle(wrap);
+        return style && style.display !== 'none' && style.visibility !== 'hidden';
+      }).catch(() => false);
+      if (!visible) return true;
+      await page.waitForTimeout?.(200);
+    }
+    return false;
+  };
+  const closedNaturally = await waitUntilClosed();
+  if (!closedNaturally) {
     await page.evaluate(() => {
-      const wrap = document.getElementById('applInsp_confirm') || document.getElementById('comfort_confirm_add');
-      if (wrap && typeof wrap.remove === 'function') wrap.remove();
+      document.querySelectorAll('#applInsp_confirm, #comfort_confirm_add').forEach(el => {
+        if (typeof el.remove === 'function') el.remove();
+      });
     }).catch(() => {});
   }
   emit && emit({ type:'log', level:'info', msg:'[MND] 참가신청 완료 팝업 닫기 시도 완료' });
