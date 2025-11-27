@@ -1361,16 +1361,34 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
           el.dispatchEvent(new Event('input', { bubbles: true }));
         }
       };
-      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        const text = ((cb.closest('label')?.innerText || '') + (cb.closest('td')?.innerText || '')).replace(/\s+/g, '');
-        if (/동의|확인/.test(text) || /agree/i.test(cb.name || '')) mark(cb);
-      });
-      const radios = Array.from(document.querySelectorAll('input[type="radio"]'));
-      const optionOne = radios.find(r => {
-        const txt = ((r.closest('label')?.innerText || '') + (r.title || '')).replace(/\s+/g, '');
-        return /선택1/.test(txt) || /select1/i.test(r.name || '');
-      });
-      if (optionOne) mark(optionOne);
+      const isVisible = (el) => {
+        if (!el) return false;
+        const rect = el.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return false;
+        const style = window.getComputedStyle(el);
+        if (!style || style.visibility === 'hidden' || style.display === 'none') return false;
+        return true;
+      };
+      const withRect = (els) => els
+        .filter(isVisible)
+        .map(el => ({ el, rect: el.getBoundingClientRect() }))
+        .sort((a, b) => (a.rect.top - b.rect.top) || (a.rect.left - b.rect.left))
+        .map(item => item.el);
+
+      const checkboxTargets = withRect(Array.from(document.querySelectorAll('input[type="checkbox"]')));
+      checkboxTargets.slice(0, 4).forEach(mark);
+
+      const radios = withRect(Array.from(document.querySelectorAll('input[type="radio"]')));
+      const findText = (el) => {
+        const label = el.closest('label');
+        if (label && label.innerText) return label.innerText.replace(/\s+/g, '');
+        const labelled = document.querySelector(`label[for="${el.id}"]`);
+        if (labelled && labelled.innerText) return labelled.innerText.replace(/\s+/g, '');
+        const parentText = (el.parentElement?.innerText || el.title || el.getAttribute('aria-label') || '').replace(/\s+/g, '');
+        return parentText;
+      };
+      const optionOne = radios.find(r => /선택1|Select1|Option1|①/.test(findText(r) || '')) || radios[0];
+      mark(optionOne);
     }).catch(() => {});
   };
 
