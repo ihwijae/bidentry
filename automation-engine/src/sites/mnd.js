@@ -1342,9 +1342,12 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   try { await closeMndBidGuideModal(workPage, emit, { timeoutMs: 4000 }); } catch {}
 
   const agreementPresence = await waitForMndElement(workPage, [
-    'label:has-text("\uB3D9\uC758") input[type="checkbox"]',
-    '.agree_area input[type="checkbox"]',
-    'input[name*="agree" i]'
+    '#c_box1',
+    '#c_box2',
+    '#c_box3',
+    'input[name="subcont_dir_pay_yn" i]',
+    '#btn_confirm',
+    'button:has-text("\uD655\uC778")'
   ], { timeoutMs: 7000, visibleOnly: false });
   if (!agreementPresence) {
     await dumpMndState(workPage, emit, 'agreement_page_missing');
@@ -1393,6 +1396,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   };
 
   const agreementButtonSelectors = [
+    '#btn_confirm',
     'button:has-text("\uD655\uC778")',
     '.btn_area button:has-text("\uD655\uC778")',
     '.btn_box button:has-text("\uD655\uC778")',
