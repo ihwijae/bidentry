@@ -344,7 +344,6 @@ if (addBidBtn) {
   });
 }
 
-ensureBidInputs();
 const runBtn = document.getElementById('runBtn');
 const stopBtn = document.getElementById('stopBtn');
 const logEl = document.getElementById('log');
@@ -353,6 +352,8 @@ const toggleLogBtn = document.getElementById('toggleLogBtn');
 const closeLogBtn = document.getElementById('closeLogBtn');
 const devToolsBtn = document.getElementById('devToolsBtn');
 const bidCompleteMessageEl = document.getElementById('bidCompleteMessage');
+
+ensureBidInputs();
 
 function openLogModal(){
   if (!logModal) return;
