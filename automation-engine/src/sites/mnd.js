@@ -1729,7 +1729,10 @@ async function closeSubmissionCompletionPopup(page, emit) {
     const candidates = Array.from(document.querySelectorAll('#layer, .layer_wrap, .pop_layer'));
     return candidates.some(el => /사후\s*심사/.test(el.innerText || ''));
   }).catch(() => false);
-  if (!popupVisible) return false;
+  if (!popupVisible) {
+    await dumpMndState(page, emit, 'post_review_popup_missing');
+    return false;
+  }
   const clicked = await page.evaluate(() => {
     const roots = Array.from(document.querySelectorAll('#layer, .layer_wrap, .pop_layer'));
     const targetPopup = roots.find(el => /사후.*입찰안내/i.test((el.innerText || '').replace(/\s+/g,'')));
