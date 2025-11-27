@@ -1726,28 +1726,28 @@ async function applyMndAgreementAfterSearch(page, emit, opts = {}) {
 async function closeSubmissionCompletionPopup(page, emit) {
   if (!page) return false;
   const clicked = await page.evaluate(() => {
-    const closers = [];
-    document.querySelectorAll('#comfort_confirm_add .clo, #comfort_confirm_add button[name="btn_pop_conf"], #applInsp_confirm button, #applInsp_confirm .applInsp_confirm, #applInsp_confirm .btn_lGray').forEach(el => closers.push(el));
-    for (const el of closers) {
-      const text = (el.innerText || '').trim();
-      if (/닫기|확인/.test(text)) {
-        el.click();
+    const selectors = [
+      '#comfort_confirm_add button.clo',
+      '#comfort_confirm_add button[name="btn_pop_conf"]',
+      '#comfort_confirm_add .btn_wrapC button',
+      '#applInsp_confirm button.applInsp_confirm',
+      '#applInsp_confirm .btn_wrapC button'
+    ];
+    for (const sel of selectors) {
+      const btn = document.querySelector(sel);
+      if (btn) {
+        btn.click();
         return true;
       }
     }
-    const explicit = document.querySelector('#comfort_confirm_add button.clo, #applInsp_confirm button.applInsp_confirm');
-    if (explicit) {
-      explicit.click();
+    const fallback = Array.from(document.querySelectorAll('button, a')).find(el => /닫기|확인/.test((el.innerText || '').trim()));
+    if (fallback) {
+      fallback.click();
       return true;
     }
     return false;
   }).catch(() => false);
   if (!clicked) {
-    await page.evaluate(() => {
-      const btn = document.querySelector('#applInsp_confirm button.applInsp_confirm')
-        || Array.from(document.querySelectorAll('button, a')).find(el => /닫기/.test(el.innerText || ''));
-      if (btn) btn.click();
-    }).catch(() => {});
     try { await page.keyboard?.press('Escape'); } catch {}
   }
   try { await page.waitForTimeout?.(600); } catch {}
