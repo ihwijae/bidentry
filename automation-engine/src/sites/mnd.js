@@ -916,6 +916,28 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     workPage = nextPage;
     try { await installMndPopupGuards(workPage, emit); } catch {}
   };
+  const adoptPageByPattern = async (patterns = []) => {
+    const ctx = (workPage && typeof workPage.context === 'function' && workPage.context())
+      || (page && typeof page.context === 'function' && page.context());
+    if (!ctx || typeof ctx.pages !== 'function') return null;
+    const pages = ctx.pages() || [];
+    for (const pg of pages.reverse()) {
+      if (!pg) continue;
+      try {
+        const closed = typeof pg.isClosed === 'function' ? pg.isClosed() : false;
+        if (closed) continue;
+      } catch {}
+      let url = '';
+      let title = '';
+      try { url = typeof pg.url === 'function' ? pg.url() : ''; } catch {}
+      try { title = typeof pg.title === 'function' ? await pg.title().catch(() => '') : ''; } catch {}
+      if (!patterns?.length || patterns.some(rx => rx.test(url) || rx.test(title))) {
+        await adoptWorkPage(pg);
+        return workPage;
+      }
+    }
+    return null;
+  };
   const ensureWorkPageAlive = async () => {
     if (workPage) {
       try {
@@ -1339,6 +1361,7 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
     await resolvedDetail.focus?.().catch(() => {});
   } catch {}
   await clickAndAdopt(resolvedDetail, { waitMs: 8000 });
+  await adoptPageByPattern([/writeOath/i, /oath/i]);
   try { await closeMndBidGuideModal(workPage, emit, { timeoutMs: 4000 }); } catch {}
 
   const agreementPresence = await waitForMndElement(workPage, [
