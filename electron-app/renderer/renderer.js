@@ -198,7 +198,7 @@ async function loadSettings() {
   const normalizedCompanies = normalizeCompanyList(s.companies);
   settingsCache = {
     urls: { kepco: '', mnd: '', ...(s.urls || {}) },
-    companies: normalizedCompanies.map((company) => {
+    companies: (normalizedCompanies.length ? normalizedCompanies : []).map((company) => {
       const clone = { ...company };
       ensureCompanyDefaults(clone);
       if (legacyAccounts.kepco) {
@@ -210,7 +210,7 @@ async function loadSettings() {
         if (!clone.auth.mnd.pw && legacyAccounts.mnd.pw) clone.auth.mnd.pw = legacyAccounts.mnd.pw;
       }
       return clone;
-    }) : [],
+    }),
     options: { certTimeoutSec: 60, ...(s.options || {}) }
   };
   document.getElementById('urlKepco').value = settingsCache.urls.kepco || '';
@@ -803,4 +803,3 @@ function handleBidStatusEvent(evt) {
   if (!evt || !bidProgressState.length) return;
   updateBidProgressItem(evt);
 }
-
