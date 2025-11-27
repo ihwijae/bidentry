@@ -1725,40 +1725,32 @@ async function applyMndAgreementAfterSearch(page, emit, opts = {}) {
 
 async function closeSubmissionCompletionPopup(page, emit) {
   if (!page) return false;
-  const popupSelectors = [
-    'div:has-text("\uC0AC\uD6C4\uC2EC\uC0AC\uB300\uC0C1 \uC785\uCC30\uC548\uB0B4")',
-    '.layer_wrap:has-text("\uC785\uCC30\uC548\uB0B4")',
-    '.pop_layer:has-text("\uC785\uCC30\uC548\uB0B4")'
-  ];
-  const popup = await waitForMndElement(page, popupSelectors, { timeoutMs: 5000, visibleOnly: false });
-  if (!popup) return false;
-  const closeSelectors = [
-    'div:has-text("\uC0AC\uD6C4\uC2EC\uC0AC\uB300\uC0C1 \uC785\uCC30\uC548\uB0B4") button:has-text("\uB2EB\uAE30")',
-    '.layer_wrap button:has-text("\uB2EB\uAE30")',
-    'button:has-text("\uB2EB\uAE30")'
-  ];
-  const closeBtn = await waitForMndElement(page, closeSelectors, { timeoutMs: 2000, visibleOnly: true });
-  if (closeBtn) {
-    try { await closeBtn.scrollIntoViewIfNeeded?.(); } catch {}
-    try { await closeBtn.click({ force:true }); }
-    catch { try { await closeBtn.evaluate(el => el && el.click()); } catch {} }
-  } else {
-    await page.evaluate(() => {
-      const btn = Array.from(document.querySelectorAll('button, a')).find(el => /닫기/.test(el.innerText));
-      if (btn) {
-        btn.click();
-        return true;
-      }
-      const closeIcon = document.querySelector('.layer_wrap .btn_pop_close, .layer_wrap .btn_close, .pop_layer .btn_close, .pop_layer .close');
-      if (closeIcon) closeIcon.click();
-      const escEvt = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
-      document.dispatchEvent(escEvt);
-      return false;
-    }).catch(() => {});
+  const popupVisible = await page.evaluate(() => {
+    const candidates = Array.from(document.querySelectorAll('#layer, .layer_wrap, .pop_layer'));
+    return candidates.some(el => /사후\s*심사/.test(el.innerText || ''));
+  }).catch(() => false);
+  if (!popupVisible) return false;
+  const clicked = await page.evaluate(() => {
+    const roots = Array.from(document.querySelectorAll('#layer, .layer_wrap, .pop_layer'));
+    const targetPopup = roots.find(el => /사후.*입찰안내/i.test((el.innerText || '').replace(/\s+/g,'')));
+    if (!targetPopup) return false;
+    const btn = Array.from(targetPopup.querySelectorAll('button, a')).find(el => /닫기/.test(el.innerText || ''));
+    if (btn) {
+      btn.click();
+      return true;
+    }
+    const closeIcon = targetPopup.querySelector('.btn_pop_close, .btn_close, .close');
+    if (closeIcon) {
+      closeIcon.click();
+      return true;
+    }
+    return false;
+  }).catch(() => false);
+  if (!clicked) {
     try { await page.keyboard?.press('Escape'); } catch {}
   }
-  try { await page.waitForTimeout?.(300); } catch {}
-  emit && emit({ type:'log', level:'info', msg:'[MND] 참가신청 완료 팝업을 닫았습니다.' });
+  try { await page.waitForTimeout?.(600); } catch {}
+  emit && emit({ type:'log', level:'info', msg:'[MND] 참가신청 완료 팝업 닫기 시도 완료' });
   return true;
 }
 
