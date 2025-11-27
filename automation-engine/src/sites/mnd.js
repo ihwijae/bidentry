@@ -1717,6 +1717,7 @@ async function applyMndAgreementAfterSearch(page, emit, opts = {}) {
   await maybeHandleFinalCertificate();
   await handleAgreementConfirmation(page, emit);
   await closeSubmissionCompletionPopup(page, emit);
+  await closePostReviewPopupWindows(page, emit);
   if (hasMoreBids) {
     await returnToMndHome(page, log);
   }
@@ -1774,6 +1775,22 @@ async function closeSubmissionCompletionPopup(page, emit) {
   }
   emit && emit({ type:'log', level:'info', msg:'[MND] 참가신청 완료 팝업 닫기 시도 완료' });
   return true;
+}
+
+async function closePostReviewPopupWindows(page, emit) {
+  const ctx = page?.context?.();
+  if (!ctx) return;
+  const pages = ctx.pages?.() || [];
+  for (const pg of pages) {
+    if (!pg || pg === page) continue;
+    let title = '';
+    try { title = await pg.title(); } catch {}
+    if (title && /사후.*입찰안내/i.test(title.replace(/\s+/g,''))) {
+      emit && emit({ type:'log', level:'info', msg:`[MND] 사후심사 안내 보조 팝업을 닫습니다. (title='${title}')` });
+      try { await pg.close({ runBeforeUnload: true }); }
+      catch {}
+    }
+  }
 }
 
 async function returnToMndHome(page, log) {
