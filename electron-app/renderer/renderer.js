@@ -297,6 +297,16 @@ function syncBidProgressPreviewFromInputs() {
   resetBidProgressList(bids);
 }
 
+function updateBidCompleteBanner() {
+  if (!bidCompleteMessageEl) return;
+  const allDone = bidProgressState.length > 0 && bidProgressState.every(item => item.status === 'done');
+  if (allDone) {
+    bidCompleteMessageEl.removeAttribute('hidden');
+  } else {
+    bidCompleteMessageEl.setAttribute('hidden', 'true');
+  }
+}
+
 if (addBidBtn) {
   addBidBtn.addEventListener('click', () => {
     createBidInput('');
@@ -310,6 +320,7 @@ const logEl = document.getElementById('log');
 const logModal = document.getElementById('logModal');
 const toggleLogBtn = document.getElementById('toggleLogBtn');
 const closeLogBtn = document.getElementById('closeLogBtn');
+const bidCompleteMessageEl = document.getElementById('bidCompleteMessage');
 
 function openLogModal(){
   if (!logModal) return;
@@ -675,6 +686,7 @@ function renderBidProgressList() {
     empty.className = 'bid-progress-empty';
     empty.textContent = '공고번호를 추가하면 진행상황이 표시됩니다.';
     list.appendChild(empty);
+    updateBidCompleteBanner();
     return;
   }
   bidProgressState.forEach(item => {
@@ -693,6 +705,7 @@ function renderBidProgressList() {
     li.appendChild(status);
     list.appendChild(li);
   });
+  updateBidCompleteBanner();
 }
 
 function bidStatusLabel(state) {
@@ -738,9 +751,6 @@ function handleBidStatusEvent(evt) {
   if (!evt || !bidProgressState.length) return;
   updateBidProgressItem(evt);
 }
-
-
-
 
 
 

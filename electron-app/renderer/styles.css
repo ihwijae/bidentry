@@ -78,6 +78,7 @@ button.secondary{ background:#eef2ff; border-color:#c7d2fe; color:#1d4ed8; }
 .bid-progress-item.error{ border-color:#fca5a5; background:#fef2f2; }
 .bid-progress-item.error .bid-status{ color:#b91c1c; }
 .bid-progress-empty{ padding:10px; border:1px dashed var(--border); border-radius:8px; color:#6b7280; font-size:13px; background:#f9fafb; }
+.bid-complete-message{ margin-top:8px; padding:12px 14px; border-radius:10px; background:#ecfdf5; color:#047857; font-weight:600; border:1px solid #a7f3d0; }
 .log-actions{ display:flex; justify-content:flex-end; margin-top:8px; }
 .log-modal{ position:fixed; inset:0; background:rgba(15,23,42,0.55); display:none; align-items:center; justify-content:center; z-index:2000; padding:24px; }
 .log-modal.open{ display:flex; }

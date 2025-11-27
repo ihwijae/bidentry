@@ -1483,6 +1483,7 @@ async function applyMndAgreementAfterSearch(page, emit, opts = {}) {
   const jobOptions = opts?.options || {};
   const certOptions = opts?.cert;
   const companyInfo = opts?.company || {};
+  const hasMoreBids = opts?.hasMoreBids === true;
   const derivedCertTimeout = Number(opts?.certTimeoutMs)
     || (jobOptions?.certTimeoutSec ? Number(jobOptions.certTimeoutSec) * 1000 : 20000);
   const baseContext = (page && typeof page.context === 'function') ? page.context() : null;
@@ -1715,7 +1716,61 @@ async function applyMndAgreementAfterSearch(page, emit, opts = {}) {
   }
   await maybeHandleFinalCertificate();
   await handleAgreementConfirmation(page, emit);
+  await closeSubmissionCompletionPopup();
+  if (hasMoreBids) {
+    await returnToMndHome(page, log);
+  }
   return { ok: true, page };
+}
+
+async function closeSubmissionCompletionPopup(page, emit) {
+  if (!page) return false;
+  const popupSelectors = [
+    'div:has-text("\uC0AC\uD6C4\uC2EC\uC0AC\uB300\uC0C1 \uC785\uCC30\uC548\uB0B4")',
+    '.layer_wrap:has-text("\uC785\uCC30\uC548\uB0B4")',
+    '.pop_layer:has-text("\uC785\uCC30\uC548\uB0B4")'
+  ];
+  const popup = await waitForMndElement(page, popupSelectors, { timeoutMs: 5000, visibleOnly: false });
+  if (!popup) return false;
+  const closeSelectors = [
+    'div:has-text("\uC0AC\uD6C4\uC2EC\uC0AC\uB300\uC0C1 \uC785\uCC30\uC548\uB0B4") button:has-text("\uB2EB\uAE30")',
+    '.layer_wrap button:has-text("\uB2EB\uAE30")',
+    'button:has-text("\uB2EB\uAE30")'
+  ];
+  const closeBtn = await waitForMndElement(page, closeSelectors, { timeoutMs: 2000, visibleOnly: true });
+  if (closeBtn) {
+    try { await closeBtn.scrollIntoViewIfNeeded?.(); } catch {}
+    try { await closeBtn.click({ force:true }); }
+    catch { try { await closeBtn.evaluate(el => el && el.click()); } catch {} }
+  } else {
+    try { await page.keyboard?.press('Escape'); } catch {}
+  }
+  try { await page.waitForTimeout?.(300); } catch {}
+  emit && emit({ type:'log', level:'info', msg:'[MND] 참가신청 완료 팝업을 닫았습니다.' });
+  return true;
+}
+
+async function returnToMndHome(page, log) {
+  if (!page) return;
+  const homeSelectors = [
+    '#header_wrap a[href*="index.do"]',
+    'a:has-text("\uAD6D\uBC29\uC804\uC790\uC870\uB2EC\uC2DC\uC2A4\uD15C")',
+    '.logo a'
+  ];
+  const homeLink = await waitForMndElement(page, homeSelectors, { timeoutMs: 6000, visibleOnly: true });
+  if (!homeLink) {
+    log && log('warn', '[MND] 메인 화면으로 이동할 링크를 찾지 못했습니다.');
+    return;
+  }
+  const navPromise = typeof page.waitForNavigation === 'function'
+    ? page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 12000 }).catch(() => null)
+    : null;
+  try { await homeLink.scrollIntoViewIfNeeded?.(); } catch {}
+  try { await homeLink.click({ force:true }); }
+  catch { try { await homeLink.evaluate(el => el && el.click()); } catch {} }
+  await navPromise;
+  try { await page.waitForLoadState?.('domcontentloaded', { timeout: 8000 }); } catch {}
+  log && log('info', '[MND] 메인 페이지로 이동했습니다.');
 }
 
 module.exports = {

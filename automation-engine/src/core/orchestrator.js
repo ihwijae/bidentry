@@ -266,11 +266,13 @@ async function run(job, emit) {
         try { await sweepPopups(openRes.page.context?.(), emit); } catch {}
         try { await dismissCommonOverlays(openRes.page, emit); } catch {}
         emit({ type:'progress', step:'search_bid', pct: 88 });
+        const hasMoreBids = ordinal < bidQueue.length;
         try {
           const applyRes = await applyMndAgreementAfterSearch(openRes.page, emit, {
             cert: job?.cert || {},
             company: job?.company || {},
-            options: job?.options || {}
+            options: job?.options || {},
+            hasMoreBids
           });
           if (applyRes?.page && applyRes.page !== openRes.page) {
             openRes.page = applyRes.page;
