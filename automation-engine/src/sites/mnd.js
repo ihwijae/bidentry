@@ -1480,6 +1480,71 @@ async function handleAgreementConfirmation(page, emit) {
 
 async function applyMndAgreementAfterSearch(page, emit) {
   const log = (level, msg) => emit && emit({ type:'log', level, msg });
+  const baseContext = (page && typeof page.context === 'function') ? page.context() : null;
+  const applyUrlRegex = /\/bid\/bidApply/i;
+  const applyTitleRegex = /\uCC38\uAC00\uC2E0\uCCAD/i;
+  const getActiveContext = () => {
+    try {
+      if (page && typeof page.context === 'function') return page.context();
+    } catch {}
+    return baseContext;
+  };
+  const isApplyPage = async (target) => {
+    if (!target) return false;
+    try {
+      const url = typeof target.url === 'function' ? target.url() : '';
+      if (applyUrlRegex.test(url)) return true;
+    } catch {}
+    try {
+      const title = typeof target.title === 'function' ? await target.title().catch(() => '') : '';
+      if (title && applyTitleRegex.test(title)) return true;
+    } catch {}
+    try {
+      if (typeof target.$ === 'function') {
+        const marker = await target.$('#btn_wrt');
+        if (marker) return true;
+      }
+    } catch {}
+    return false;
+  };
+  const tryAdoptApplyPage = async () => {
+    const ctx = getActiveContext();
+    const pages = (ctx && typeof ctx.pages === 'function') ? ctx.pages() : [];
+    if (!pages || !pages.length) return null;
+    for (const candidate of [...pages].reverse()) {
+      const match = await isApplyPage(candidate);
+      if (!match) continue;
+      if (candidate !== page) {
+        page = candidate;
+        log('info', '[MND] 참가신청 페이지로 포커스를 전환했습니다.');
+        try { await page.bringToFront?.(); } catch {}
+        try { await installMndPopupGuards(page, emit); } catch {}
+      }
+      return page;
+    }
+    return null;
+  };
+  const ensureApplyPage = async (timeoutMs = 12000) => {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      if (await isApplyPage(page)) return page;
+      const adopted = await tryAdoptApplyPage();
+      if (adopted) return adopted;
+      try { await page?.waitForTimeout?.(250); } catch {}
+    }
+    await tryAdoptApplyPage();
+    if (await isApplyPage(page)) return page;
+    await dumpMndState(page, emit, 'apply_page_missing');
+    throw new Error('[MND] 참가신청서 작성 페이지를 확인하지 못했습니다.');
+  };
+
+  await ensureApplyPage();
+  try { await page?.bringToFront?.(); } catch {}
+  try { await page?.waitForLoadState?.('domcontentloaded', { timeout: 6000 }); } catch {}
+  try {
+    const currentUrl = typeof page?.url === 'function' ? page.url() : '';
+    if (currentUrl) log('debug', `[MND] 참가신청 페이지 URL: ${currentUrl}`);
+  } catch {}
   const scrollToSection = async (ratio = 1) => {
     try {
       await page.evaluate((r) => {
