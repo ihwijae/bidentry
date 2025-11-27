@@ -1,10 +1,10 @@
 // Minimal Electron shell that runs the automation engine CLI
 'use strict';
 
-let app, BrowserWindow, ipcMain, dialog;
+let app, BrowserWindow, ipcMain, dialog, globalShortcut;
 try {
   // In real Electron runtime, this provides { app, BrowserWindow, ... }
-  ({ app, BrowserWindow, ipcMain, dialog } = require('electron'));
+  ({ app, BrowserWindow, ipcMain, dialog, globalShortcut } = require('electron'));
 } catch {}
 const { spawn } = require('child_process');
 const path = require('path');
@@ -198,7 +198,17 @@ $obj = @{ ok=$true; signCert=$sc; subject=$x.Subject; issuer=$x.Issuer; serial=$
     });
 
 
+    if (globalShortcut) {
+      globalShortcut.register('Alt+F12', () => {
+        const target = mainWindow && !mainWindow.isDestroyed() ? mainWindow : null;
+        if (target) {
+          try { target.webContents.openDevTools({ mode: 'detach' }); } catch {}
+        }
+      });
+    }
+
     app.on('window-all-closed', () => { app.quit(); });
+    app.on('will-quit', () => { try { globalShortcut?.unregisterAll(); } catch {} });
   });
 } else {
   // Fallback: run as plain Node (useful in limited CI/sandbox)
