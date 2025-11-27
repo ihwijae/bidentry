@@ -10,6 +10,8 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
+let mainWindow = null;
+
 // Dev auto-reload (only when not packaged)
 const isPackaged = app ? app.isPackaged : false;
 if (!isPackaged) {
@@ -92,6 +94,7 @@ if (app && typeof app.whenReady === 'function') {
         nodeIntegration: false,
       }
     });
+    mainWindow = win;
     win.removeMenu?.();
     win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
 
@@ -181,6 +184,17 @@ $obj = @{ ok=$true; signCert=$sc; subject=$x.Subject; issuer=$x.Issuer; serial=$
       if (!currentPs) return { ok: false, error: 'Not running' };
       try { currentPs.kill(); } catch {}
       return { ok: true };
+    });
+
+    ipcMain.handle('devtools:open', () => {
+      const target = mainWindow && !mainWindow.isDestroyed() ? mainWindow : win;
+      if (!target) return { ok: false, error: 'window unavailable' };
+      try {
+        target.webContents.openDevTools({ mode: 'detach' });
+        return { ok: true };
+      } catch (err) {
+        return { ok: false, error: (err && err.message) || String(err) };
+      }
     });
 
 

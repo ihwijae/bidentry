@@ -7,7 +7,7 @@ contextBridge.exposeInMainWorld('api', {
   stopEngine: () => ipcRenderer.invoke('engine:stop'),
   selectPath: (opts) => ipcRenderer.invoke('dialog:selectPath', opts),
   inspectCert: (p) => ipcRenderer.invoke('cert:inspect', p),
+  openDevTools: () => ipcRenderer.invoke('devtools:open'),
   onEngineEvent: (cb) => ipcRenderer.on('engine:event', (_e, evt) => cb(evt)),
   onEngineExit: (cb) => ipcRenderer.on('engine:exit', (_e, data) => cb(data)),
 });
-

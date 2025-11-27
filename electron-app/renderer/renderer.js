@@ -351,6 +351,7 @@ const logEl = document.getElementById('log');
 const logModal = document.getElementById('logModal');
 const toggleLogBtn = document.getElementById('toggleLogBtn');
 const closeLogBtn = document.getElementById('closeLogBtn');
+const devToolsBtn = document.getElementById('devToolsBtn');
 const bidCompleteMessageEl = document.getElementById('bidCompleteMessage');
 
 function openLogModal(){
@@ -374,6 +375,15 @@ if (logModal) {
   window.addEventListener('keydown', (evt) => {
     if (evt.key === 'Escape' && logModal.classList.contains('open')) {
       closeLogModal();
+    }
+  });
+}
+
+if (devToolsBtn) {
+  devToolsBtn.addEventListener('click', async () => {
+    const res = await window.api.openDevTools();
+    if (!res?.ok) {
+      toast(res?.error || 'DevTools를 열 수 없습니다.');
     }
   });
 }
@@ -782,6 +792,5 @@ function handleBidStatusEvent(evt) {
   if (!evt || !bidProgressState.length) return;
   updateBidProgressItem(evt);
 }
-
 
 
