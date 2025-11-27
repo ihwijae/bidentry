@@ -1743,6 +1743,18 @@ async function closeSubmissionCompletionPopup(page, emit) {
     try { await closeBtn.click({ force:true }); }
     catch { try { await closeBtn.evaluate(el => el && el.click()); } catch {} }
   } else {
+    await page.evaluate(() => {
+      const btn = Array.from(document.querySelectorAll('button, a')).find(el => /닫기/.test(el.innerText));
+      if (btn) {
+        btn.click();
+        return true;
+      }
+      const closeIcon = document.querySelector('.layer_wrap .btn_pop_close, .layer_wrap .btn_close, .pop_layer .btn_close, .pop_layer .close');
+      if (closeIcon) closeIcon.click();
+      const escEvt = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true });
+      document.dispatchEvent(escEvt);
+      return false;
+    }).catch(() => {});
     try { await page.keyboard?.press('Escape'); } catch {}
   }
   try { await page.waitForTimeout?.(300); } catch {}
