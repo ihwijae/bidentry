@@ -1751,6 +1751,16 @@ async function closeSubmissionCompletionPopup(page, emit) {
     try { await page.keyboard?.press('Escape'); } catch {}
   }
   try { await page.waitForTimeout?.(600); } catch {}
+  const stillVisible = await page.evaluate(() => {
+    const wrap = document.getElementById('applInsp_confirm') || document.getElementById('comfort_confirm_add');
+    return wrap && wrap.style.display !== 'none';
+  }).catch(() => false);
+  if (stillVisible) {
+    await page.evaluate(() => {
+      const wrap = document.getElementById('applInsp_confirm') || document.getElementById('comfort_confirm_add');
+      if (wrap && typeof wrap.remove === 'function') wrap.remove();
+    }).catch(() => {});
+  }
   emit && emit({ type:'log', level:'info', msg:'[MND] 참가신청 완료 팝업 닫기 시도 완료' });
   return true;
 }
@@ -1764,7 +1774,11 @@ async function returnToMndHome(page, log) {
   ];
   const homeLink = await waitForMndElement(page, homeSelectors, { timeoutMs: 6000, visibleOnly: true });
   if (!homeLink) {
-    log && log('warn', '[MND] 메인 화면으로 이동할 링크를 찾지 못했습니다.');
+    log && log('warn', '[MND] 메인 화면으로 이동할 링크를 찾지 못했습니다. 직접 이동을 시도합니다.');
+    try {
+      await page.goto('https://www.d2b.go.kr/index.do', { waitUntil: 'domcontentloaded', timeout: 15000 });
+      return;
+    } catch {}
     return;
   }
   const navPromise = typeof page.waitForNavigation === 'function'
