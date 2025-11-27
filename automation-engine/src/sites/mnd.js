@@ -1505,6 +1505,18 @@ async function applyMndAgreementAfterSearch(page, emit) {
   if (!row) {
     throw new Error('[MND] 협정자동신청 대상 목록을 찾지 못했습니다.');
   }
+  const scrollToSection = async (ratio = 1) => {
+    try {
+      await page.evaluate((r) => {
+        const doc = document.documentElement || document.body;
+        const height = doc?.scrollHeight || document.body?.scrollHeight || 0;
+        const target = Math.max(0, Math.min(1, r)) * height;
+        window.scrollTo?.(0, target);
+      }, ratio);
+    } catch {}
+    try { await page.waitForTimeout?.(200); } catch {}
+  };
+  await scrollToSection(0.4);
   const selectDepositWaiver = async () => {
     const waiverSelectors = [
       'select[name*="guar" i]',
@@ -1581,7 +1593,9 @@ async function applyMndAgreementAfterSearch(page, emit) {
     }
   };
   await ensureDepositWaiverPopup();
+  await scrollToSection(0.8);
   await ensureTermsAgreement();
+  await scrollToSection(0.95);
   const applySelectors = [
     'button:has-text("\uD611\uC815\uC790\uB3D9\uC2E0\uCCAD")',
     'button:has-text("\uC790\uB3D9\uC2E0\uCCAD")',
