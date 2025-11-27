@@ -11,6 +11,21 @@ const BID_GUIDE_SKIP_REGEXES = [/\uC778\uC99D/i, /\uACF5\uB3D9/i, /certificate/i
 const MND_GUARDED_CONTEXTS = new WeakSet();
 const MND_GUARDED_PAGES = new WeakSet();
 
+async function closeAboutBlankTabs(page) {
+  try {
+    const ctx = page?.context?.();
+    if (!ctx || typeof ctx.pages !== 'function') return;
+    for (const pg of ctx.pages()) {
+      if (!pg) continue;
+      let url = '';
+      try { url = typeof pg.url === 'function' ? pg.url() : ''; } catch {}
+      if (url === 'about:blank') {
+        try { await pg.close({ runBeforeUnload: true }); } catch {}
+      }
+    }
+  } catch {}
+}
+
 function runBidGuideGuardClient() {
   if (window.__mndBidGuideGuardInstalled) return;
   window.__mndBidGuideGuardInstalled = true;
@@ -911,10 +926,12 @@ async function goToMndAgreementAndSearch(page, emit, bidId) {
   };
 
   let workPage = await resolveWorkPage() || page;
+  try { await closeAboutBlankTabs(workPage); } catch {}
   const adoptWorkPage = async (nextPage) => {
     if (!nextPage || workPage === nextPage) return;
     workPage = nextPage;
     try { await installMndPopupGuards(workPage, emit); } catch {}
+    try { await closeAboutBlankTabs(workPage); } catch {}
   };
   const adoptPageByPattern = async (patterns = []) => {
     const ctx = (workPage && typeof workPage.context === 'function' && workPage.context())
@@ -1559,6 +1576,7 @@ async function applyMndAgreementAfterSearch(page, emit, opts = {}) {
   };
 
   await ensureApplyPage();
+  try { await closeAboutBlankTabs(page); } catch {}
   try { await page?.bringToFront?.(); } catch {}
   try { await page?.waitForLoadState?.('domcontentloaded', { timeout: 6000 }); } catch {}
   try { await installMndPopupGuards(page, emit); } catch {}
@@ -1781,6 +1799,7 @@ async function closeSubmissionCompletionPopup(page, emit) {
   };
   const closedNaturally = await waitUntilClosed();
   if (!closedNaturally) {
+    await dumpMndState(page, emit, 'post_review_popup_stuck');
     await page.evaluate(() => {
       document.querySelectorAll('#applInsp_confirm, #comfort_confirm_add').forEach(el => {
         if (typeof el.remove === 'function') el.remove();
