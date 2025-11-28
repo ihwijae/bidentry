@@ -110,7 +110,12 @@ if (app && typeof app.whenReady === 'function') {
     });
     mainWindow = win;
     win.removeMenu?.();
-    win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
+    const devServerUrl = process.env.VITE_DEV_SERVER_URL;
+    if (devServerUrl) {
+      win.loadURL(devServerUrl);
+    } else {
+      win.loadFile(path.join(__dirname, 'renderer', 'dist', 'index.html'));
+    }
 
     // IPC: settings load/save
     ipcMain.handle('settings:load', () => loadSettings());
