@@ -619,6 +619,8 @@ window.api.onEngineEvent(evt => {
       toast(msg);
       lastErrorToastMessage = msg;
     }
+  } else if (evt.type === 'log' && evt.msg && evt.msg.includes('[PLAYWRIGHT] 브라우저 파일이 없어 설치를 진행합니다.')) {
+    toast('필요한 브라우저 파일을 설치 중입니다. 잠시만 기다려 주세요...');
   } else if (evt.type === 'bid_status') {
     handleBidStatusEvent(evt);
   } else if (evt.type === 'done') {
