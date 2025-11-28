@@ -9,6 +9,12 @@
       "#certList tr",
       ".cert-list tbody tr",
       ".nx-cert-list tr",
+      "#select-cert-list tr",
+      "#select-cert-list tbody tr",
+      "#select-cert-list li",
+      "#select-cert-list .cert-row",
+      "#select-cert-list .nx-cert-row",
+      "#select-cert-list .select-row",
       "#NXcertList tr",
       ".nx-cert-list tr",
       ".nx-cert-list li",
@@ -26,6 +32,11 @@
     ],
     "hintText": "",
     "hintCells": [],
-    "hintIndex": -1
+    "hintIndex": -1,
+    "modalSelectors": [
+      "#nx-cert-select",
+      ".nx-cert-select",
+      "#browser-guide-added-wrapper #nx-cert-select"
+    ]
   }
 }

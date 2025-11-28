@@ -410,6 +410,16 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
     let bestIdx = -1;
     let bestScore = -Infinity;
     rows.forEach((row, idx) => {
+      const headerCells = Array.from(row.querySelectorAll('th'));
+      let isHeader = headerCells.length > 0;
+      if (!isHeader && typeof row.closest === 'function') {
+        try { if (row.closest('thead')) isHeader = true; } catch {}
+      }
+      const rowTextRaw = row.innerText || row.textContent || '';
+      if (!isHeader && /구분\s+사용자\s+만료일\s+발급자/.test(rowTextRaw.replace(/\s+/g, ' '))) {
+        isHeader = true;
+      }
+      if (isHeader) return;
       const text = row.innerText || row.textContent || '';
       const ntext = norm(text);
       let score = 0;
