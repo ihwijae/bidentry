@@ -28,13 +28,18 @@
         "filter": [
           "**/*"
         ]
+      },
+      {
+        "from": "../icon.ico",
+        "to": "icon.ico"
       }
     ],
     "win": {
       "target": [
         "nsis"
       ],
-      "artifactName": "BidAutomation-${version}-win.${ext}"
+      "artifactName": "BidAutomation-${version}-win.${ext}",
+      "icon": "../icon.ico"
     }
   },
   "devDependencies": {

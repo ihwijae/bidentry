@@ -16,6 +16,13 @@ if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = (app && app.isPackaged) ? 'production' : 'development';
 }
 
+const resolveAppIcon = () => {
+  if (app && app.isPackaged) {
+    return path.join(process.resourcesPath || path.resolve(__dirname), 'icon.ico');
+  }
+  return path.resolve(__dirname, '..', 'icon.ico');
+};
+
 // Dev auto-reload (only when not packaged)
 const isPackaged = app ? app.isPackaged : false;
 if (!isPackaged) {
@@ -96,7 +103,8 @@ if (app && typeof app.whenReady === 'function') {
         preload: path.join(__dirname, 'preload.js'),
         contextIsolation: true,
         nodeIntegration: false,
-      }
+      },
+      icon: resolveAppIcon()
     });
     mainWindow = win;
     win.removeMenu?.();

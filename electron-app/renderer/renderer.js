@@ -3,6 +3,7 @@ const tabs = document.querySelectorAll('.tab');
 const views = {
   main: document.getElementById('tab-main'),
   settings: document.getElementById('tab-settings'),
+  guide: document.getElementById('tab-guide'),
 };
 tabs.forEach(btn => btn.addEventListener('click', () => {
   tabs.forEach(b => b.classList.remove('active'));
