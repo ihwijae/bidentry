@@ -26,10 +26,13 @@ function installBrowsers(targetDir, log) {
   return new Promise((resolve, reject) => {
     try { fs.mkdirSync(targetDir, { recursive: true }); } catch {}
     let installScript = null;
+    let pkgRoot = null;
     try {
-      installScript = require.resolve('playwright/lib/cli/cli.js', { paths: [ENGINE_ROOT, __dirname] });
+      const playwrightPkg = require.resolve('playwright/package.json', { paths: [ENGINE_ROOT, __dirname] });
+      pkgRoot = path.dirname(playwrightPkg);
+      installScript = path.join(pkgRoot, 'cli.js');
     } catch {}
-    if (!installScript) {
+    if (!installScript || !fs.existsSync(installScript)) {
       return reject(new Error('Playwright CLI not found. Ensure dependencies are installed.'));
     }
     const env = {
@@ -48,7 +51,11 @@ function installBrowsers(targetDir, log) {
 }
 
 async function ensurePlaywright(browsersPath, log) {
-  const target = browsersPath || process.env.PLAYWRIGHT_BROWSERS_PATH || DEFAULT_DIR;
+  let target = browsersPath || process.env.PLAYWRIGHT_BROWSERS_PATH;
+  if (!target && process.env.APPDATA) {
+    target = path.join(process.env.APPDATA, 'AutomationShell', 'ms-playwright');
+  }
+  if (!target) target = DEFAULT_DIR;
   if (platformExecutable(target)) return { browsersPath: target };
   if (typeof log === 'function') log(`[PLAYWRIGHT] 브라우저 파일이 없어 설치를 진행합니다. (${target})`);
   await installBrowsers(target, log);
