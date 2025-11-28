@@ -7,6 +7,7 @@ const { sweepPopups, dismissCommonOverlays } = require('../web/popups');
 const { selectCertificateAndConfirm } = require('../native/uia');
 const { goToBidApplyAndSearch, handleKepcoCertificate, applyAfterSearch, closeKepcoPostLoginModals } = require('../sites/kepco');
 const { handleMndCertificate, goToMndAgreementAndSearch, applyMndAgreementAfterSearch } = require('../sites/mnd');
+const { debugDumpsEnabled } = require('../util/debug');
 const { scanLocalCerts } = require('../native/scanCerts');
 
 function runDir() {
@@ -75,8 +76,10 @@ async function run(job, emit) {
     }
     else if (site === 'mnd') {
       try {
-        const dumpMndCert = job?.options?.dumpMndCertDom !== false;
-        const dumpTag = job?.options?.dumpMndCertTag || (dumpMndCert ? 'mnd_login_cert' : null);
+        const dumpEnabled = debugDumpsEnabled() && job?.options?.dumpMndCertDom !== false;
+        const dumpTag = dumpEnabled
+          ? (job?.options?.dumpMndCertTag || 'mnd_login_cert')
+          : null;
         const webCert = await handleMndCertificate(openRes.page, emit, job?.cert || {}, {
           company: job?.company || {},
           timeoutMs: (Number(job?.options?.certTimeoutSec) || 30) * 1000,
@@ -273,8 +276,10 @@ async function run(job, emit) {
         try { await dismissCommonOverlays(openRes.page, emit); } catch {}
         emit({ type:'progress', step:'search_bid', pct: 88 });
         const hasMoreBids = ordinal < bidQueue.length;
-        const dumpMndCert = job?.options?.dumpMndCertDom !== false;
-        const dumpTag = job?.options?.dumpMndCertTag || (dumpMndCert ? 'mnd_apply_cert' : null);
+        const dumpEnabled = debugDumpsEnabled() && job?.options?.dumpMndCertDom !== false;
+        const dumpTag = dumpEnabled
+          ? (job?.options?.dumpMndCertTag || 'mnd_apply_cert')
+          : null;
         try {
           const applyRes = await applyMndAgreementAfterSearch(openRes.page, emit, {
             cert: job?.cert || {},

@@ -1,0 +1,304 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="UTF-8"> 
+<title>한국전력 전자조달 시스템</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="google" content="notranslate">
+<meta name="_csrf_parameter" content="_csrf"><meta name="_csrf_header" content="X-CSRF-TOKEN"><meta name="_csrf" content="b26dd103-a3dc-48bd-93f2-dad0acb132a7">
+
+<link rel="stylesheet" href="themes/mdi/resources/kepco-theme-all.css" type="text/css"><link rel="stylesheet" href="themes/default/5.0.1.1255/resources/etnajs-theme-kepco-all.css" type="text/css"><link rel="stylesheet" href="themes/portal/resources/portal-theme-standard-all.css" type="text/css">
+
+<link rel="stylesheet" href="stylesheets.css?bust=1607648146082" type="text/css">
+<!-- <x-compile> -->
+<!-- <x-bootstrap> -->
+<!-- </x-bootstrap> -->
+<script async="" charset="utf-8" src="https://kepco-ep.kepco.co.kr/INIT/JS/static/79887/install.js?ver=1764288000000"></script><script type="text/javascript">var KepcoContextPath = '';var KepcoSSO = '';var isAuthentication = 'false';</script>
+<script type="text/javascript" src="resources/cmmn/js/simpleBrowser.js"></script>
+
+<script type="text/javascript" src="resources/cmmn/js/weblog.js"></script>
+<script language="JavaScript"> 
+
+
+ function isAllowedBrowser() {
+ 		var isAllowedBrowser = false
+ 		   ,isIE = SimpleBrowser.isChrome
+ 		   ,isChrome = SimpleBrowser.isIE
+		   ,ieVersion = SimpleBrowser.ieVersion
+		   ,chromeVersion = SimpleBrowser.chromeVersion
+ 		   ,browserName = SimpleBrowser.browser.name;
+
+ 		if(isChrome || isIE) {
+ 			isAllowedBrowser = ieVersion >= 11 || chromeVersion >= 43 || false;
+ 		}else if( browserName == "Firefox"){
+ 			isAllowedBrowser = true;
+ 		}
+
+ 		return isAllowedBrowser;
+ 	}
+ if(!isAllowedBrowser()) {
+ 	parent.location.replace('underSploin.do');
+ }
+	
+    document.onkeydown = processKey;
+
+    function processKey()
+    {	
+        // F5( 새로고침 ) 키를 누르지 못하도록 하기위해서
+        // 뒤로가기 키를 누르지 못하도록 하기위해서
+    	if(event.keyCode == 116){//F5, BackSpace
+            event.keyCode = 0;
+            event.cancelBubble = true;
+            event.returnValue = false;
+            event.preventDefault();
+        }
+        /*
+        if(event.keyCode == 116 || event.keyCode == 8 || event.keyCode == 123 || event.keyCode == 122){//F5, BackSpace, F12, F11
+            event.keyCode = 0;
+            event.cancelBubble = true;
+            event.returnValue = false;
+            event.preventDefault();
+        }else if(event.ctrlKey == true && event.shiftKey){//ctrl + shift
+        	event.keyCode = 0;
+            event.cancelBubble = true;
+            event.returnValue = false;
+            event.preventDefault();
+        }else if(event.ctrlKey == true && event.keyCode == 83){//ctrl + S
+        	event.keyCode = 0;
+            event.cancelBubble = true;
+            event.returnValue = false;
+            event.preventDefault();
+        }else if(event.ctrlKey == true && event.keyCode == 78){//ctrl + N
+        	event.keyCode = 0;
+            event.cancelBubble = true;
+            event.returnValue = false;
+            event.preventDefault();
+        }
+        */
+    }
+    
+    document.oncontextmenu = function(e){
+    	if(e){
+    		e.preventDefault();
+    	}else{
+    		event.keyCode = 0;
+    		event.cancelBubble = true;
+            event.returnValue = false;
+    	}
+    }
+</script>
+
+
+<!-- 엠로 기술연구소 메모리 모니터링 파일 import -->
+<!--   <script type="text/javascript" src="/extjs/swfobject.js"></script> -->
+
+<script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="require-module" src="./require-module.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="resources/jsoneditor-2.3.3/jsoneditor-min" src="./resources/jsoneditor-2.3.3/jsoneditor-min.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="resources/sencha-chart/sencha-charts" src="./resources/sencha-chart/sencha-charts.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="extjs/etc" src="./extjs/etc.js"></script><script type="text/javascript" charset="utf-8" async="" data-requirecontext="_" data-requiremodule="extjs/define" src="./extjs/define.js"></script><link type="text/css" rel="stylesheet" href="https://srm.kepco.net/resources/jsoneditor-2.3.3/jsoneditor-min.css"></head>
+<body style="background:url('login/images/mdi_loading.gif') no-repeat fixed center;" id="ext-element-1" class="x-body x-webkit x-chrome">
+<script type="text/javascript" src="resources/es6-promise-2.0.0.min.js?bust=1607648146082"></script><script type="text/javascript" src="ext-all.js?bust=1607648146082"></script><script type="text/javascript" src="etnajs.js?bust=1607648146082"></script><script type="text/javascript" src="etnajs-cmmn.js?bust=1607648146082"></script><script type="text/javascript" src="extjs/override.js?bust=1607648146082"></script><script type="text/javascript" src="extjs/profile-override.js?bust=1607648146082"></script><script type="text/javascript" src="extjs/serviceBidScheduler.js?bust=1607648146082"></script><script type="text/javascript" src="stateful.js?bust=1607648146082"></script><script type="text/javascript" src="require.js?bust=1607648146082"></script><script type="text/javascript" src="MessageSource-production.js?bust=1607648146082"></script><script type="text/javascript" src="login/js/jquery-1.11.2.min.js?bust=1607648146082"></script><script type="text/javascript" src="Mdi-production.js?bust=1607648146082"></script><script type="text/javascript" src="api.js?bust=1607648146082"></script><script type="text/javascript" src="ext-bootstrap.js?bust=1607648146082"></script><script type="text/javascript" src="extjs/messagesource-override.js?bust=1607648146082"></script>
+
+<script type="text/javascript" src="extjs/locale/etna-lang-ko.js"></script>
+
+
+<!-- 엠로 기술연구소 안성욱 CacheBuster 반영 Ext Boot Inject-->
+
+<script type="text/javascript">
+    
+	var bust = 1607648146082;
+	var requireConfig = {
+		urlArgs : "bust=" + bust
+	};
+    //extjs 5.0.1
+    Ext.Boot.$create = Ext.Boot.create;
+    Ext.Boot.create = function(url, key, cfg) {
+		var config = cfg || {};
+        config.buster = Ext.Boot.getConfig('disableCachingParam') + '=' + bust;
+    	return Ext.Boot.$create(url, key, config);
+    };
+</script>
+	
+
+<script type="text/javascript">
+	//모듈의 contextPath 설정
+	(function() {
+		var contextPath = '';
+		if(!contextPath) {
+			contextPath = ' ';
+		}
+		Ext.data.Connection.templates = {
+			contextPath : contextPath
+		};
+	}());
+	
+	//IE11 또는 크롬 43 버전 이상인지 체크
+	/* if(!isAllowedBrowser()) {
+		parent.location.replace('underSploin.do');
+	}
+	function isAllowedBrowser() {
+		var isAllowedBrowser = false
+		   ,isIE = Ext.isChrome
+		   ,isChrome = Ext.isIE
+		   ,ieVersion = Ext.ieVersion
+		   ,chromeVersion = Ext.chromeVersion;
+		if(isChrome || isIE) {
+			isAllowedBrowser = ieVersion >= 11 || chromeVersion >= 43 || false;
+		}
+		return isAllowedBrowser;
+	}
+	 */
+	
+	var checkChangeUnload = true;
+	var beforeUnloadHandler = function(e){
+		// 메인페이지에서 로그인을 안했을 경우에는 '새로고침 하시겠습니까?' 메시지 안띄우기
+		if(MdiManager.spmain && !Cmmn.User.data) return; 
+		
+		if(checkChangeUnload){
+			e.event.returnValue = ' ';
+			disableUnloadFlag();
+		}
+	};
+	
+	function disableUnloadFlag(){
+		checkChangeUnload = false;
+		Ext.defer(function(){
+			checkChangeUnload = true;
+		}, 200);
+	}
+	
+	
+	function start(){
+		Ext.application({
+			requires : [ 'Mdi.view.mdi.Viewport' ],
+			name : 'App',
+			launch : function()
+			{	
+				//페이지 새로고침 시 확인메세지 출력
+				Ext.getWin().on('beforeunload', beforeUnloadHandler); 
+				if(isAuthentication === 'false') {
+					MdiManager.toggleSpMain();
+				}
+				Mdi.model.Setting.set('authenticatable', true); 
+		    	Mdi.model.Setting.set('authenticatorClass', 'Mdi.view.mdi.authenticator.Standard');
+		    	Ext.state.Manager.setProvider(new Stateful.state.Provider());
+		    	Mdi.model.Setting.set('kind','Disclosed');
+				MdiManager.logout = function(){
+					//로그아웃시 beforeunload 이벤트 제거
+					Ext.getWin().addBeforeListener('beforeunload', function(e){
+						return false;
+					},window, {
+						single : true
+					});
+					logoutForm.submit();
+				}
+				Ext.direct.Manager.addProvider(Ext.app.REMOTING_API);
+				
+				
+				// 엠로 기술연구소 메모리 모니터링 용 오버라이드 
+				/*
+				Ext.define('MemoryCheck.controller.Manager',{
+					override : 'Mdi.controller.Manager',
+					addView : function(className, config, requireClasses, callback){
+						var me = this;
+						me.callParent([className, config, requireClasses, callback]);
+						if(Ext.isIE){
+							Ext.defer(function(){
+								try{
+								
+									document.getElementById('MemoryCheckSWF').getPrivateMemory();
+								}catch(e){};
+							
+							}, 1000);
+						
+						}
+					
+					}
+				
+				});
+				*/
+				
+				Ext.defer(function() {
+					Ext.create('Mdi.view.mdi.Viewport');		
+				}, isAuthentication === 'true' ? 0 : 300);
+				
+				/* 하단의 내용들은 외자프로젝트를 위한 임시소스 나중에 지워야함 20151026 옥승한 */
+				/*
+				var announceNo = "";
+				if(announceNo){
+					var pageInfo = {
+							classpath : 'Spt_Sp_CustomerSupport.view.AnnounceComment',
+							name : '공지사항',
+							authKey : 'CUS31100',
+							initPageLoading : true,
+							announceNo : announceNo
+						}
+					if (MdiManager.hasView(pageInfo.classpath)) {
+						var view = MdiManager.mdiTab.down(Ext.String.format('>[classpath='+pageInfo.classpath+']'));
+						MdiManager.mdiTab.remove(view,true);                  
+					}
+					MdiManager.addView(pageInfo.classpath, {title: pageInfo.name, authKey: pageInfo.authKey, initPageInfo: pageInfo}, pageInfo.classpath);
+				}
+				*/
+				/* 임시내용 끝 */
+				
+			}
+		});
+		Ext.create('Site.override.SessionExpiredCheck').init();
+	}
+	start();
+	require( ["require-module"] );
+	//require(['Mdi'], start, start);
+	
+</script>
+
+<!-- </x-compile> -->
+
+  <form id="logoutForm" action="logoutProcess.do" method="post" style="width:0px;height:0px;">
+  <input type="hidden" name="_csrf" value="b26dd103-a3dc-48bd-93f2-dad0acb132a7">
+</form>
+
+<!-- <iframe id="ssoIframe" src="" style="width:0px;height:0px;"></iframe> 미사용 iframe 주석-->
+
+
+<!-- 엠로 기술연구소 메모리 모니터링 SWF파일 설정 -->
+<!-- 
+<div id="MemoryCheckSWF"></div>
+<script type="text/javascript">
+swfobject.embedSWF("/extjs/MemoryCheck.swf", "MemoryCheckSWF", "0", "0", "10.0.0", "expressInstall.swf", null,{wmode : "transparent"},null,
+function(e){
+	if(e.success != true){
+	
+	}
+}
+);
+
+var LIMIT_COUNT = 4;
+var LIMIT_MEMORY = 1200;
+var count = localStorage.getItem('checkCount') ? localStorage.getItem('checkCount') : 0;
+
+function returnMemory(_privateMemory){
+	if((count >= LIMIT_COUNT) && (_privateMemory >= LIMIT_MEMORY)){
+		Ext.Msg.confirm('\#{주의}','\#{메모리가 일정량이상 증가하여 안정적이지 않을 수 있습니다. 새탭으로 여시겠습니까?(현재 탭은 종료 됩니다.)}', 
+		function(btn){
+			if(btn == 'yes'){
+				localStorage.clear();
+				var win = Ext.getWin();
+			    var callback = function(e) {
+			        if(win) {
+			            win.removeBeforeListener('beforeunload', arguments.callee);
+			        }
+			        win = undefined;
+			        return false;
+			    };
+			    win.addBeforeListener('beforeunload', callback);
+				var newWindow = window.open(location.href,'_blank');
+				Ext.defer(function(){
+					window.open('about:blank','_self').close();
+				},500);
+			}
+		}
+		)
+	}else{
+		localStorage.setItem('checkCount', ++count);
+	}
+}
+</script> 
+-->
+
+<div class="x-tip  x-layer x-tip-default x-border-box" id="ext-quicktips-tip" style="display: none;"><div class="x-tip-header  x-header x-docked x-unselectable x-tip-header-default x-horizontal x-tip-header-horizontal x-tip-header-default-horizontal x-top x-tip-header-top x-tip-header-default-top x-box-layout-ct" id="ext-quicktips-tip_header"><div id="ext-quicktips-tip_header-innerCt" data-ref="innerCt" role="presentation" class="x-box-inner"><div id="ext-quicktips-tip_header-targetEl" data-ref="targetEl" class="x-box-target" role="presentation"><div class="x-title  x-tip-header-title x-tip-header-title-default x-box-item x-title-default x-title-rotate-none x-title-align-left" unselectable="on" id="ext-comp-1009"><h4 id="ext-comp-1009-textEl" data-ref="textEl" class="x-title-text x-title-text-default x-title-item" unselectable="on">&amp;amp;#160;</h4></div></div></div></div><div id="ext-quicktips-tip-body" data-ref="body" class="x-tip-body x-tip-body-default x-tip-body-default" role="presentation"><div id="ext-quicktips-tip-outerCt" data-ref="outerCt" class="x-autocontainer-outerCt" role="presentation"><div id="ext-quicktips-tip-innerCt" data-ref="innerCt" style="" class="x-autocontainer-innerCt" role="presentation"></div></div></div><div role="presentation" class="x-tip-anchor x-tip-anchor-top" id="ext-element-2"></div></div><div class="x-component  spmain x-layer x-component-default x-border-box" style="width: 100%; height: calc(100% - 120px); left: 0px; top: 120px; right: auto; z-index: 19000;" id="mdiiframe-1010"><iframe src="main/splogin.jsp" id="mdiiframe-1010-iframeEl" data-ref="iframeEl" name="mdiiframe-1010-frame" width="100%" height="100%" frameborder="0" title="메인화면"></iframe></div><div id="etnadownloader" data-ref="downloadFrameEl" tabindex="-1" style="display:none;width:0px;height:0px;"><iframe id="etnadownloader-iframeEl" data-ref="iframeEl" tabindex="-1" frameborder="0" title="다운로더"> <html><body></body></html></iframe></div></body></html>

@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { handleNxCertificate } = require('./nxCertificate');
+const { debugDumpsEnabled } = require('../util/debug');
 const TEXT_LOGIN = '\uB85C\uADF8\uC778';
 const TEXT_CERT_CORE = '\uACF5\uB3D9\uC778\uC99D';
 const TEXT_CERT_LOGIN = TEXT_CERT_CORE + ' \uB85C\uADF8\uC778';
@@ -394,6 +395,7 @@ async function handleMndCertificate(page, emit, cert = {}, extra = {}) {
 }
 
 async function dumpMndState(page, emit, tag) {
+  if (!debugDumpsEnabled()) return;
   if (!page) return;
   const stamp = new Date().toISOString().replace(/[:.]/g,'-');
   const base = `${stamp}_${tag || 'mnd'}`;

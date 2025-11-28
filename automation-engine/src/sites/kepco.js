@@ -3,10 +3,12 @@
 const fs = require('fs');
 const path = require('path');
 const { handleNxCertificate } = require('./nxCertificate');
+const { debugDumpsEnabled } = require('../util/debug');
 
 const KEPCO_POPUP_URL_PATTERNS = [/\/popup\//i, /NoticeFishingPopup/i, /Kepco.*Popup/i];
 
 async function dumpKepcoHtml(page, emit, tag){
+  if (!debugDumpsEnabled()) return;
   if (!page) return;
   try {
     const html = await page.content();
@@ -77,7 +79,6 @@ async function loginKepco(page, emit, auth = {}) {
     await dumpKepcoHtml(page, emit, 'kepco_home_initial');
   } catch {}
 
-  // 1) Top navigation login link/button click
   const loginLinkCandidates = [
     '#button-1022-btnInnerEl',
     'span.x-btn-inner:has-text("\uB85C\uADF8\uC778")',
@@ -88,6 +89,39 @@ async function loginKepco(page, emit, auth = {}) {
     'a[href*="login" i]',
     'xpath=//a[contains(normalize-space(.),"\uB85C\uADF8\uC778")]'
   ];
+
+  const waitForLoginLink = async (timeoutMs = 7000) => {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      for (const sel of loginLinkCandidates) {
+        try {
+          const el = await page.$(sel);
+          if (el) return true;
+        } catch {}
+        try {
+          const el = await $(sel);
+          if (el) return true;
+        } catch {}
+      }
+      await page.waitForTimeout(200).catch(() => {});
+    }
+    return false;
+  };
+
+  let loginLinkReady = await waitForLoginLink();
+  if (!loginLinkReady) {
+    await dumpKepcoHtml(page, emit, 'kepco_login_link_missing_initial');
+    emit && emit({ type: 'log', level: 'warn', msg: '[KEPCO] 로그인 링크 탐색 실패, 페이지 리로드 시도' });
+    try { await page.reload({ waitUntil: 'domcontentloaded' }); } catch {}
+    await page.waitForTimeout(600).catch(() => {});
+    loginLinkReady = await waitForLoginLink(6000);
+  }
+  if (!loginLinkReady) {
+    await dumpKepcoHtml(page, emit, 'kepco_login_link_missing_retry');
+    throw new Error('[KEPCO] 로그인 링크를 찾지 못했습니다.');
+  }
+
+  // 1) Top navigation login link/button click
   const popup = await clickWithPopup(page, loginLinkCandidates);
   const loginPage = popup || page;
   // Ensure alert dialogs don't block automation

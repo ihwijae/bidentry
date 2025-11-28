@@ -82,6 +82,12 @@ button.secondary{ background:#eef2ff; border-color:#c7d2fe; color:#1d4ed8; }
 .copy-bid-btn{ border:1px solid #cbd5f5; background:#eef2ff; color:#1d4ed8; border-radius:6px; font-size:12px; padding:4px 10px; cursor:pointer; transition:background 120ms ease, color 120ms ease; }
 .copy-bid-btn:hover{ background:#e0e7ff; color:#1e3a8a; }
 .bid-progress-empty{ padding:10px; border:1px dashed var(--border); border-radius:8px; color:#6b7280; font-size:13px; background:#f9fafb; }
+.guide-block{ margin-bottom:24px; padding:16px; border:1px solid var(--border); border-radius:12px; background:#f9fafb; }
+.guide-block h3{ margin-top:0; font-size:18px; color:#1f2937; }
+.guide-block ol{ margin-left:18px; color:#374151; line-height:1.6; }
+.guide-block li{ margin-bottom:10px; }
+.guide-block small{ display:block; margin-top:4px; color:#6b7280; font-size:12px; }
+.guide-note{ margin-top:10px; color:#1d4ed8; font-weight:500; }
 .bid-complete-message{ margin-top:8px; padding:12px 14px; border-radius:10px; background:#ecfdf5; color:#047857; font-weight:600; border:1px solid #a7f3d0; }
 .log-actions{ display:flex; justify-content:flex-end; margin-top:8px; }
 .log-modal{ position:fixed; inset:0; background:rgba(15,23,42,0.55); display:none; align-items:center; justify-content:center; z-index:2000; padding:24px; }

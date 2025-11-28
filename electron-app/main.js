@@ -12,6 +12,10 @@ const fs = require('fs');
 
 let mainWindow = null;
 
+if (!process.env.NODE_ENV) {
+  process.env.NODE_ENV = (app && app.isPackaged) ? 'production' : 'development';
+}
+
 // Dev auto-reload (only when not packaged)
 const isPackaged = app ? app.isPackaged : false;
 if (!isPackaged) {
