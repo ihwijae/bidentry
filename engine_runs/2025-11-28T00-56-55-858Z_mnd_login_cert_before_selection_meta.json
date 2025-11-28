@@ -1,0 +1,31 @@
+{
+  "selectionPrefs": {
+    "subject": "에코엠이엔씨 주식회사",
+    "issuer": "",
+    "serial": "",
+    "bizNo": "1078775007",
+    "rowSelectors": [
+      "#NXcertList tr",
+      "#certList tr",
+      ".cert-list tbody tr",
+      ".nx-cert-list tr",
+      "#NXcertList tr",
+      ".nx-cert-list tr",
+      ".nx-cert-list li",
+      ".cert-list tbody tr",
+      ".cert-list tr",
+      ".cert-list li",
+      ".nx-cert-row",
+      ".cert-row",
+      ".cert-item",
+      "li[data-cert-index]",
+      "li[data-idx]",
+      "[data-cert-index]",
+      "[data-row-index]",
+      "[role=\"row\"]"
+    ],
+    "hintText": "",
+    "hintCells": [],
+    "hintIndex": -1
+  }
+}

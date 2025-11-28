@@ -93,6 +93,12 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
 
   const rowSelectors = [
     ...(Array.isArray(extra?.rowSelectors) ? extra.rowSelectors : []),
+    '#select-cert-list tr',
+    '#select-cert-list tbody tr',
+    '#select-cert-list li',
+    '#select-cert-list .cert-row',
+    '#select-cert-list .nx-cert-row',
+    '#select-cert-list .select-row',
     '#NXcertList tr',
     '.nx-cert-list tr',
     '.nx-cert-list li',
@@ -296,6 +302,8 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
   const preferBizNo = String(extra?.company?.bizNo || cert.bizNo || '').replace(/[^0-9]/g, '');
 
   const hintIndexRaw = Number(extra?.selectionHint?.index);
+  const modalRootSelectors = ['#nx-cert-select', '.nx-cert-select', '#browser-guide-added-wrapper #nx-cert-select'];
+
   const selectionPrefs = {
     subject: preferSubject,
     issuer: preferIssuer,
@@ -303,10 +311,19 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
     bizNo: preferBizNo,
     rowSelectors,
     hintText: (extra?.selectionHint?.text || ''),
-    hintCells: Array.isArray(extra?.selectionHint?.cells) ? extra.selectionHint.cells : [],
+    hintCells: Array.isArray(extra?.selectionHint?.cells)
+      ? extra.selectionHint.cells.filter((cell) => {
+        if (cell === null || cell === undefined) return false;
+        const raw = String(cell).trim();
+        if (!raw) return false;
+        if (raw.toLowerCase() === 'nan') return false;
+        return true;
+      })
+      : [],
     hintIndex: Number.isFinite(hintIndexRaw)
       ? Math.max(0, Math.floor(hintIndexRaw))
-      : -1
+      : -1,
+    modalSelectors: modalRootSelectors
   };
   await maybeDump('before_selection', { certPage, scope, meta: { selectionPrefs } });
 
@@ -330,28 +347,48 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
     const selectors = (Array.isArray(prefs.rowSelectors) && prefs.rowSelectors.length)
       ? prefs.rowSelectors
       : ['#NXcertList tr', '.nx-cert-list tr', '.nx-cert-list li', '.cert-list tbody tr', '.cert-list tr', '.cert-list li', '.nx-cert-row', '.cert-row', '.cert-item', '[role="row"]'];
+    const modalSelectors = Array.isArray(prefs.modalSelectors) && prefs.modalSelectors.length
+      ? prefs.modalSelectors
+      : ['#nx-cert-select', '.nx-cert-select'];
+    const modalRoot = (() => {
+      for (const sel of modalSelectors) {
+        if (!sel) continue;
+        try {
+          const found = document.querySelector(sel);
+          if (found) return found;
+        } catch {}
+      }
+      return null;
+    })();
+    const withinModal = (node) => {
+      if (!node) return false;
+      if (!modalRoot) return true;
+      try { return modalRoot === node || modalRoot.contains(node); }
+      catch { return true; }
+    };
+    const pushRows = (found) => {
+      if (!Array.isArray(found)) return;
+      for (const row of found) {
+        if (!row) continue;
+        if (!withinModal(row)) continue;
+        if (!seen.has(row)) {
+          seen.add(row);
+          rows.push(row);
+        }
+      }
+    };
     const rows = [];
     const seen = new Set();
     for (const sel of selectors) {
       if (!sel) continue;
       try {
         const found = Array.from(document.querySelectorAll(sel));
-        for (const row of found) {
-          if (!seen.has(row)) {
-            seen.add(row);
-            rows.push(row);
-          }
-        }
+        pushRows(found);
       } catch {}
     }
     if (!rows.length) {
       const fallback = Array.from(document.querySelectorAll('table tr'));
-      for (const row of fallback) {
-        if (!seen.has(row)) {
-          seen.add(row);
-          rows.push(row);
-        }
-      }
+      pushRows(fallback);
     }
     if (!rows.length) {
       return { ok: false, reason: 'no_rows' };

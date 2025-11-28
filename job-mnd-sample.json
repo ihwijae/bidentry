@@ -1,0 +1,18 @@
+{
+  "site": "mnd",
+  "bidId": "YOUR_BID_ID",
+  "company": {
+    "name": "회사명",
+    "bizNo": "000-00-00000",
+    "representative": "대표자"
+  },
+  "cert": {
+    "provider": "KICA",
+    "pin": "123456",
+    "media": "hdd"
+  },
+  "options": {
+    "headless": false,
+    "dumpMndCertDom": true
+  }
+}
