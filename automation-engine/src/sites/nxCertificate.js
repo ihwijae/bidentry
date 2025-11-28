@@ -224,6 +224,7 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
   const preferIssuer = String(cert.issuerMatch || cert.provider || '').trim();
   const preferSerial = String(cert.serialMatch || cert.serial || '').trim();
   const pinValue = String(cert.pin || cert.password || '').trim();
+  const modalRootSelectors = ['#nx-cert-select', '.nx-cert-select', '#browser-guide-added-wrapper #nx-cert-select'];
 
   async function applyMediaPreference(contexts) {
     const raw = String(cert.media || cert.storage || '').trim();
@@ -274,7 +275,44 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
 
 
 
+  const ensureRowsReady = async () => {
+    const deadline = Date.now() + (Number(extra?.rowsReadyTimeoutMs) || 6000);
+    while (Date.now() < deadline) {
+      const ready = await scope.evaluate((selectors) => {
+        const modal = selectors.find((sel) => {
+          try {
+            const node = document.querySelector(sel);
+            if (!node) return false;
+            const style = window.getComputedStyle(node);
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            if (node.offsetWidth === 0 || node.offsetHeight === 0) return false;
+            return true;
+          } catch {}
+          return false;
+        });
+        if (!modal) return false;
+        const root = document.querySelector('#select-cert-list') || modal.querySelector('.select-cert-list');
+        if (!root) return false;
+        const rows = root.querySelectorAll('tr');
+        if (!rows || !rows.length) return false;
+        for (const row of rows) {
+          const cells = row.querySelectorAll('td');
+          if (cells && cells.length) {
+            const text = (row.innerText || row.textContent || '').trim();
+            if (text) return true;
+          }
+        }
+        return false;
+      }, modalRootSelectors).catch(() => false);
+      if (ready) return true;
+      await sleep(pollDelay);
+    }
+    await maybeDump('rows_not_ready', { certPage, scope });
+    return false;
+  };
+
   await applyMediaPreference(scopeCandidates);
+  await ensureRowsReady();
 
   const probeSelectors = rowSelectors.filter(Boolean);
   for (const ctx of scopeCandidates) {
@@ -302,7 +340,6 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
   const preferBizNo = String(extra?.company?.bizNo || cert.bizNo || '').replace(/[^0-9]/g, '');
 
   const hintIndexRaw = Number(extra?.selectionHint?.index);
-  const modalRootSelectors = ['#nx-cert-select', '.nx-cert-select', '#browser-guide-added-wrapper #nx-cert-select'];
 
   const selectionPrefs = {
     subject: preferSubject,
