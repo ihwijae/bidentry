@@ -61,8 +61,10 @@ function runEngineFromElectron(argv) {
   const enginePath = resolveEngineScript();
   const args = argv.length > 0 ? argv : ['--demo'];
 
+  const childEnv = { ...process.env, ELECTRON_RUN_AS_NODE: '1' };
   const ps = spawn(process.execPath, [enginePath, ...args], {
-    stdio: ['ignore', 'pipe', 'pipe']
+    stdio: ['ignore', 'pipe', 'pipe'],
+    env: childEnv
   });
 
   ps.stdout.setEncoding('utf8');
