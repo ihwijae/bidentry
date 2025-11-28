@@ -41,31 +41,6 @@
         ]
       },
       {
-        "from": "node_modules/playwright",
-        "to": "engine/node_modules/playwright",
-        "filter": [
-          "package.json",
-          "cli.js",
-          "index.*",
-          "lib/**",
-          "types/**",
-          "bin/**"
-        ]
-      },
-      {
-        "from": "node_modules/playwright-core",
-        "to": "engine/node_modules/playwright-core",
-        "filter": [
-          "package.json",
-          "cli.js",
-          "index.*",
-          "lib/**",
-          "types/**",
-          "bin/**",
-          "browsers.json"
-        ]
-      },
-      {
         "from": "../icon.ico",
         "to": "icon.ico"
       }

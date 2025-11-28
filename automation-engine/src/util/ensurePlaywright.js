@@ -7,6 +7,7 @@ const { spawn } = require('child_process');
 
 const ENGINE_ROOT = path.resolve(__dirname, '..', '..');
 const DEFAULT_DIR = path.join(os.homedir(), '.bidentry-ms-playwright');
+const BUNDLED_DIR = path.join(ENGINE_ROOT, 'node_modules', 'playwright');
 
 function platformExecutable(base) {
   const candidates = fs.existsSync(base) ? fs.readdirSync(base) : [];
@@ -52,6 +53,11 @@ function installBrowsers(targetDir, log) {
 
 async function ensurePlaywright(browsersPath, log) {
   let target = browsersPath || process.env.PLAYWRIGHT_BROWSERS_PATH;
+  if (!target && fs.existsSync(path.join(BUNDLED_DIR, 'browsers.json'))) {
+    target = path.join(BUNDLED_DIR, '.local-browsers');
+    process.env.PLAYWRIGHT_BROWSERS_PATH = target;
+    return { browsersPath: target };
+  }
   if (!target && process.env.APPDATA) {
     target = path.join(process.env.APPDATA, 'AutomationShell', 'ms-playwright');
   }
