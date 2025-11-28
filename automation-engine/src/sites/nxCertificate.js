@@ -236,6 +236,7 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
 
   const preferBizNo = String(extra?.company?.bizNo || cert.bizNo || '').replace(/[^0-9]/g, '');
 
+  const hintIndexRaw = Number(extra?.selectionHint?.index);
   const selectionPrefs = {
     subject: preferSubject,
     issuer: preferIssuer,
@@ -243,7 +244,10 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
     bizNo: preferBizNo,
     rowSelectors,
     hintText: (extra?.selectionHint?.text || ''),
-    hintCells: Array.isArray(extra?.selectionHint?.cells) ? extra.selectionHint.cells : []
+    hintCells: Array.isArray(extra?.selectionHint?.cells) ? extra.selectionHint.cells : [],
+    hintIndex: Number.isFinite(hintIndexRaw)
+      ? Math.max(0, Math.floor(hintIndexRaw))
+      : -1
   };
 
   const attemptSelection = async (ctx) => ctx.evaluate((prefs) => {
@@ -293,7 +297,19 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
       return { ok: false, reason: 'no_rows' };
     }
     const hintText = norm(prefs.hintText || '');
-    const hintCells = Array.isArray(prefs.hintCells) ? prefs.hintCells.map(norm) : [];
+    const hintSegments = [];
+    if (hintText) {
+      const rawSegments = String(prefs.hintText || '').split(/[\r\n]+/);
+      for (const seg of rawSegments) {
+        const normalized = norm(seg);
+        if (normalized && normalized !== hintText && !hintSegments.includes(normalized)) {
+          hintSegments.push(normalized);
+        }
+      }
+    }
+    const hintCells = Array.isArray(prefs.hintCells)
+      ? prefs.hintCells.map(norm).filter(Boolean)
+      : [];
     let bestIdx = -1;
     let bestScore = -Infinity;
     rows.forEach((row, idx) => {
@@ -301,6 +317,10 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
       const ntext = norm(text);
       let score = 0;
       const rowDigits = onlyDigits(text);
+      const rowCellTexts = Array.from(row.querySelectorAll('td, th, div, span, p'))
+        .map((el) => (el.innerText || el.textContent || '').trim())
+        .filter(Boolean);
+      const rowCellNorms = rowCellTexts.map(norm).filter(Boolean);
       if (wantSerial && ntext.includes(wantSerial)) score += 500;
       if (wantSubject && ntext.includes(wantSubject)) score += 220;
       if (wantIssuer && ntext.includes(wantIssuer)) score += 80;
@@ -309,10 +329,35 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
         if (ntext === hintText) score += 1500;
         else if (ntext.includes(hintText)) score += 600;
       }
-      if (hintCells.length) {
-        const matches = hintCells.reduce((acc, cell) => acc + (cell && ntext.includes(cell) ? 1 : 0), 0);
-        if (matches) score += matches * 200;
+      if (hintSegments.length) {
+        const segMatches = hintSegments.reduce((acc, seg) => acc + (seg && ntext.includes(seg) ? 1 : 0), 0);
+        if (segMatches) score += segMatches * 220;
       }
+      if (hintCells.length) {
+        let exact = 0;
+        let partial = 0;
+        for (const hint of hintCells) {
+          if (!hint) continue;
+          let matched = false;
+          for (const cell of rowCellNorms) {
+            if (!cell) continue;
+            if (cell === hint) {
+              exact += 1;
+              matched = true;
+              break;
+            }
+            if (!matched && (cell.includes(hint) || hint.includes(cell))) {
+              partial += 1;
+              matched = true;
+            }
+          }
+          if (!matched && ntext.includes(hint)) partial += 1;
+        }
+        if (exact) score += exact * 700;
+        if (!exact && partial) score += partial * 260;
+      }
+      if (/갱신안내|갱신\s*안내/.test(text)) score -= 800;
+      else if (/갱신|만료/.test(text)) score -= 120;
       if (!wantSerial && !wantSubject && !wantIssuer && !wantBiz) {
         score += Math.max(0, rows.length - idx);
       }
@@ -321,6 +366,13 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
         bestIdx = idx;
       }
     });
+    if ((bestScore <= 0 || bestIdx < 0) && Number.isFinite(prefs.hintIndex) && prefs.hintIndex >= 0) {
+      const fallbackIdx = Math.min(rows.length - 1, Math.floor(prefs.hintIndex));
+      if (fallbackIdx >= 0 && rows[fallbackIdx]) {
+        bestIdx = fallbackIdx;
+        bestScore = 1;
+      }
+    }
     if (bestScore <= 0 || bestIdx < 0) {
       return { ok: false, reason: 'no_match' };
     }
