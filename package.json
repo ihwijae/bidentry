@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "clean:playwright": "node scripts/clean-playwright.js",
-    "prebuild": "npm run clean:playwright",
+    "prebuild": "npm --prefix automation-engine install && npm run clean:playwright",
     "dev": "npm --prefix electron-app run dev",
     "app:dev": "npm --prefix electron-app run dev",
     "engine:demo": "node automation-engine/src/cli.js --demo",

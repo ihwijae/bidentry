@@ -10,7 +10,7 @@
     "start": "node src/cli.js --help",
     "dev": "node src/cli.js --demo"
   },
-  "devDependencies": {
+  "dependencies": {
     "playwright": "^1.55.0"
   }
 }

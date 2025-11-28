@@ -25,14 +25,20 @@ function platformExecutable(base) {
 function installBrowsers(targetDir, log) {
   return new Promise((resolve, reject) => {
     try { fs.mkdirSync(targetDir, { recursive: true }); } catch {}
-    const installScript = path.join(ENGINE_ROOT, 'node_modules', 'playwright', 'install.js');
+    let installScript = null;
+    try {
+      installScript = require.resolve('playwright/lib/cli/cli.js', { paths: [ENGINE_ROOT, __dirname] });
+    } catch {}
+    if (!installScript) {
+      return reject(new Error('Playwright CLI not found. Ensure dependencies are installed.'));
+    }
     const env = {
       ...process.env,
       PLAYWRIGHT_BROWSERS_PATH: targetDir,
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '',
       ELECTRON_RUN_AS_NODE: '1'
     };
-    const ps = spawn(process.execPath, [installScript, 'chromium'], { env, stdio: 'inherit' });
+    const ps = spawn(process.execPath, [installScript, 'install', 'chromium'], { env, stdio: 'inherit' });
     ps.on('close', (code) => {
       if (code === 0) resolve();
       else reject(new Error('Playwright browser install failed'));
