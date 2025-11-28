@@ -30,6 +30,29 @@ let toastOverlay = null;
 let isEngineRunning = false;
 let bidProgressState = [];
 
+async function copyTextToClipboard(text) {
+  try {
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {}
+  try {
+    const textarea = document.createElement('textarea');
+    textarea.value = text || '';
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    const ok = document.execCommand('copy');
+    textarea.remove();
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
 function ensureCompanyDefaults(company) {
   if (!company) return;
   company.cert = company.cert || {};
@@ -754,8 +777,20 @@ function renderBidProgressList() {
     if (item.status === 'error' && item.error) {
       status.title = item.error;
     }
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'copy-bid-btn';
+    copyBtn.textContent = '복사';
+    copyBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const ok = await copyTextToClipboard(item.bidId || '');
+      if (ok) toast(`공고번호 ${item.bidId} 복사 완료`);
+      else toast('클립보드 복사에 실패했습니다.');
+    });
     li.appendChild(code);
     li.appendChild(status);
+    li.appendChild(copyBtn);
     list.appendChild(li);
   });
   updateBidCompleteBanner();
