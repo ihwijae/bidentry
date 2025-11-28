@@ -72,6 +72,11 @@ async function loginKepco(page, emit, auth = {}) {
     return null;
   }
 
+  try {
+    await page.waitForLoadState('domcontentloaded').catch(() => {});
+    await dumpKepcoHtml(page, emit, 'kepco_home_initial');
+  } catch {}
+
   // 1) Top navigation login link/button click
   const loginLinkCandidates = [
     '#button-1022-btnInnerEl',
