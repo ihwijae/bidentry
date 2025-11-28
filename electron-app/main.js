@@ -20,6 +20,10 @@ const resolveEngineRoot = () => {
   if (app && app.isPackaged) {
     return path.join(process.resourcesPath || path.resolve(__dirname), 'engine');
   }
+  try {
+    const pkgPath = require.resolve('automation-engine/package.json', { paths: [__dirname] });
+    return path.dirname(pkgPath);
+  } catch {}
   return path.resolve(__dirname, '..', 'automation-engine');
 };
 

@@ -31,7 +31,7 @@
     ],
     "extraResources": [
       {
-        "from": "../automation-engine",
+        "from": "node_modules/automation-engine",
         "to": "engine",
         "filter": [
           "src/**",
@@ -64,7 +64,7 @@
     "wait-on": "^7.0.1"
   },
   "dependencies": {
-    "bid-automation": "file:..",
+    "automation-engine": "file:../automation-engine",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   }
