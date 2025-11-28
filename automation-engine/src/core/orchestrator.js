@@ -75,9 +75,12 @@ async function run(job, emit) {
     }
     else if (site === 'mnd') {
       try {
+        const dumpMndCert = job?.options?.dumpMndCertDom !== false;
+        const dumpTag = job?.options?.dumpMndCertTag || (dumpMndCert ? 'mnd_login_cert' : null);
         const webCert = await handleMndCertificate(openRes.page, emit, job?.cert || {}, {
           company: job?.company || {},
-          timeoutMs: (Number(job?.options?.certTimeoutSec) || 30) * 1000
+          timeoutMs: (Number(job?.options?.certTimeoutSec) || 30) * 1000,
+          dumpTag
         });
         if (webCert?.ok) {
           usedWebCert = true;
@@ -270,13 +273,16 @@ async function run(job, emit) {
         try { await dismissCommonOverlays(openRes.page, emit); } catch {}
         emit({ type:'progress', step:'search_bid', pct: 88 });
         const hasMoreBids = ordinal < bidQueue.length;
+        const dumpMndCert = job?.options?.dumpMndCertDom !== false;
+        const dumpTag = job?.options?.dumpMndCertTag || (dumpMndCert ? 'mnd_apply_cert' : null);
         try {
           const applyRes = await applyMndAgreementAfterSearch(openRes.page, emit, {
             cert: job?.cert || {},
             company: job?.company || {},
             options: job?.options || {},
             hasMoreBids,
-            certSelectionHint: job?.__mndLastCertSelection
+            certSelectionHint: job?.__mndLastCertSelection,
+            certDumpTag: dumpTag
           });
           if (applyRes?.page && applyRes.page !== openRes.page) {
             openRes.page = applyRes.page;

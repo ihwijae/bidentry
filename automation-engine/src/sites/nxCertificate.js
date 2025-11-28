@@ -1,9 +1,68 @@
 ﻿"use strict";
 
+const fs = require('fs');
+const path = require('path');
+
 async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {}) {
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
   const prefix = `[${siteLabel || 'CERT'}]`;
   const log = (level, msg) => emit && emit({ type: 'log', level, msg: `${prefix} ${msg}` });
+  const dumpTagBase = typeof extra?.dumpTag === 'string' ? extra.dumpTag.trim() : '';
+  const readHtml = async (ctx) => {
+    if (!ctx) return '';
+    if (typeof ctx.content === 'function') {
+      try {
+        const html = await ctx.content();
+        if (html) return html;
+      } catch {}
+    }
+    if (typeof ctx.evaluate === 'function') {
+      try {
+        return await ctx.evaluate(() => {
+          const doc = document.documentElement || document.body;
+          return doc ? doc.outerHTML : '';
+        });
+      } catch {}
+    }
+    return '';
+  };
+  const dumpCertificateDom = async (tag, ctx = {}) => {
+    if (!tag) return false;
+    const dir = path.join(process.cwd(), 'engine_runs');
+    try { fs.mkdirSync(dir, { recursive: true }); } catch {}
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const base = `${stamp}_${tag}`;
+    const outputs = [];
+    const writeFile = (suffix, contents, ext = '.html') => {
+      if (!contents) return;
+      const file = path.join(dir, `${base}_${suffix}${ext}`);
+      try {
+        fs.writeFileSync(file, contents, 'utf-8');
+        outputs.push(file);
+      } catch {}
+    };
+    const pageHtml = await readHtml(ctx.certPage || ctx.page || null);
+    writeFile('certPage', pageHtml);
+    if (ctx.scope && ctx.scope !== ctx.certPage) {
+      const scopeHtml = await readHtml(ctx.scope);
+      writeFile('scope', scopeHtml);
+    }
+    if (ctx.meta) {
+      try {
+        writeFile('meta', JSON.stringify(ctx.meta, null, 2), '.json');
+      } catch {}
+    }
+    if (outputs.length) {
+      log('info', `Certificate DOM dump saved (${tag}): ${outputs.map((f) => path.basename(f)).join(', ')}`);
+      return true;
+    }
+    return false;
+  };
+  const maybeDump = async (suffix, ctx = {}) => {
+    if (!dumpTagBase) return false;
+    const tag = suffix ? `${dumpTagBase}_${suffix}` : dumpTagBase;
+    return dumpCertificateDom(tag, ctx);
+  };
 
   if (!page) {
     log('error', 'Playwright page handle missing');
@@ -249,6 +308,7 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
       ? Math.max(0, Math.floor(hintIndexRaw))
       : -1
   };
+  await maybeDump('before_selection', { certPage, scope, meta: { selectionPrefs } });
 
   const attemptSelection = async (ctx) => ctx.evaluate((prefs) => {
     const normalizeCorporateMarks = (s) => (s || '')
@@ -406,6 +466,11 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
   scope = selectionScope;
 
   if (!selection?.ok) {
+    await maybeDump('selection_failed', {
+      certPage,
+      scope,
+      meta: { selectionPrefs, selectionError: selection?.reason || 'no_selection' }
+    });
     log('error', 'No certificate entries available for selection');
     return { ok: false, error: 'No certificate entries available' };
   }
@@ -571,6 +636,11 @@ async function handleNxCertificate(siteLabel, page, emit, cert = {}, extra = {})
         return (err.innerText || err.textContent || '').trim();
       }).catch(() => '');
       if (errorText) {
+        await maybeDump('confirm_error', {
+          certPage,
+          scope,
+          meta: { errorText, selection: selectionSummary }
+        });
         log('error', `Certificate confirm failed: ${errorText}`);
         return { ok: false, error: `Certificate confirm failed: ${errorText}` };
       }

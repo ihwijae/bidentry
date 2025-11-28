@@ -1715,7 +1715,8 @@ async function applyMndAgreementAfterSearch(page, emit, opts = {}) {
     const certRes = await handleMndCertificate(page, emit, certOptions, {
       company: companyInfo,
       timeoutMs: derivedCertTimeout,
-      selectionHint: certSelectionHint
+      selectionHint: certSelectionHint,
+      dumpTag: opts?.certDumpTag
     }).catch((err) => ({ ok: false, error: (err && err.message) || String(err || '') }));
     if (!certRes?.ok) {
       throw new Error(`[MND] 참가신청 인증서 처리 실패: ${certRes?.error || '알 수 없는 오류'}`);
