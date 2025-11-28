@@ -3,6 +3,7 @@
 
 const fs = require('fs');
 const { run } = require('./core/orchestrator');
+const { ensurePlaywright } = require('./util/ensurePlaywright');
 
 function emit(obj) {
   try {
@@ -28,6 +29,14 @@ async function main() {
   }
 
   emit({ type: 'started', pid: process.pid, ts: new Date().toISOString(), demo });
+  try {
+    const logFn = (msg) => emit({ type: 'log', level: 'info', msg });
+    const { browsersPath } = await ensurePlaywright(process.env.PLAYWRIGHT_BROWSERS_PATH, logFn);
+    if (browsersPath) process.env.PLAYWRIGHT_BROWSERS_PATH = browsersPath;
+  } catch (err) {
+    emit({ type: 'error', msg: `[PLAYWRIGHT] 브라우저 설치 실패: ${(err && err.message) || err}` });
+    process.exit(1);
+  }
   try {
     const result = await run(job || { site: 'kepco', url: job?.url || '', bidId: 'DEMO', options: { demo } }, emit);
     emit({ type: 'done', ok: true, result });

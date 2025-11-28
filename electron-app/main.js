@@ -16,6 +16,13 @@ if (!process.env.NODE_ENV) {
   process.env.NODE_ENV = (app && app.isPackaged) ? 'production' : 'development';
 }
 
+const resolveEngineRoot = () => {
+  if (app && app.isPackaged) {
+    return path.join(process.resourcesPath || path.resolve(__dirname), 'engine');
+  }
+  return path.resolve(__dirname, '..', 'automation-engine');
+};
+
 const resolveAppIcon = () => {
   if (app && app.isPackaged) {
     return path.join(process.resourcesPath || path.resolve(__dirname), 'icon.ico');
@@ -49,19 +56,15 @@ function saveSettings(data) {
 }
 
 function resolveEngineScript() {
-  // In dev, run from ../automation-engine/src/cli.js
-  // In packaged app, use resourcesPath/engine/cli.js (copied via extraResources)
-  if (app && app.isPackaged) {
-    return path.join(process.resourcesPath || path.resolve(__dirname), 'engine', 'cli.js');
-  }
-  return path.resolve(__dirname, '..', 'automation-engine', 'src', 'cli.js');
+  const root = resolveEngineRoot();
+  return path.join(root, 'src', 'cli.js');
 }
 
-function runEngineFromElectron(argv) {
+function runEngineFromElectron(argv, extraEnv = {}) {
   const enginePath = resolveEngineScript();
   const args = argv.length > 0 ? argv : ['--demo'];
 
-  const childEnv = { ...process.env, ELECTRON_RUN_AS_NODE: '1' };
+  const childEnv = { ...process.env, ELECTRON_RUN_AS_NODE: '1', ...extraEnv };
   const ps = spawn(process.execPath, [enginePath, ...args], {
     stdio: ['ignore', 'pipe', 'pipe'],
     env: childEnv
@@ -178,7 +181,9 @@ $obj = @{ ok=$true; signCert=$sc; subject=$x.Subject; issuer=$x.Issuer; serial=$
       const jobPath = path.join(jobDir, `job_${Date.now()}.json`);
       fs.writeFileSync(jobPath, JSON.stringify(payload, null, 2), 'utf-8');
       const args = ['--job', jobPath];
-      currentPs = runEngineFromElectron(args);
+      const browsersDir = path.join(getUserDataDir(), 'ms-playwright');
+      try { fs.mkdirSync(browsersDir, { recursive: true }); } catch {}
+      currentPs = runEngineFromElectron(args, { PLAYWRIGHT_BROWSERS_PATH: browsersDir });
       currentPs.stdout?.on('data', chunk => {
         const lines = String(chunk).split(/\r?\n/);
         for (const line of lines) {
