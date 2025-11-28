@@ -7,6 +7,7 @@
     "electron-app"
   ],
   "scripts": {
+    "prebuild": "npm --prefix automation-engine install",
     "dev": "npm --prefix electron-app run dev",
     "app:dev": "npm --prefix electron-app run dev",
     "engine:demo": "node automation-engine/src/cli.js --demo",

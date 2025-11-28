@@ -23,10 +23,13 @@
     ],
     "extraResources": [
       {
-        "from": "../automation-engine/src",
+        "from": "../automation-engine",
         "to": "engine",
         "filter": [
-          "**/*"
+          "src/**",
+          "package.json",
+          "package-lock.json",
+          "node_modules/**"
         ]
       },
       {
