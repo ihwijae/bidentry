@@ -31,7 +31,7 @@
     ],
     "extraResources": [
       {
-        "from": "node_modules/automation-engine",
+        "from": "../automation-engine",
         "to": "engine",
         "filter": [
           "src/**",
@@ -39,6 +39,10 @@
           "package-lock.json",
           "node_modules/**"
         ]
+      },
+      {
+        "from": "node_modules/playwright",
+        "to": "engine/node_modules/playwright"
       },
       {
         "from": "../icon.ico",
