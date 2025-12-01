@@ -183,6 +183,9 @@ async function loginKepco(page, emit, auth = {}) {
         id: {
           labels: [/\uC544\uC774\uB514/i],
           selectors: [
+            '#username',
+            'input#username',
+            'input[name="username" i]',
             'input[placeholder*="\uC544\uC774\uB514" i]',
             'input[title*="\uC544\uC774\uB514" i]',
             'input[name*="id" i]', 'input[id*="id" i]', 'input[name*="userid" i]',
@@ -192,6 +195,9 @@ async function loginKepco(page, emit, auth = {}) {
         pw: {
           labels: [/\uBE44\uBC00\uBC88\uD638|\uBE44\uBC88/i],
           selectors: [
+            '#password',
+            'input#password',
+            'input[name="password" i]',
             'input[placeholder*="\uBE44\uBC00\uBC88\uD638" i]',
             'input[title*="\uBE44\uBC00\uBC88\uD638" i]',
             'input[type="password"]', 'input[name*="pw" i]', 'input[id*="pw" i]'
@@ -283,10 +289,21 @@ async function loginKepco(page, emit, auth = {}) {
       const setInputValue = async (handle, value) => {
         if (!handle) return false;
         const text = String(value ?? '');
-        try { await handle.focus(); } catch {}
-        try { await handle.fill(''); } catch {}
+        const direct = await handle.evaluate((el, val) => {
+          if (!el) return false;
+          try { el.focus && el.focus(); } catch {}
+          if (typeof el.value === 'string') {
+            el.value = val;
+          } else {
+            el.setAttribute('value', val);
+          }
+          el.dispatchEvent?.(new Event('input', { bubbles: true }));
+          el.dispatchEvent?.(new Event('change', { bubbles: true }));
+          return String(el.value ?? '').trim() === String(val).trim();
+        }, text).catch(() => false);
+        if (direct) return true;
         try { await handle.fill(text); return true; } catch {}
-        try { await handle.type(text, { delay: 8 }); return true; } catch {}
+        try { await handle.type(text, { delay: 2 }); return true; } catch {}
         return false;
       };
 
