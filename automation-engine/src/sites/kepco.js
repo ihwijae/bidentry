@@ -183,12 +183,10 @@ async function loginKepco(page, emit, auth = {}) {
         id: {
           labels: [/\uC544\uC774\uB514/i],
           selectors: [
-            '#loginLayer #username',
-            '#loginLayer input#username',
+            'div.formBox #username',
+            'div.formBox input#username',
             '#username',
             'form#loginFrm #username',
-            'div.formBox #username',
-            'input#username',
             'input[name="username" i]',
             'input[placeholder*="\uC544\uC774\uB514" i]',
             'input[title*="\uC544\uC774\uB514" i]',
@@ -199,12 +197,10 @@ async function loginKepco(page, emit, auth = {}) {
         pw: {
           labels: [/\uBE44\uBC00\uBC88\uD638|\uBE44\uBC88/i],
           selectors: [
-            '#loginLayer #password',
-            '#loginLayer input#password',
+            'div.formBox #password',
+            'div.formBox input#password',
             '#password',
             'form#loginFrm #password',
-            'div.formBox #password',
-            'input#password',
             'input[name="password" i]',
             'input[placeholder*="\uBE44\uBC00\uBC88\uD638" i]',
             'input[title*="\uBE44\uBC00\uBC88\uD638" i]',
@@ -214,8 +210,8 @@ async function loginKepco(page, emit, auth = {}) {
       };
 
       const modalFastSelectors = {
-        id: ['#loginLayer #username', 'form#loginFrm #username'],
-        pw: ['#loginLayer #password', 'form#loginFrm #password']
+        id: ['div.formBox #username', '#username'],
+        pw: ['div.formBox #password', '#password']
       };
 
       const tryDirectHandle = async (selectors = [], timeoutMs = 400) => {
