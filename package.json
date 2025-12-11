@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "clean:playwright": "node scripts/clean-playwright.js",
-    "prebuild": "cross-env PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm --prefix automation-engine install && npm run clean:playwright",
+    "prebuild": "node scripts/ensure-automation-engine.js && npm run clean:playwright",
     "dev": "npm --prefix electron-app run dev",
     "app:dev": "npm --prefix electron-app run dev",
     "engine:demo": "node automation-engine/src/cli.js --demo",
