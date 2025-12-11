@@ -205,16 +205,6 @@ async function loginKepco(page, emit, auth = {}) {
         }
       };
 
-      const quickLocateField = async (selectors, timeoutMs = 1500) => {
-        for (const sel of selectors) {
-          try {
-            const handle = await scope.waitForSelector(sel, { timeout: timeoutMs });
-            if (handle) return handle;
-          } catch {}
-        }
-        return null;
-      };
-
       const queryInTargets = async (targets, selectors) => {
         for (const target of targets) {
           if (!target) continue;
@@ -228,7 +218,7 @@ async function loginKepco(page, emit, auth = {}) {
         return null;
       };
 
-      async function locateFields(timeoutMs = 3200) {
+      async function locateFields(timeoutMs = 5000) {
         const deadline = Date.now() + timeoutMs;
         const located = { id: null, pw: null };
         const preferScopes = scope ? [scope] : [];
@@ -286,18 +276,12 @@ async function loginKepco(page, emit, auth = {}) {
         return located;
       }
 
-      let idField = await quickLocateField(loginFieldConfig.id.selectors);
-      let pwField = await quickLocateField(loginFieldConfig.pw.selectors);
-      if (!idField || !pwField) {
-        const slowLocated = await locateFields();
-        idField ||= slowLocated.id;
-        pwField ||= slowLocated.pw;
-      }
+      let { id: idField, pw: pwField } = await locateFields();
       if (!idField || !pwField) {
         emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW 입력 필드 탐색 재시도 (팝업 정리 후)' });
         try { await closeKepcoPostLoginModals(loginPage, emit, { abortOnCertModal: true }); } catch {}
         await loginPage.waitForTimeout(300).catch(()=>{});
-        const retry = await locateFields(2200);
+        const retry = await locateFields(4000);
         idField ||= retry.id;
         pwField ||= retry.pw;
       }
