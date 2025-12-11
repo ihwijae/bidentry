@@ -184,6 +184,8 @@ async function loginKepco(page, emit, auth = {}) {
           labels: [/\uC544\uC774\uB514/i],
           selectors: [
             '#username',
+            'form#loginFrm #username',
+            'div.formBox #username',
             'input#username',
             'input[name="username" i]',
             'input[placeholder*="\uC544\uC774\uB514" i]',
@@ -196,6 +198,8 @@ async function loginKepco(page, emit, auth = {}) {
           labels: [/\uBE44\uBC00\uBC88\uD638|\uBE44\uBC88/i],
           selectors: [
             '#password',
+            'form#loginFrm #password',
+            'div.formBox #password',
             'input#password',
             'input[name="password" i]',
             'input[placeholder*="\uBE44\uBC00\uBC88\uD638" i]',
@@ -203,6 +207,25 @@ async function loginKepco(page, emit, auth = {}) {
             'input[type="password"]', 'input[name*="pw" i]', 'input[id*="pw" i]'
           ]
         }
+      };
+
+      const directSelectorPriority = {
+        id: ['#username', 'form#loginFrm #username', 'div.formBox input#username'],
+        pw: ['#password', 'form#loginFrm #password', 'div.formBox input#password']
+      };
+
+      const tryDirectHandle = async (selectors = [], timeoutMs = 600) => {
+        for (const sel of selectors) {
+          try {
+            const h = await scope?.waitForSelector?.(sel, { timeout: timeoutMs }).catch(() => null);
+            if (h) return h;
+          } catch {}
+          try {
+            const handle = await loginPage?.waitForSelector?.(sel, { timeout: 80 }).catch(() => null);
+            if (handle) return handle;
+          } catch {}
+        }
+        return null;
       };
 
       const queryInTargets = async (targets, selectors) => {
@@ -218,7 +241,7 @@ async function loginKepco(page, emit, auth = {}) {
         return null;
       };
 
-      async function locateFields(timeoutMs = 5000) {
+      async function locateFields(timeoutMs = 3500) {
         const deadline = Date.now() + timeoutMs;
         const located = { id: null, pw: null };
         const preferScopes = scope ? [scope] : [];
@@ -276,15 +299,26 @@ async function loginKepco(page, emit, auth = {}) {
         return located;
       }
 
-      let { id: idField, pw: pwField } = await locateFields();
-      if (!idField || !pwField) {
+      const acquireFields = async () => {
+        let idHandle = await tryDirectHandle(directSelectorPriority.id);
+        let pwHandle = await tryDirectHandle(directSelectorPriority.pw);
+        if (idHandle && pwHandle) return { id: idHandle, pw: pwHandle };
+
+        const located = await locateFields();
+        idHandle ||= located.id;
+        pwHandle ||= located.pw;
+        if (idHandle && pwHandle) return { id: idHandle, pw: pwHandle };
+
         emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW 입력 필드 탐색 재시도 (팝업 정리 후)' });
         try { await closeKepcoPostLoginModals(loginPage, emit, { abortOnCertModal: true }); } catch {}
-        await loginPage.waitForTimeout(300).catch(()=>{});
-        const retry = await locateFields(4000);
-        idField ||= retry.id;
-        pwField ||= retry.pw;
-      }
+        await loginPage.waitForTimeout(250).catch(()=>{});
+        const retry = await locateFields(2200);
+        idHandle ||= retry.id;
+        pwHandle ||= retry.pw;
+        return { id: idHandle, pw: pwHandle };
+      };
+
+      const { id: idField, pw: pwField } = await acquireFields();
 
       const setInputValue = async (handle, value) => {
         if (!handle) return false;
@@ -307,48 +341,73 @@ async function loginKepco(page, emit, auth = {}) {
         return false;
       };
 
-      if (idField && pwField) {
-        await setInputValue(idField, auth.id);
-        await setInputValue(pwField, auth.pw);
-        // Verify values set; if not, force via DOM
-        const ok = await loginPage.evaluate((i, p) => {
-          const get = (h) => h && (h.value ?? '');
-          return { id: get(i), pw: get(p) };
-        }, idField, pwField).catch(()=>({id:'',pw:''}));
-        if (!ok.id || !ok.pw) {
-          await loginPage.evaluate((i, p, vid, vpw) => {
-            if (i) { i.value = vid; i.dispatchEvent(new Event('input', { bubbles:true })); }
-            if (p) { p.value = vpw; p.dispatchEvent(new Event('input', { bubbles:true })); }
-          }, idField, pwField, String(auth.id), String(auth.pw)).catch(()=>{});
-        }
-        // Try click submit, avoid cert/phone buttons
-        const submitSel = [
-          'button[type="submit"]',
-          'input[type="submit"]',
-          'button:has-text("\uB85C\uADF8\uC778")',
-          // avoid header/footer generic links
-        ];
-        let submit = null;
-        for (const s of submitSel) {
-          const cand = await scope.$(s);
-          if (!cand) continue;
-          const txt = (await cand.textContent().catch(()=>'')) || '';
-          if (/\uACF5\uB3D9|\uD734\uB300/.test(txt)) continue; // exclude cert/phone login
-          submit = cand; break;
-        }
-        if (submit) {
-          const nav = loginPage.waitForNavigation({ waitUntil: 'load', timeout: 8000 }).catch(() => null);
-          await submit.click().catch(()=>{});
-          await nav;
-        } else {
-          try { await pwField.focus(); await pwField.press('Enter'); } catch {}
-          await loginPage.waitForNavigation({ waitUntil:'load', timeout: 10000 }).catch(()=>{});
-        }
-        emit && emit({ type:'log', level:'info', msg:'[KEPCO] ID/PW \uB85C\uADF8\uC778 \uC2DC\uB3C4 \uC644\uB8CC' });
-        return popup || null;
+      if (!idField || !pwField) {
+        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW 입력 필드 탐색 실패' });
+        throw new Error('[KEPCO] \uB85C\uADF8\uC778 \uC785\uB825 \uD544\uB4DC \uD0D0\uC0C9 \uC2E4\uD328');
       }
-      emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW \uC785\uB825 \uD544\uB4DC \uD0D0\uC0C9 \uC2E4\uD328' });
-      throw new Error('[KEPCO] \uB85C\uADF8\uC778 \uC785\uB825 \uD544\uB4DC \uD0D0\uC0C9 \uC2E4\uD328');
+
+      await setInputValue(idField, auth.id);
+      await setInputValue(pwField, auth.pw);
+      const ensureHandlesFilled = async () => {
+        const read = async (handle) => {
+          if (!handle) return '';
+          return (await handle.evaluate(el => (el && typeof el.value === 'string') ? el.value.trim() : '').catch(()=>'')).trim();
+        };
+        return { id: await read(idField), pw: await read(pwField) };
+      };
+      let verified = await ensureHandlesFilled();
+      if (!verified.id || !verified.pw) {
+        await loginPage.evaluate((selectors, creds) => {
+          const pick = (sels) => {
+            for (const sel of sels || []) {
+              const el = document.querySelector(sel);
+              if (el) return el;
+            }
+            return null;
+          };
+          const idEl = pick(selectors.id);
+          const pwEl = pick(selectors.pw);
+          if (idEl) {
+            idEl.value = creds.id;
+            idEl.dispatchEvent(new Event('input', { bubbles:true }));
+            idEl.dispatchEvent(new Event('change', { bubbles:true }));
+          }
+          if (pwEl) {
+            pwEl.value = creds.pw;
+            pwEl.dispatchEvent(new Event('input', { bubbles:true }));
+            pwEl.dispatchEvent(new Event('change', { bubbles:true }));
+          }
+        }, loginFieldConfig, { id: String(auth.id), pw: String(auth.pw) }).catch(()=>{});
+        verified = await ensureHandlesFilled();
+      }
+      if (!verified.id || !verified.pw) {
+        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW 값 확인 실패' });
+        throw new Error('[KEPCO] \uB85C\uADF8\uC778 \uC815\uBCF4\uB97C \uC785\uB825\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.');
+      }
+
+      const submitSel = [
+        'button[type="submit"]',
+        'input[type="submit"]',
+        'button:has-text("\uB85C\uADF8\uC778")'
+      ];
+      let submit = null;
+      for (const s of submitSel) {
+        const cand = await scope.$(s).catch(() => null);
+        if (!cand) continue;
+        const txt = (await cand.textContent().catch(()=>'')) || '';
+        if (/\uACF5\uB3D9|\uD734\uB300/.test(txt)) continue;
+        submit = cand; break;
+      }
+      if (submit) {
+        const nav = loginPage.waitForNavigation({ waitUntil: 'load', timeout: 8000 }).catch(() => null);
+        await submit.click().catch(()=>{});
+        await nav;
+      } else {
+        try { await pwField.focus(); await pwField.press('Enter'); } catch {}
+        await loginPage.waitForNavigation({ waitUntil:'load', timeout: 10000 }).catch(()=>{});
+      }
+      emit && emit({ type:'log', level:'info', msg:'[KEPCO] ID/PW \uB85C\uADF8\uC778 \uC2DC\uB3C4 \uC644\uB8CC' });
+      return popup || null;
     } catch {}
   }
   // If we reach here without handling ID/PW, do not block on cert; continue to cert trigger
