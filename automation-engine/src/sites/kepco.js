@@ -183,6 +183,8 @@ async function loginKepco(page, emit, auth = {}) {
         id: {
           labels: [/\uC544\uC774\uB514/i],
           selectors: [
+            '#loginLayer #username',
+            '#loginLayer input#username',
             '#username',
             'form#loginFrm #username',
             'div.formBox #username',
@@ -197,6 +199,8 @@ async function loginKepco(page, emit, auth = {}) {
         pw: {
           labels: [/\uBE44\uBC00\uBC88\uD638|\uBE44\uBC88/i],
           selectors: [
+            '#loginLayer #password',
+            '#loginLayer input#password',
             '#password',
             'form#loginFrm #password',
             'div.formBox #password',
@@ -209,21 +213,22 @@ async function loginKepco(page, emit, auth = {}) {
         }
       };
 
-      const directSelectorPriority = {
-        id: ['#username', 'form#loginFrm #username', 'div.formBox input#username'],
-        pw: ['#password', 'form#loginFrm #password', 'div.formBox input#password']
+      const modalFastSelectors = {
+        id: ['#loginLayer #username', 'form#loginFrm #username'],
+        pw: ['#loginLayer #password', 'form#loginFrm #password']
       };
 
-      const tryDirectHandle = async (selectors = [], timeoutMs = 600) => {
+      const tryDirectHandle = async (selectors = [], timeoutMs = 400) => {
+        const targets = [];
+        if (scope && typeof scope.$ === 'function') targets.push(scope);
+        if (loginPage && typeof loginPage.$ === 'function' && loginPage !== scope) targets.push(loginPage);
         for (const sel of selectors) {
-          try {
-            const h = await scope?.waitForSelector?.(sel, { timeout: timeoutMs }).catch(() => null);
-            if (h) return h;
-          } catch {}
-          try {
-            const handle = await loginPage?.waitForSelector?.(sel, { timeout: 80 }).catch(() => null);
-            if (handle) return handle;
-          } catch {}
+          for (const target of targets) {
+            try {
+              const handle = await target.waitForSelector(sel, { timeout: timeoutMs }).catch(() => null);
+              if (handle) return handle;
+            } catch {}
+          }
         }
         return null;
       };
@@ -241,7 +246,7 @@ async function loginKepco(page, emit, auth = {}) {
         return null;
       };
 
-      async function locateFields(timeoutMs = 3500) {
+      async function locateFields(timeoutMs = 3000) {
         const deadline = Date.now() + timeoutMs;
         const located = { id: null, pw: null };
         const preferScopes = scope ? [scope] : [];
@@ -300,8 +305,8 @@ async function loginKepco(page, emit, auth = {}) {
       }
 
       const acquireFields = async () => {
-        let idHandle = await tryDirectHandle(directSelectorPriority.id);
-        let pwHandle = await tryDirectHandle(directSelectorPriority.pw);
+        let idHandle = await tryDirectHandle(modalFastSelectors.id);
+        let pwHandle = await tryDirectHandle(modalFastSelectors.pw);
         if (idHandle && pwHandle) return { id: idHandle, pw: pwHandle };
 
         const located = await locateFields();
