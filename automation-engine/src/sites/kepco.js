@@ -185,6 +185,7 @@ async function loginKepco(page, emit, auth = {}) {
           selectors: [
             '#username',
             'div.formBox #username',
+            'form#loginFrm #username',
             'input#username',
             'input[name="username" i]',
             'input[placeholder*="\uC544\uC774\uB514" i]',
@@ -198,6 +199,7 @@ async function loginKepco(page, emit, auth = {}) {
           selectors: [
             '#password',
             'div.formBox #password',
+            'form#loginFrm #password',
             'input#password',
             'input[name="password" i]',
             'input[placeholder*="\uBE44\uBC00\uBC88\uD638" i]',
@@ -220,6 +222,31 @@ async function loginKepco(page, emit, auth = {}) {
         return list;
       };
 
+      const waitKnownField = async (selectors, timeoutMs = 800) => {
+        const deadline = Date.now() + timeoutMs;
+        const targets = [];
+        if (scope && typeof scope.$ === 'function') targets.push(scope);
+        if (loginPage && typeof loginPage.$ === 'function') targets.push(loginPage);
+        while (Date.now() < deadline) {
+          for (const sel of selectors) {
+            for (const target of targets) {
+              try {
+                const el = await target.$(sel);
+                if (el) return el;
+              } catch {}
+              if (typeof target.waitForSelector === 'function') {
+                try {
+                  const handle = await target.waitForSelector(sel, { timeout: 80 });
+                  if (handle) return handle;
+                } catch {}
+              }
+            }
+          }
+          await loginPage.waitForTimeout(40).catch(()=>{});
+        }
+        return null;
+      };
+
       const fastLocateField = async (selectors, timeoutMs = 1200) => {
         const contexts = fastContexts();
         const deadline = Date.now() + timeoutMs;
@@ -232,7 +259,7 @@ async function loginKepco(page, emit, auth = {}) {
               } catch {}
             }
           }
-          await loginPage.waitForTimeout(50).catch(()=>{});
+          await loginPage.waitForTimeout(60).catch(()=>{});
         }
         return null;
       };
@@ -308,8 +335,12 @@ async function loginKepco(page, emit, auth = {}) {
         return located;
       }
 
-      let idField = await fastLocateField(loginFieldConfig.id.selectors);
-      let pwField = await fastLocateField(loginFieldConfig.pw.selectors);
+      let idField = await waitKnownField(loginFieldConfig.id.selectors, 900);
+      let pwField = await waitKnownField(loginFieldConfig.pw.selectors, 900);
+      if (!idField || !pwField) {
+        idField ||= await fastLocateField(loginFieldConfig.id.selectors);
+        pwField ||= await fastLocateField(loginFieldConfig.pw.selectors);
+      }
       if (!idField || !pwField) {
         const slowLocated = await locateFields();
         idField ||= slowLocated.id;
@@ -345,10 +376,16 @@ async function loginKepco(page, emit, auth = {}) {
         return false;
       };
 
-      if (idField && pwField) {
-        await setInputValue(idField, auth.id);
-        await setInputValue(pwField, auth.pw);
-        const ok = await loginPage.evaluate((selectors) => {
+      if (!idField || !pwField) {
+        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW 입력 필드 탐색 실패' });
+        throw new Error('[KEPCO] 로그인 입력 필드를 찾지 못했습니다.');
+      }
+
+      await setInputValue(idField, auth.id);
+      await setInputValue(pwField, auth.pw);
+
+      const verifyFilled = async () => {
+        return await loginPage.evaluate((selectors) => {
           const pick = (sels) => {
             for (const sel of sels || []) {
               const el = document.querySelector(sel);
@@ -363,34 +400,39 @@ async function loginKepco(page, emit, auth = {}) {
             pw: (pwEl && (pwEl.value ?? '').trim()) || ''
           };
         }, { id: loginFieldConfig.id.selectors, pw: loginFieldConfig.pw.selectors }).catch(()=>({id:'',pw:''}));
-        if (!ok.id || !ok.pw) {
-          await loginPage.evaluate((payload) => {
-            const { selectors, creds } = payload || {};
-            if (!selectors || !creds) return;
-            const pick = (sels) => {
-              for (const sel of sels || []) {
-                const el = document.querySelector(sel);
-                if (el) return el;
-              }
-              return null;
-            };
-            const idEl = pick(selectors.id);
-            const pwEl = pick(selectors.pw);
-            if (idEl) {
-              idEl.value = creds.id;
-              idEl.dispatchEvent(new Event('input', { bubbles:true }));
-              idEl.dispatchEvent(new Event('change', { bubbles:true }));
+      };
+
+      let confirmed = await verifyFilled();
+      if (!confirmed.id || !confirmed.pw) {
+        await loginPage.evaluate((payload) => {
+          const { selectors, creds } = payload || {};
+          if (!selectors || !creds) return;
+          const pick = (sels) => {
+            for (const sel of sels || []) {
+              const el = document.querySelector(sel);
+              if (el) return el;
             }
-            if (pwEl) {
-              pwEl.value = creds.pw;
-              pwEl.dispatchEvent(new Event('input', { bubbles:true }));
-              pwEl.dispatchEvent(new Event('change', { bubbles:true }));
-            }
-          }, { selectors: { id: loginFieldConfig.id.selectors, pw: loginFieldConfig.pw.selectors }, creds: { id: String(auth.id), pw: String(auth.pw) } }).catch(()=>{});
-        }
-      } else {
-        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW 입력 필드 탐색 실패' });
-        throw new Error('[KEPCO] 로그인 입력 필드를 찾지 못했습니다.');
+            return null;
+          };
+          const idEl = pick(selectors.id);
+          const pwEl = pick(selectors.pw);
+          if (idEl) {
+            idEl.value = creds.id;
+            idEl.dispatchEvent(new Event('input', { bubbles:true }));
+            idEl.dispatchEvent(new Event('change', { bubbles:true }));
+          }
+          if (pwEl) {
+            pwEl.value = creds.pw;
+            pwEl.dispatchEvent(new Event('input', { bubbles:true }));
+            pwEl.dispatchEvent(new Event('change', { bubbles:true }));
+          }
+        }, { selectors: { id: loginFieldConfig.id.selectors, pw: loginFieldConfig.pw.selectors }, creds: { id: String(auth.id), pw: String(auth.pw) } }).catch(()=>{});
+        confirmed = await verifyFilled();
+      }
+
+      if (!confirmed.id || !confirmed.pw) {
+        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW 값 설정 실패' });
+        throw new Error('[KEPCO] 로그인 정보를 입력하지 못했습니다.');
       }
 
         // Try click submit, avoid cert/phone buttons
