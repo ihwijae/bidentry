@@ -11,6 +11,7 @@
     "dev": "node src/cli.js --demo"
   },
   "dependencies": {
+    "bid-automation": "file:..",
     "playwright": "^1.55.0"
   }
 }

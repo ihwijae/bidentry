@@ -17,12 +17,45 @@ async function dumpKepcoHtml(page, emit, tag){
     fs.mkdirSync(dir, { recursive: true });
     const file = path.join(dir, `${stamp}_${tag || 'kepco'}.html`);
     fs.writeFileSync(file, html, 'utf-8');
-    emit && emit({ type:'log', level:'info', msg:`[KEPCO] HTML 덤프 저장: ${file}` });
+    emit && emit({ type:'log', level:'info', msg:`[KEPCO] HTML dump saved: ${file}` });
   } catch (err) {
-    emit && emit({ type:'log', level:'warn', msg:`[KEPCO] HTML 덤프 실패: ${(err && err.message) || err}` });
+    emit && emit({ type:'log', level:'warn', msg:`[KEPCO] HTML dump failed: ${(err && err.message) || err}` });
   }
 }
-async function loginKepco(page, emit, auth = {}) {
+async function loginKepco(page, emit, auth = {}, options = {}) {
+  const asMs = (val, fallback) => {
+    const n = Number(val);
+    return Number.isFinite(n) && n > 0 ? n : fallback;
+  };
+  const timing = {
+    popupWaitMs: asMs(options?.kepcoPopupWaitMs, 220),
+    loginLinkTimeoutMs: asMs(options?.kepcoLoginLinkTimeoutMs, 2200),
+    loginLinkRetryTimeoutMs: asMs(options?.kepcoLoginLinkRetryTimeoutMs, 1600),
+    loginLinkPollMs: asMs(options?.kepcoLoginLinkPollMs, 80),
+    postReloadDelayMs: asMs(options?.kepcoPostReloadDelayMs, 120),
+    modalScopeTimeoutMs: asMs(options?.kepcoModalScopeTimeoutMs, 1200),
+    modalScopePollMs: asMs(options?.kepcoModalScopePollMs, 60),
+    directFieldTimeoutMs: asMs(options?.kepcoDirectFieldTimeoutMs, 220),
+    locateFieldsTimeoutMs: asMs(options?.kepcoLocateFieldsTimeoutMs, 900),
+    locateFieldsRetryTimeoutMs: asMs(options?.kepcoLocateFieldsRetryTimeoutMs, 650),
+    locateFieldsPollMs: asMs(options?.kepcoLocateFieldsPollMs, 40),
+    locateRetryDelayMs: asMs(options?.kepcoLocateRetryDelayMs, 70),
+    loginNavTimeoutMs: asMs(options?.kepcoLoginNavTimeoutMs, 4500),
+    postSubmitMaxWaitMs: asMs(options?.kepcoPostSubmitMaxWaitMs, 1200)
+  };
+  const timingLogEnabled = options?.kepcoTimingLog !== false;
+  const tsStart = Date.now();
+  const mark = (label, extra = '') => {
+    if (!timingLogEnabled) return;
+    const now = Date.now();
+    const suffix = extra ? ` | ${extra}` : '';
+    emit && emit({
+      type: 'log',
+      level: 'info',
+      msg: `[KEPCO][TS] ${new Date(now).toISOString()} +${now - tsStart}ms ${label}${suffix}`
+    });
+  };
+  mark('loginKepco:start');
   // Query across all frames (main first)
   async function $(selector) {
     const inMain = await page.$(selector);
@@ -38,45 +71,44 @@ async function loginKepco(page, emit, auth = {}) {
   }
 
   async function clickWithPopup(targetPage, candidates) {
+    let trigger = null;
     for (const sel of candidates) {
-      const el = await targetPage.$(sel).catch(() => null) || await $(sel);
-      if (!el) continue;
-      emit && emit({ type: 'log', level: 'info', msg: `[KEPCO] 클릭 시도: ${sel}` });
-      const popupPromise = targetPage.waitForEvent('popup', { timeout: 1500 }).catch(() => null);
-      await el.click().catch(() => {});
-      const popup = await popupPromise;
-      if (popup) {
-        await popup.waitForLoadState('domcontentloaded').catch(() => {});
-        const title = (await popup.title().catch(()=>'')) || '';
-        const url = popup.url?.() || '';
-        // Ignore notice popups (handled by auto-closer); stay on current page
-        if (/\uACF5\uC9C0|\uC548\uB0B4|\uC774\uBCA4\uD2B8/i.test(title) || /popup/i.test(url) || popup.isClosed()) {
-          emit && emit({ type:'log', level:'info', msg:`[KEPCO] 안내 팝업 닫힘 (title='${title}')` });
-          try { if (!popup.isClosed()) await popup.close({ runBeforeUnload:true }); } catch {}
-        } else {
-          emit && emit({ type: 'log', level: 'info', msg: '[KEPCO] 새로운 팝업으로 전환' });
-          return popup;
-        }
-      }
-      // Give modal animations a brief moment
-      await targetPage.waitForTimeout(80).catch(()=>{});
-      continue;
+      try {
+        const el = await targetPage.$(sel).catch(() => null);
+        if (el) { trigger = { el, sel }; break; }
+      } catch {}
     }
-    try {
-      const locator = targetPage.getByRole?.('link', { name: /\uB85C\uADF8\uC778/i });
-      if (locator && await locator.count().catch(()=>0)) {
-        emit && emit({ type:'log', level:'info', msg:'[KEPCO] 링크 역할 기반 로그인 클릭' });
-        const popup = await targetPage.waitForEvent('popup', { timeout: 1500 }).catch(()=>null);
-        await locator.first().click().catch(()=>{});
-        return popup;
-      }
-    } catch {}
-    return null;
-  }
+    if (!trigger) {
+      try {
+        const locator = targetPage.getByRole?.('link', { name: /\uB85C\uADF8\uC778/i });
+        if (locator && await locator.count().catch(()=>0)) {
+          const el = await locator.first().elementHandle().catch(()=>null);
+          if (el) trigger = { el, sel: 'role=link[name=????????' };
+        }
+      } catch {}
+    }
+    if (!trigger) return null;
 
+    emit && emit({ type: 'log', level: 'info', msg: `[KEPCO] ????????????? ${trigger.sel}` });
+    const popupPromise = targetPage.waitForEvent('popup', { timeout: timing.popupWaitMs }).catch(() => null);
+    try { await trigger.el.click(); }
+    catch { try { await trigger.el.click({ force: true }); } catch {} }
+
+    const popup = await popupPromise;
+    if (!popup) return null;
+    await popup.waitForLoadState('domcontentloaded').catch(() => {});
+    const title = (await popup.title().catch(()=>'')) || '';
+    const url = popup.url?.() || '';
+    if (/\uACF5\uC9C0|\uC548\uB0B4|\uC774\uBCA4\uD2B8/i.test(title) || /popup/i.test(url) || popup.isClosed()) {
+      try { if (!popup.isClosed()) await popup.close({ runBeforeUnload:true }); } catch {}
+      return null;
+    }
+    return popup;
+  }
   try {
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await dumpKepcoHtml(page, emit, 'kepco_home_initial');
+    mark('home:domcontentloaded');
   } catch {}
 
   const loginLinkCandidates = [
@@ -90,7 +122,7 @@ async function loginKepco(page, emit, auth = {}) {
     'xpath=//a[contains(normalize-space(.),"\uB85C\uADF8\uC778")]'
   ];
 
-  const waitForLoginLink = async (timeoutMs = 7000) => {
+  const waitForLoginLink = async (timeoutMs = timing.loginLinkTimeoutMs) => {
     const deadline = Date.now() + timeoutMs;
     while (Date.now() < deadline) {
       for (const sel of loginLinkCandidates) {
@@ -98,35 +130,38 @@ async function loginKepco(page, emit, auth = {}) {
           const el = await page.$(sel);
           if (el) return true;
         } catch {}
-        try {
-          const el = await $(sel);
-          if (el) return true;
-        } catch {}
       }
-      await page.waitForTimeout(200).catch(() => {});
+      await page.waitForTimeout(timing.loginLinkPollMs).catch(() => {});
     }
     return false;
   };
 
+  mark('loginLink:wait:start', `timeout=${timing.loginLinkTimeoutMs}`);
   let loginLinkReady = await waitForLoginLink();
+  mark('loginLink:wait:end', `found=${loginLinkReady}`);
   if (!loginLinkReady) {
     await dumpKepcoHtml(page, emit, 'kepco_login_link_missing_initial');
-    emit && emit({ type: 'log', level: 'warn', msg: '[KEPCO] 로그인 링크 탐색 실패, 페이지 리로드 시도' });
+    emit && emit({ type: 'log', level: 'warn', msg: '[KEPCO] login link not found initially; reloading page and retrying' });
     try { await page.reload({ waitUntil: 'domcontentloaded' }); } catch {}
-    await page.waitForTimeout(600).catch(() => {});
-    loginLinkReady = await waitForLoginLink(6000);
+    await page.waitForTimeout(timing.postReloadDelayMs).catch(() => {});
+    mark('loginLink:retry:start', `timeout=${timing.loginLinkRetryTimeoutMs}`);
+    loginLinkReady = await waitForLoginLink(timing.loginLinkRetryTimeoutMs);
+    mark('loginLink:retry:end', `found=${loginLinkReady}`);
   }
   if (!loginLinkReady) {
     await dumpKepcoHtml(page, emit, 'kepco_login_link_missing_retry');
-    throw new Error('[KEPCO] 로그인 링크를 찾지 못했습니다.');
+    throw new Error('[KEPCO] Failed to locate login link');
   }
 
   // 1) Top navigation login link/button click
+  mark('loginLink:click:start');
   const popup = await clickWithPopup(page, loginLinkCandidates);
+  mark('loginLink:click:end', `popup=${!!popup}`);
   const loginPage = popup || page;
   // Ensure alert dialogs don't block automation
   try { loginPage.on('dialog', d => d.dismiss().catch(()=>{})); } catch {}
   await loginPage.waitForLoadState('domcontentloaded').catch(()=>{});
+  mark('loginPage:domcontentloaded');
 
   const gatherContexts = () => {
     const ctxs = [];
@@ -163,7 +198,7 @@ async function loginKepco(page, emit, auth = {}) {
         'div.layer:has-text("\uB85C\uADF8\uC778")'
       ];
       let scope = loginPage;
-      const resolveModalScope = async (timeoutMs = 4500) => {
+      const resolveModalScope = async (timeoutMs = timing.modalScopeTimeoutMs) => {
         const deadline = Date.now() + timeoutMs;
         while (Date.now() < deadline) {
           for (const c of containerSel) {
@@ -172,12 +207,14 @@ async function loginKepco(page, emit, auth = {}) {
               if (found) return found;
             } catch {}
           }
-          await loginPage.waitForTimeout(120).catch(()=>{});
+          await loginPage.waitForTimeout(timing.modalScopePollMs).catch(()=>{});
         }
         return null;
       };
+      mark('modalScope:resolve:start', `timeout=${timing.modalScopeTimeoutMs}`);
       const modalScope = await resolveModalScope();
       if (modalScope) scope = modalScope;
+      mark('modalScope:resolve:end', `found=${!!modalScope}`);
 
       const loginFieldConfig = {
         id: {
@@ -209,12 +246,34 @@ async function loginKepco(page, emit, auth = {}) {
         }
       };
 
+      const isVisibleHandle = async (handle) => {
+        if (!handle) return false;
+        try {
+          return await handle.evaluate((el) => {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
+            const rect = el.getBoundingClientRect();
+            if (!rect || rect.width <= 0 || rect.height <= 0) return false;
+            if (el.disabled) return false;
+            return true;
+          });
+        } catch {}
+        return false;
+      };
+
       const modalFastSelectors = {
         id: ['div.formBox #username', '#username'],
         pw: ['div.formBox #password', '#password']
       };
+      const fastFieldPairs = [
+        ['#username', '#password'],
+        ['div.formBox #username', 'div.formBox #password'],
+        ['form#loginFrm #username', 'form#loginFrm #password'],
+        ['input[name="username" i]', 'input[name="password" i]']
+      ];
 
-      const tryDirectHandle = async (selectors = [], timeoutMs = 400) => {
+      const tryDirectHandle = async (selectors = [], timeoutMs = timing.directFieldTimeoutMs) => {
         const targets = [];
         if (scope && typeof scope.$ === 'function') targets.push(scope);
         if (loginPage && typeof loginPage.$ === 'function' && loginPage !== scope) targets.push(loginPage);
@@ -222,8 +281,38 @@ async function loginKepco(page, emit, auth = {}) {
           for (const target of targets) {
             try {
               const handle = await target.waitForSelector(sel, { timeout: timeoutMs }).catch(() => null);
-              if (handle) return handle;
+              if (handle && await isVisibleHandle(handle)) return handle;
             } catch {}
+          }
+        }
+        return null;
+      };
+
+      const tryFastVisiblePair = async () => {
+        const targetContexts = [];
+        const seen = new Set();
+        const push = (ctx) => {
+          if (!ctx || seen.has(ctx) || typeof ctx.$ !== 'function') return;
+          seen.add(ctx);
+          targetContexts.push(ctx);
+        };
+        push(scope);
+        push(loginPage);
+        try {
+          for (const fr of loginPage.frames?.() || []) push(fr);
+        } catch {}
+
+        for (const ctx of targetContexts) {
+          for (const [idSel, pwSel] of fastFieldPairs) {
+            let idEl = null;
+            let pwEl = null;
+            try { idEl = await ctx.$(idSel); } catch {}
+            if (!idEl) continue;
+            try { pwEl = await ctx.$(pwSel); } catch {}
+            if (!pwEl) continue;
+            if (await isVisibleHandle(idEl) && await isVisibleHandle(pwEl)) {
+              return { id: idEl, pw: pwEl };
+            }
           }
         }
         return null;
@@ -242,7 +331,7 @@ async function loginKepco(page, emit, auth = {}) {
         return null;
       };
 
-      async function locateFields(timeoutMs = 3000) {
+      async function locateFields(timeoutMs = timing.locateFieldsTimeoutMs) {
         const deadline = Date.now() + timeoutMs;
         const located = { id: null, pw: null };
         const preferScopes = scope ? [scope] : [];
@@ -261,7 +350,7 @@ async function loginKepco(page, emit, auth = {}) {
             for (const ctx of ctxs) {
               try {
                 const el = await ctx.$(sel);
-                if (el) return el;
+                if (el && await isVisibleHandle(el)) return el;
               } catch {}
             }
           }
@@ -276,7 +365,7 @@ async function loginKepco(page, emit, auth = {}) {
                 const locator = ctx.getByLabel(lbl);
                 if (locator && await locator.count().catch(()=>0)) {
                   const handle = await locator.first().elementHandle().catch(()=>null);
-                  if (handle) return handle;
+                  if (handle && await isVisibleHandle(handle)) return handle;
                 }
               } catch {}
             }
@@ -295,35 +384,42 @@ async function loginKepco(page, emit, auth = {}) {
             }
           }
           if (located.id && located.pw) break;
-          await loginPage.waitForTimeout(80).catch(()=>{});
+          await loginPage.waitForTimeout(timing.locateFieldsPollMs).catch(()=>{});
         }
         return located;
       }
 
       const acquireFields = async () => {
+        const fastPair = await tryFastVisiblePair();
+        if (fastPair?.id && fastPair?.pw) return { ...fastPair, source: 'fast-pair' };
+
         let idHandle = await tryDirectHandle(modalFastSelectors.id);
         let pwHandle = await tryDirectHandle(modalFastSelectors.pw);
-        if (idHandle && pwHandle) return { id: idHandle, pw: pwHandle };
+        if (idHandle && pwHandle) return { id: idHandle, pw: pwHandle, source: 'direct-handle' };
 
         const located = await locateFields();
         idHandle ||= located.id;
         pwHandle ||= located.pw;
-        if (idHandle && pwHandle) return { id: idHandle, pw: pwHandle };
+        if (idHandle && pwHandle) return { id: idHandle, pw: pwHandle, source: 'locate-fields' };
 
-        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW 입력 필드 탐색 재시도 (팝업 정리 후)' });
+        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW ?????????????筌????????????밸븶筌믩끃??獄???????멥렑?????????????(????????袁⑸즴筌?씛彛???돗????????????????????거??????????????' });
         try { await closeKepcoPostLoginModals(loginPage, emit, { abortOnCertModal: true }); } catch {}
-        await loginPage.waitForTimeout(250).catch(()=>{});
-        const retry = await locateFields(2200);
+        await loginPage.waitForTimeout(timing.locateRetryDelayMs).catch(()=>{});
+        const retry = await locateFields(timing.locateFieldsRetryTimeoutMs);
         idHandle ||= retry.id;
         pwHandle ||= retry.pw;
-        return { id: idHandle, pw: pwHandle };
+        return { id: idHandle, pw: pwHandle, source: 'retry-locate' };
       };
 
-      const { id: idField, pw: pwField } = await acquireFields();
+      mark('fields:acquire:start');
+      const { id: idField, pw: pwField, source: fieldSource } = await acquireFields();
+      mark('fields:acquire:end', `source=${fieldSource || 'unknown'} found=${!!idField && !!pwField}`);
 
       const setInputValue = async (handle, value) => {
         if (!handle) return false;
         const text = String(value ?? '');
+        try { await handle.click({ force: true }); } catch {}
+        try { await handle.focus(); } catch {}
         const direct = await handle.evaluate((el, val) => {
           if (!el) return false;
           try { el.focus && el.focus(); } catch {}
@@ -343,12 +439,15 @@ async function loginKepco(page, emit, auth = {}) {
       };
 
       if (!idField || !pwField) {
-        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW 입력 필드 탐색 실패' });
+        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW input fields not found' });
         throw new Error('[KEPCO] \uB85C\uADF8\uC778 \uC785\uB825 \uD544\uB4DC \uD0D0\uC0C9 \uC2E4\uD328');
       }
 
-      await setInputValue(idField, auth.id);
-      await setInputValue(pwField, auth.pw);
+      mark('fields:input:start');
+      const idSet = await setInputValue(idField, auth.id);
+      const pwSet = await setInputValue(pwField, auth.pw);
+      mark('fields:input:end', `id=${idSet} pw=${pwSet}`);
+      emit && emit({ type:'log', level:'info', msg:`[KEPCO] ID/PW input set (id=${idSet}, pw=${pwSet})` });
       const ensureHandlesFilled = async () => {
         const read = async (handle) => {
           if (!handle) return '';
@@ -356,8 +455,10 @@ async function loginKepco(page, emit, auth = {}) {
         };
         return { id: await read(idField), pw: await read(pwField) };
       };
+      mark('fields:verify:start');
       let verified = await ensureHandlesFilled();
       if (!verified.id || !verified.pw) {
+        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW values were not applied correctly' });
         await loginPage.evaluate((selectors, creds) => {
           const pick = (sels) => {
             for (const sel of sels || []) {
@@ -380,17 +481,25 @@ async function loginKepco(page, emit, auth = {}) {
           }
         }, loginFieldConfig, { id: String(auth.id), pw: String(auth.pw) }).catch(()=>{});
         verified = await ensureHandlesFilled();
+        mark('fields:verify:fallback:end', `id=${!!verified.id} pw=${!!verified.pw}`);
       }
       if (!verified.id || !verified.pw) {
-        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW 값 확인 실패' });
+        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW values were not applied correctly' });
         throw new Error('[KEPCO] \uB85C\uADF8\uC778 \uC815\uBCF4\uB97C \uC785\uB825\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.');
       }
 
+      mark('fields:verify:end', `id=${!!verified.id} pw=${!!verified.pw}`);
       const submitSel = [
         'button[type="submit"]',
         'input[type="submit"]',
         'button:has-text("\uB85C\uADF8\uC778")'
       ];
+      const waitAfterSubmit = async () => {
+        const sleep = loginPage.waitForTimeout(timing.postSubmitMaxWaitMs).then(() => 'timeout').catch(() => 'timeout');
+        const nav = loginPage.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: timing.loginNavTimeoutMs }).then(() => 'nav').catch(() => null);
+        const popup = loginPage.waitForEvent('popup', { timeout: timing.postSubmitMaxWaitMs }).then(() => 'popup').catch(() => null);
+        await Promise.race([sleep, nav, popup]).catch(() => {});
+      };
       let submit = null;
       for (const s of submitSel) {
         const cand = await scope.$(s).catch(() => null);
@@ -400,14 +509,18 @@ async function loginKepco(page, emit, auth = {}) {
         submit = cand; break;
       }
       if (submit) {
-        const nav = loginPage.waitForNavigation({ waitUntil: 'load', timeout: 8000 }).catch(() => null);
+        mark('submit:click:start');
         await submit.click().catch(()=>{});
-        await nav;
+        await waitAfterSubmit();
+        mark('submit:click:end');
       } else {
+        mark('submit:enter:start');
         try { await pwField.focus(); await pwField.press('Enter'); } catch {}
-        await loginPage.waitForNavigation({ waitUntil:'load', timeout: 10000 }).catch(()=>{});
+        await waitAfterSubmit();
+        mark('submit:enter:end');
       }
       emit && emit({ type:'log', level:'info', msg:'[KEPCO] ID/PW \uB85C\uADF8\uC778 \uC2DC\uB3C4 \uC644\uB8CC' });
+      mark('loginKepco:done');
       return popup || null;
     } catch {}
   }
@@ -438,11 +551,11 @@ async function closeKepcoPostLoginModals(page, emit, options = {}){
   const selectors = [
     '.x-tool-close',
     '.x-window .x-tool-close',
-    'button:has-text("닫기")',
-    'a:has-text("닫기")',
-    'input[type="button"][value*="닫기" i]',
-    'button:has-text("확인")',
-    'a:has-text("확인")',
+    'button:has-text("\uB2EB\uAE30")',
+    'a:has-text("\uB2EB\uAE30")',
+    'input[type="button"][value*="\uB2EB\uAE30" i]',
+    'button:has-text("\uD655\uC778")',
+    'a:has-text("\uD655\uC778")',
     '.popup-close',
     '.btn-close',
     'span[onclick*="close"]',
@@ -472,14 +585,30 @@ async function closeKepcoPostLoginModals(page, emit, options = {}){
     if (!hit) return false;
     try {
       await ctx.close({ runBeforeUnload: true });
-      emit && emit({ type:'log', level:'info', msg:`[KEPCO] 팝업 페이지 강제 종료: ${url}` });
+      emit && emit({ type:'log', level:'info', msg:`[KEPCO] popup window force-closed: ${url}` });
       return true;
     } catch {}
     return false;
   }
 
   const abortOnCertModal = options.abortOnCertModal === true;
+  const protectWorkflowModal = options.protectWorkflowModal === true;
   const certSelectors = ['#nx-cert-select', '.nx-cert-select', '#browser-guide-added-wrapper', '#nx-cert-select-wrap'];
+  const shouldPreserveWorkflowModal = async (elHandle) => {
+    if (!protectWorkflowModal || !elHandle) return false;
+    try {
+      return await elHandle.evaluate((node) => {
+        const root = node?.closest?.('.x-window, .x-panel, .x-message-box') || node?.parentElement;
+        if (!root) return false;
+        const text = String(root.textContent || '').replace(/\s+/g, '');
+        const hasFlowCheckbox = !!root.querySelector('input[role="checkbox"], input.x-form-checkbox, .x-form-cb-wrap input');
+        if (/\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD|\uC704\uC758\uC0AC\uD56D|\uD655\uC778\uD558\uC600\uC2B5\uB2C8\uB2E4|\uB3D9\uC758\uC0AC\uD56D/.test(text) && hasFlowCheckbox) return true;
+        if (/\uC81C\uCD9C/.test(text)) return true;
+        return false;
+      });
+    } catch {}
+    return false;
+  };
 
   const contexts = () => {
     const ctxs = [];
@@ -516,8 +645,8 @@ async function closeKepcoPostLoginModals(page, emit, options = {}){
   };
 
   const checkSelectors = [
-    'label:has-text("오늘 하루 이 창 열지 않기")',
-    'label:has-text("하루 동안 보지 않기")',
+    'label:has-text("\uC624\uB298 \uD558\uB8E8 \uC774 \uCC3D \uC5F4\uC9C0 \uC54A\uAE30")',
+    'label:has-text("\uD558\uB8E8 \uB3D9\uC548 \uBCF4\uC9C0 \uC54A\uAE30")',
     '.auclose input[type="checkbox"]',
     'input[type="checkbox"][name*="today" i]',
     'input[type="checkbox"][id*="today" i]',
@@ -527,7 +656,7 @@ async function closeKepcoPostLoginModals(page, emit, options = {}){
   for (let attempt = 0; attempt < 5; attempt++) {
     let closed = false;
     if (await hasCertificateModal()) {
-      emit && emit({ type:'log', level:'debug', msg:'[KEPCO] 인증서 모달 감지로 공지 닫기 루틴을 중단합니다.' });
+      emit && emit({ type:'log', level:'debug', msg:'[KEPCO] certificate modal detected, stop notice-popup closer loop' });
       break;
     }
     for (const ctx of contexts()) {
@@ -542,7 +671,7 @@ async function closeKepcoPostLoginModals(page, emit, options = {}){
               await chk.click({ force:true }).catch(()=>{});
               handledElements.add(chk);
               closed = true;
-              emit && emit({ type:'log', level:'info', msg:`[KEPCO] 팝업 '오늘 하루 보지 않기' 체크: ${chkSel}` });
+              emit && emit({ type:'log', level:'info', msg:`[KEPCO] popup checkbox toggled: ${chkSel}` });
             }
           }
         } catch {}
@@ -553,10 +682,11 @@ async function closeKepcoPostLoginModals(page, emit, options = {}){
           if (btns && btns.length) {
             for (const btn of btns) {
               if (handledElements.has(btn)) continue;
+              if (await shouldPreserveWorkflowModal(btn)) continue;
               await btn.click({ force: true }).catch(()=>{});
               handledElements.add(btn);
               closed = true;
-              emit && emit({ type:'log', level:'info', msg:`[KEPCO] 공지/모달 닫기: ${sel}` });
+              emit && emit({ type:'log', level:'info', msg:`[KEPCO] ?????????濚밸Ŧ援???/??????嫄??????????????嫄???????????? ${sel}` });
             }
           }
         } catch {}
@@ -586,7 +716,7 @@ async function closeExtraKepcoWindows(page, emit, options = {}) {
     if (!allowNonPopupClose && !popupPatterns.some((rx) => rx.test(url))) continue;
     try {
       await current.close({ runBeforeUnload: true });
-      emit && emit({ type: 'log', level: 'info', msg: `[KEPCO] 별도 창 강제 종료: ${url}` });
+      emit && emit({ type: 'log', level: 'info', msg: `[KEPCO] ?????????怨뺤떪??????????????????????????????μ떜媛?걫???? ${url}` });
     } catch {}
   }
 }
@@ -663,33 +793,45 @@ async function goToBidApplyAndSearch(page, emit, bidId){
   }
 
   async function findInputHandle(){
-    const tryLabels = async (ctx) => {
-      if (!ctx.getByLabel) return null;
-      for (const label of BID_LABELS){
+    const scoreCandidate = async (el) => {
+      if (!el || !(await isUsableInput(el))) return -1;
+      return await el.evaluate((node) => {
+        const attr = (k) => String(node.getAttribute(k) || '');
+        const lower = (v) => String(v || '').toLowerCase();
+        const title = lower(attr('title'));
+        const name = lower(attr('name'));
+        const id = lower(attr('id'));
+        const ph = lower(attr('placeholder'));
+        const aria = lower(attr('aria-label'));
+        const readOnly = node.hasAttribute('readonly') || node.getAttribute('aria-readonly') === 'true';
+        const labelText = lower(node.closest('tr, td, div, form')?.textContent || '');
+        const bag = `${title} ${name} ${id} ${ph} ${aria} ${labelText}`;
+        if (!bag) return -1;
+        if (/\uACF5\uACE0\uC77C\uC790|\uC2E0\uCCAD\uB9C8\uAC10|\uB9C8\uAC10\uC77C\uC790|from|to|date/.test(bag)) return -1;
+        let score = 0;
+        if (/\uACF5\uACE0\uBC88\uD638|\uC785\uCC30\uACF5\uACE0\uBC88\uD638|\uC785\uCC30\uBC88\uD638/.test(bag)) score += 10;
+        if (/gonggo|bid/.test(bag)) score += 6;
+        if (/\uC870\uD68C\uC870\uAC74|\uAC80\uC0C9\uC870\uAC74/.test(bag)) score += 2;
+        if (/yyyy|mm|dd|\/\d{2}/.test(bag)) score -= 6;
+        if (readOnly) score -= 4;
+        return score;
+      }).catch(() => -1);
+    };
+    for (const ctx of contexts()){
+      const candidates = [];
+      for (const sel of BID_INPUT_SELECTORS){
         try {
-          const loc = ctx.getByLabel(label);
-          if (loc && await loc.count().catch(()=>0)) {
-            const handle = await loc.first().elementHandle();
-            if (handle && await isUsableInput(handle)) return handle;
+          const list = await ctx.$$(sel);
+          for (const el of list || []) {
+            const score = await scoreCandidate(el);
+            if (score >= 0) candidates.push({ el, score });
           }
         } catch {}
       }
-      return null;
-    };
-    const trySelectors = async (ctx) => {
-      for (const sel of BID_INPUT_SELECTORS){
-        try {
-          const el = await ctx.$(sel);
-          if (el && await isUsableInput(el)) return el;
-        } catch {}
+      if (candidates.length) {
+        candidates.sort((a, b) => b.score - a.score);
+        return candidates[0].el;
       }
-      return null;
-    };
-    for (const ctx of contexts()){
-      const byLabel = await tryLabels(ctx);
-      if (byLabel) return byLabel;
-      const bySelector = await trySelectors(ctx);
-      if (bySelector) return bySelector;
     }
     return null;
   }
@@ -741,8 +883,14 @@ async function goToBidApplyAndSearch(page, emit, bidId){
     if (matches !== desiredDigits) return false;
     const extState = await page.evaluate((digits) => {
       if (!(window.Ext && Ext.ComponentQuery)) return false;
-      const comp = Ext.ComponentQuery.query('textfield[title*=\uACF5\uACE0][isVisible()]')[0]
-        || Ext.ComponentQuery.query('textfield[name*=bid], textfield[id*=bid]')[0];
+      const list = Ext.ComponentQuery.query('textfield[isVisible()]') || [];
+      const comp = list.find((it) => {
+        const text = String(it?.fieldLabel || it?.title || it?.name || it?.id || '');
+        if (!text) return false;
+        if (!/\uACF5\uACE0\uBC88\uD638|\uC785\uCC30\uACF5\uACE0\uBC88\uD638|\uC785\uCC30\uBC88\uD638|gonggo|bid/i.test(text)) return false;
+        if (/\uACF5\uACE0\uC77C\uC790|\uC2E0\uCCAD\uB9C8\uAC10|date|from|to/i.test(text)) return false;
+        return true;
+      }) || null;
       if (!comp) return true;
       const val = (comp.getValue && comp.getValue()) || comp.value || '';
       return String(val).replace(/\D/g,'') === digits;
@@ -759,7 +907,7 @@ async function goToBidApplyAndSearch(page, emit, bidId){
   }
   if (!appliedOk) {
     const finalValue = await input.evaluate(el => (el && typeof el.value === 'string') ? el.value : '').catch(()=> '');
-    log('warn', `[KEPCO] 공고번호 입력 검증 실패 (현재='${finalValue}')`);
+    log('warn', `[KEPCO] bid number field input verification failed (value='${finalValue}')`);
     await dumpKepcoHtml(page, emit, 'bid_input_failed');
     return;
   }
@@ -783,27 +931,60 @@ async function goToBidApplyAndSearch(page, emit, bidId){
 
 async function applyAfterSearch(page, emit){
   const APPLY_BUTTON_TEXT = '\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD';
+  const SUBMIT_SELECTOR = '#button-1693-btnInnerEl, span.x-btn-inner:has-text("\uC81C\uCD9C"), button:has-text("\uC81C\uCD9C"), a:has-text("\uC81C\uCD9C")';
   const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
-  async function inFrames(run){
-    const ctxs = [page, ...page.frames?.() || []];
-    for (const ctx of ctxs){
-      try { const res = await run(ctx); if (res) return res; } catch {}
+  const log = (level, msg)=>emit && emit({ type:'log', level, msg });
+
+  const getAllPages = () => {
+    const pages = [];
+    const seen = new Set();
+    const push = (pg) => {
+      if (!pg || seen.has(pg) || pg.isClosed?.()) return;
+      seen.add(pg);
+      pages.push(pg);
+    };
+    push(page);
+    try {
+      for (const pg of page.context?.().pages?.() || []) push(pg);
+    } catch {}
+    return pages;
+  };
+
+  const getAllContexts = () => {
+    const all = [];
+    for (const pg of getAllPages()) {
+      all.push({ ctx: pg, ownerPage: pg });
+      try {
+        for (const fr of pg.frames?.() || []) all.push({ ctx: fr, ownerPage: pg });
+      } catch {}
+    }
+    return all;
+  };
+
+  async function inContexts(run){
+    for (const { ctx, ownerPage } of getAllContexts()){
+      try {
+        const res = await run(ctx, ownerPage);
+        if (res) return res;
+      } catch {}
     }
     return null;
   }
-  async function waitInFrames(predicate, timeoutMs=8000){
+
+  async function waitInContexts(predicate, timeoutMs=8000){
     const start = Date.now();
     while(Date.now() - start < timeoutMs){
-      const hit = await inFrames(predicate);
+      const hit = await inContexts(predicate);
       if (hit) return hit;
-      await sleep(200);
+      await sleep(180);
     }
     return null;
   }
+
   async function waitForNoMask(timeoutMs=6000){
     const start = Date.now();
     while(Date.now() - start < timeoutMs){
-      const masked = await inFrames(async (ctx)=>{
+      const masked = await inContexts(async (ctx)=>{
         try { return await ctx.$('.x-mask, .ext-el-mask, .x-loading-mask'); } catch { return null; }
       });
       if (!masked) return true;
@@ -829,7 +1010,7 @@ async function applyAfterSearch(page, emit){
         selModel.select(record);
         target.getView?.().focusRow?.(record);
         return selModel.hasSelection ? selModel.hasSelection() : true;
-      } catch (err) {
+      } catch {
         return false;
       }
     });
@@ -838,329 +1019,207 @@ async function applyAfterSearch(page, emit){
   const findApplyButton = async (ctx) => {
     try {
       const handle = await ctx.evaluateHandle((text) => {
-        const isValidBtn = (node) => {
-          if (!node) return null;
-          const btn = node.closest('a.x-btn, button, .x-btn') || node;
-          if (!btn) return null;
-          const label = (btn.textContent || '').replace(/\s+/g,'');
-          if (label.indexOf('취소') !== -1) return null;
-          if (label.indexOf(text) !== -1) return btn;
-          if (btn.querySelector && btn.querySelector('.btn-request')) return btn;
-          return null;
+        const normalize = (v) => String(v || '').replace(/\s+/g, '').trim();
+        const targetText = normalize(text);
+        const isVisible = (el) => {
+          if (!el) return false;
+          const style = window.getComputedStyle(el);
+          if (style.display === 'none' || style.visibility === 'hidden') return false;
+          const rect = el.getBoundingClientRect();
+          return !!rect && rect.width > 0 && rect.height > 0;
         };
-        const icons = Array.from(document.querySelectorAll('.x-toolbar-docked-bottom .btn-request'));
-        for (const icon of icons){
-          const btn = isValidBtn(icon);
-          if (btn) return btn;
+
+        // 1) High-confidence path: grid toolbar request icon button.
+        const requestIcons = Array.from(
+          document.querySelectorAll('.grid-toolbar .btn-request, .x-toolbar-docked-top .btn-request')
+        );
+        for (const icon of requestIcons) {
+          const button = icon.closest('a.x-btn, button, .x-btn');
+          if (!button || !isVisible(button)) continue;
+          const labelNode = button.querySelector('.x-btn-inner, span') || button;
+          const label = normalize(labelNode.textContent || button.textContent || '');
+          if (!label || label.indexOf('\uCDE8\uC18C') !== -1) continue;
+          if (label === targetText || label.indexOf(targetText) !== -1) return button;
         }
-        const toolbarButtons = Array.from(document.querySelectorAll('.x-toolbar-docked-bottom .x-btn, .x-toolbar-docked-bottom button'));
-        for (const btn of toolbarButtons) {
-          const hit = isValidBtn(btn) || isValidBtn(btn.querySelector('.x-btn-inner, span'));
-          if (hit) return hit;
+
+        // 2) Fallback: selected-grid panel's top toolbar text match.
+        const selectedRow = document.querySelector('.x-grid-row-selected, tr.x-grid-row-selected, .x-grid-item-selected');
+        const checker = document.querySelector('.x-grid-row-checker');
+        const anchor = selectedRow || checker;
+        const panel = anchor ? anchor.closest('.x-grid, .x-gridpanel, .x-panel') : null;
+        const toolbar = panel ? panel.querySelector('.grid-toolbar.x-docked-top, .x-toolbar-docked-top.grid-toolbar, .x-toolbar-docked-top') : null;
+        if (!toolbar) return null;
+        const buttons = Array.from(toolbar.querySelectorAll('a.x-btn, button, .x-btn'));
+        for (const button of buttons) {
+          if (!isVisible(button)) continue;
+          const labelNode = button.querySelector('.x-btn-inner, span') || button;
+          const label = normalize(labelNode.textContent || button.textContent || '');
+          if (!label || label.indexOf('\uCDE8\uC18C') !== -1) continue;
+          if (label === targetText) return button;
+          if (button.querySelector('.btn-request') && label.indexOf(targetText) !== -1) return button;
         }
         return null;
       }, APPLY_BUTTON_TEXT);
-      return handle.asElement?.() || null;
+
+      const el = handle?.asElement?.() || null;
+      if (!el) return null;
+      const buttonId = await el.evaluate((node) => {
+        const root = node?.closest?.('a.x-btn, button, .x-btn') || node;
+        return root?.id || '';
+      }).catch(() => '');
+      return { el, buttonId };
     } catch {
       return null;
     }
   };
 
-  // 1) Grid checkbox + "입찰참가신청" 버튼 빠른 경로
-  // Fast path heuristic: checkbox + "입찰참가신청" button inside same panel
-  async function fastPath() {
-    const ctx = await inFrames(async (f)=>{
-      try {
-        const hasChk = await f.$('.x-grid-row-checker');
-        const hasBtn = await findApplyButton(f);
-        return (hasChk && hasBtn) ? f : null;
-      } catch { return null; }
-    });
-    if (!ctx) return false;
+  async function clickExactApplyButton(button, ctx){
+    if (!button?.el) return false;
+    await waitForNoMask(5000);
+    try { await button.el.scrollIntoViewIfNeeded?.().catch(()=>{}); } catch {}
+    try { await button.el.click({ force:true }); } catch {}
     try {
-      // 1) Ensure checkbox is checked and row selected
-      const chk = await ctx.$('.x-grid-row-checker');
-      await chk.scrollIntoViewIfNeeded?.().catch(()=>{});
-      await chk.click({ force:true }).catch(()=>{});
-      await sleep(120);
-      // Fallback: force select first grid row if selection missing
-      let selected = await ctx.$('.x-grid-row-selected, tr.x-grid-row-selected').catch(()=>null);
-      if (!selected) {
-        const first = await ctx.$('.x-grid-row, tr.x-grid-row').catch(()=>null);
-        if (first) { try { await first.click({ force:true }).catch(()=>{}); } catch {} }
-        await sleep(80);
-        selected = await ctx.$('.x-grid-row-selected, tr.x-grid-row-selected').catch(()=>null);
-      }
-      // 2) Find clickable button (resolve wrapper element)
-      let target = await findApplyButton(ctx);
-      if (target) {
-        try {
-          const clickableHandle = await target.evaluateHandle((node)=> (node.closest('a.x-btn, button, .x-btn') || node));
-          const clickableEl = clickableHandle.asElement?.();
-          if (clickableEl) target = clickableEl;
-        } catch {}
-        await target.scrollIntoViewIfNeeded?.().catch(()=>{});
-        await target.click({ force:true }).catch(()=>{});
-        emit && emit({ type:'log', level:'info', msg:'[KEPCO] fastPath: "\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD" \uBC84\uD2BC \uD074\uB9AD' });
-        return true;
-      }
+      await ctx.evaluate((buttonId) => {
+        if (!buttonId) return;
+        const root = document.getElementById(buttonId);
+        if (!root) return;
+        const inner = root.querySelector('.x-btn-inner, span');
+        const fire = (el) => {
+          if (!el) return;
+          ['mouseover','mousedown','mouseup','click'].forEach((t) => {
+            el.dispatchEvent(new MouseEvent(t, { bubbles:true, cancelable:true }));
+          });
+        };
+        fire(root);
+        fire(inner);
+        if (window.Ext && typeof Ext.getCmp === 'function') {
+          const cmp = Ext.getCmp(buttonId);
+          if (cmp) {
+            try { cmp.setDisabled && cmp.setDisabled(false); } catch {}
+            try { cmp.focus && cmp.focus(); } catch {}
+            try { cmp.fireEvent && cmp.fireEvent('click', cmp); } catch {}
+            try { cmp.handler && cmp.handler.call(cmp); } catch {}
+          }
+        }
+      }, button.buttonId || '');
     } catch {}
-    return false;
+    return true;
   }
 
-  const fast = await fastPath();
-  if (fast) {
-    // If fast path offers modal context use it, otherwise fall back below
-    const modalCtx = await waitInFrames(async (ctx)=>{
-      try {
-        return await ctx.$('.x-window') || await ctx.$('label:has-text("\uB3D9\uC758 \uC0AC\uD56D")');
-      } catch { return null; }
-    }, 1500);
-    if (modalCtx) {
-      // Modal handling routine below remains active as fallback
-    } else {
-      emit && emit({ type:'log', level:'warn', msg:'[KEPCO] fastPath modal not detected, running fallback' });
-    }
-  }
+  let applyClicked = false;
+  const pagesBeforeClick = new Set(getAllPages());
 
-  // Alternate flow (legacy logic)
   const extSelected = await ensureGridSelectionViaExt();
-  if (extSelected) {
-    emit && emit({ type:'log', level:'info', msg:'[KEPCO] Grid selection ensured via Ext.ComponentQuery' });
-  }
-  const checker = await waitInFrames(async (ctx)=>{
+  if (extSelected) log('info', '[KEPCO] Grid selection ensured via Ext.ComponentQuery');
+
+  const checker = await waitInContexts(async (ctx)=>{
     const el = await ctx.$('.x-grid-row-checker').catch(()=>null)
            || await ctx.$('div.x-grid-row-checker[role="presentation"]').catch(()=>null);
     if (el) return { ctx, el };
     return null;
   }, 6000);
-  if (checker){
-    if (!extSelected) {
-      try { await checker.el.click({ force:true }).catch(()=>{}); } catch {}
-      try { await checker.ctx.evaluate((e)=>{ e.click(); }, checker.el).catch(()=>{}); } catch {}
-      emit && emit({ type:'log', level:'info', msg:'[KEPCO] Grid checkbox click' });
-      await sleep(200);
-    }
-    // Ensure row is selected: click first grid row if no selection class
-    await inFrames(async (ctx)=>{
-      const selectors = ['.x-grid-row.x-grid-row-selected', 'tr.x-grid-row-selected', '.x-grid-item-selected'];
-      for (const sel of selectors){
-        const selected = await ctx.$(sel).catch(()=>null);
-        if (selected) return false;
-      }
-      const first = await ctx.$('.x-grid-row, tr.x-grid-row, .x-grid-item').catch(()=>null);
-      if (first) { try { await first.click({ force:true }).catch(()=>{}); } catch {} }
-      return false;
-    });
-    // Try to scroll the grid bottom toolbar into view
-    await inFrames(async (ctx)=>{
-      try { const grid = await ctx.$('.x-grid'); if (grid){ await grid.scrollIntoViewIfNeeded?.().catch(()=>{}); } } catch {}
-      return false;
-    });
-  } else if (!extSelected) {
-    emit && emit({ type:'log', level:'warn', msg:'[KEPCO] Failed to locate grid checkbox' });
+
+  if (checker && !extSelected) {
+    try { await checker.el.click({ force:true }).catch(()=>{}); } catch {}
+    log('info', '[KEPCO] Grid checkbox click');
+    await sleep(200);
   }
 
-  // 2) Click "입찰참가신청" button
-  const btn = await waitInFrames(async (ctx)=>{
-    try {
-      const handle = await ctx.evaluateHandle((text) => {
-        const matches = (node) => {
-          if (!node) return null;
-          const content = (node.textContent || '').replace(/\s+/g,'').trim();
-          if (content.indexOf(text) === -1) return null;
-          const btn = node.closest('a.x-btn, button, .x-btn');
-          if (btn && btn.textContent && btn.textContent.indexOf('\uCDE8\uC18C') !== -1) return null;
-          return btn || node;
-        };
-        const findIn = (root) => {
-          if (!root) return null;
-          const toolbar = root.querySelector('.x-toolbar-docked-bottom');
-          const scopes = toolbar ? [toolbar] : [root];
-          for (const scope of scopes) {
-            const nodes = scope.querySelectorAll('.x-btn-inner, .x-btn, button, a, span');
-            for (const node of nodes) {
-              const hit = matches(node);
-              if (hit) return hit;
-            }
-          }
-          const requestBtn = root.querySelector('.x-toolbar-docked-bottom .btn-request');
-          return matches(requestBtn);
-        };
-        const direct = document.querySelector('.x-toolbar-docked-bottom .btn-request')
-          || document.querySelector('.x-toolbar-docked-bottom a.x-btn');
-        if (matches(direct)) return direct.closest('a.x-btn, button, .x-btn') || direct;
-        const selected = document.querySelector('.x-grid-row-selected, tr.x-grid-row-selected');
-        const base = selected ? selected.closest('.x-panel') : document.querySelector('.x-panel');
-        let cand = findIn(base);
-        if (!cand) cand = findIn(document.body);
-        if (!cand) {
-          const extras = Array.from(document.querySelectorAll('[id^="button-"][id$="-btnInnerEl"], [id^="button-"][id$="-btnEl"], .x-toolbar-docked-bottom .x-btn-inner'));
-          for (const node of extras) {
-            const hit = matches(node);
-            if (hit) { cand = hit; break; }
-          }
-        }
-        return cand || null;
-      }, APPLY_BUTTON_TEXT);
+  await inContexts(async (ctx)=>{
+    const hasSelected = await ctx.$('.x-grid-row.x-grid-row-selected, tr.x-grid-row-selected, .x-grid-item-selected').catch(()=>null);
+    if (hasSelected) return true;
+    const first = await ctx.$('.x-grid-row, tr.x-grid-row, .x-grid-item').catch(()=>null);
+    if (first) { try { await first.click({ force:true }).catch(()=>{}); } catch {} }
+    return true;
+  });
 
-      if (handle) return { ctx, el: handle.asElement?.() || handle };
-    } catch {}
+  const buttonHit = await waitInContexts(async (ctx) => {
+    const found = await findApplyButton(ctx);
+    return found ? { ctx, found } : null;
+  }, 6000);
+
+  if (!buttonHit) {
+    log('warn', '[KEPCO] apply button not found');
+    await dumpKepcoHtml(page, emit, 'apply_button_missing');
+    throw new Error('[KEPCO] Failed to find apply button');
+  }
+
+  if (buttonHit.found?.buttonId) {
+    log('info', '[KEPCO] apply target id=' + buttonHit.found.buttonId);
+  }
+  await clickExactApplyButton(buttonHit.found, buttonHit.ctx);
+  applyClicked = true;
+  log('info', '[KEPCO] apply button click completed');
+
+  const followUp = await waitInContexts(async (ctx, ownerPage) => {
+    const modal = await ctx.$('.x-window, .x-message-box').catch(()=>null);
+    if (modal) return { page: ownerPage, reason: 'modal' };
+    const submit = await ctx.$(SUBMIT_SELECTOR).catch(()=>null);
+    if (submit) return { page: ownerPage, reason: 'submit-visible' };
     return null;
-  }, 8000);
-  if (btn){
-    // Prefer Ext handler call first to avoid focus/selection toggling
-    await inFrames(async (ctx)=>{
-      try {
-        await ctx.evaluate((text) => {
-          try {
-            if (window.Ext){
-              const tryClick = (cmp) => {
-                if (!cmp) return;
-                try { cmp.setDisabled && cmp.setDisabled(false); } catch(e){}
-                try { cmp.focus && cmp.focus(); } catch(e){}
-                try { cmp.fireEvent && cmp.fireEvent('click'); } catch(e){}
-                try { cmp.handler && cmp.handler.call(cmp); } catch(e){}
-              };
-              let targetCmp = null;
-              if (Ext.ComponentQuery){
-                let arr = Ext.ComponentQuery.query('toolbar[dock="bottom"] button');
-                if (arr && arr.length){
-                  for (let i=0;i<arr.length;i++){
-                    const candidate = arr[i];
-                    const label = (candidate && (candidate.text || candidate.ariaLabel || (candidate.el && candidate.el.dom && candidate.el.dom.textContent))) || '';
-                    if (label && label.indexOf(text) > -1) { targetCmp = candidate; break; }
-                  }
-                }
-                if (!targetCmp){
-                  arr = Ext.ComponentQuery.query('button');
-                  if (arr && arr.length){
-                    for (let j=0;j<arr.length;j++){
-                      const candidate = arr[j];
-                      const label = (candidate && (candidate.text || candidate.ariaLabel || (candidate.el && candidate.el.dom && candidate.el.dom.textContent))) || '';
-                      if (label && label.indexOf(text) > -1) { targetCmp = candidate; break; }
-                    }
-                  }
-                }
-              }
-              if (!targetCmp && Ext.ComponentManager && Ext.ComponentManager.each){
-                Ext.ComponentManager.each(function(item){
-                  if (targetCmp) return;
-                  try {
-                    const label = (item && (item.text || item.ariaLabel || (item.el && item.el.dom && item.el.dom.textContent))) || '';
-                    if (label && label.indexOf(text) > -1) { targetCmp = item; }
-                  } catch(e){}
-                });
-              }
-              tryClick(targetCmp);
-            }
-          } catch(e){}
-        }, APPLY_BUTTON_TEXT);
-      } catch {}
-      return false;
-    });
+  }, 3000);
 
-    await waitForNoMask(8000);
-    // Scroll into view and try multiple event paths (ExtJS-friendly)
-    try { await btn.el.scrollIntoViewIfNeeded?.().catch(()=>{}); } catch {}
-    try { await btn.el.click({ force:true }).catch(()=>{}); } catch {}
-    try { await btn.el.dblclick?.({ force:true }).catch(()=>{}); } catch {}
-    // If still no modal, click by absolute coordinates as last resort
-    try {
-      const box = await btn.el.boundingBox?.();
-      if (box) {
-        await page.mouse.move(box.x + box.width/2, box.y + box.height/2);
-        await page.mouse.down(); await page.mouse.up();
-        await sleep(120);
-      }
-    } catch {}
-    // click wrapper and specific inner ids if exist
-    try { await btn.ctx.evaluate((e, text)=>{
-      const fire = (node)=>{
-        if(!node) return;
-        ['mouseover','mousedown','mouseup','click'].forEach(t=>node.dispatchEvent(new MouseEvent(t,{bubbles:true,cancelable:true}))); };
-      const matchText = (node)=>!!(node && (node.textContent || '').indexOf(text) > -1);
-      const root = e.closest ? e.closest('a.x-btn, button, .x-btn') || e : e;
-      let inner = null;
-      const direct = document.querySelector('.x-toolbar-docked-bottom .btn-request');
-      if (!inner && matchText(direct)) inner = direct;
-      if (root && root.querySelector){
-        const found = Array.from(root.querySelectorAll('.x-btn-inner, span')).find(matchText);
-        if (found) inner = found;
-      }
-      if (!inner){
-        inner = Array.from(document.querySelectorAll('.x-btn-inner, .x-btn, button, a')).find(matchText) || null;
-      }
-      fire(root); fire(inner);
-      if (window.Ext){
-        const tryClick = (cmp)=>{
-          if (!cmp) return;
-          try { cmp.setDisabled && cmp.setDisabled(false); } catch(e){}
-          try { cmp.focus && cmp.focus(); } catch(e){}
-          try { cmp.fireEvent && cmp.fireEvent('click'); } catch(e){}
-          try { cmp.handler && cmp.handler.call(cmp); } catch(e){}
-        };
-        let targetCmp = null;
-        if (Ext.ComponentQuery){
-          let arr = Ext.ComponentQuery.query('toolbar[dock="bottom"] button');
-          if (arr && arr.length){
-            for (let i=0;i<arr.length;i++){
-              const candidate = arr[i];
-              const label = (candidate && (candidate.text || candidate.ariaLabel || (candidate.el && candidate.el.dom && candidate.el.dom.textContent))) || '';
-              if (label && label.indexOf(text) > -1){ targetCmp = candidate; break; }
-            }
-          }
-          if (!targetCmp){
-            arr = Ext.ComponentQuery.query('button');
-            if (arr && arr.length){
-              for (let j=0;j<arr.length;j++){
-                const candidate = arr[j];
-                const label = (candidate && (candidate.text || candidate.ariaLabel || (candidate.el && candidate.el.dom && candidate.el.dom.textContent))) || '';
-                if (label && label.indexOf(text) > -1){ targetCmp = candidate; break; }
-              }
-            }
-          }
-        }
-        if (!targetCmp && Ext.ComponentManager && Ext.ComponentManager.each){
-          Ext.ComponentManager.each(function(item){
-            if (targetCmp) return;
-            try {
-              const label = (item && (item.text || item.ariaLabel || (item.el && item.el.dom && item.el.dom.textContent))) || '';
-              if (label && label.indexOf(text) > -1){ targetCmp = item; }
-            } catch(err){}
-          });
-        }
-        tryClick(targetCmp);
-      }
-    }, btn.el, APPLY_BUTTON_TEXT).catch(()=>{}); } catch {}
-    // Keyboard fallback (focus toolbar then press Enter/Space)
-    try { await btn.el.focus?.().catch(()=>{}); await btn.el.press?.('Enter').catch(()=>{}); await btn.el.press?.(' ').catch(()=>{}); } catch {}
-    emit && emit({ type:'log', level:'info', msg:'[KEPCO] "\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD" \uBC84\uD2BC \uD074\uB9AD \uC644\uB8CC' });
-    // Wait briefly for modal to appear
-    const modal = await waitInFrames(async (ctx)=>{ try { return await ctx.$('.x-window'); } catch { return null; } }, 1500);
-    if (!modal) {
-      emit && emit({ type:'log', level:'warn', msg:'[KEPCO] apply button clicked but follow-up modal was not detected' });
+  let workPage = page;
+  if (followUp?.page) {
+    workPage = followUp.page;
+    log('info', '[KEPCO] follow-up detected (' + followUp.reason + ')');
+  } else {
+    const opened = getAllPages().find((pg) => !pagesBeforeClick.has(pg));
+    if (opened) {
+      workPage = opened;
+      await opened.waitForLoadState('domcontentloaded').catch(()=>{});
+      log('info', '[KEPCO] follow-up detected (new popup page)');
+    } else {
+      log('warn', '[KEPCO] apply button clicked but follow-up modal/page was not detected');
       await dumpKepcoHtml(page, emit, 'apply_modal_missing');
     }
-    await sleep(300);
-  } else {
-    emit && emit({ type:'log', level:'warn', msg:'[KEPCO] "\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD" \uBC84\uD2BC\uC744 \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.' });
   }
 
-  await handleFinalAgreementAndSubmit(page, emit);
+  if (!applyClicked) {
+    throw new Error('[KEPCO] Apply button click was not confirmed');
+  }
+
+  const finalRes = await handleFinalAgreementAndSubmit(workPage, emit);
+  if (!finalRes?.submitted) {
+    throw new Error('[KEPCO] Final submit button click was not confirmed');
+  }
 }
 
 async function handleFinalAgreementAndSubmit(page, emit){
   const log = (level,msg)=>emit && emit({ type:'log', level, msg });
   const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+  const SUBMIT_SELECTOR = '#button-1693-btnInnerEl, span.x-btn-inner:has-text("\uC81C\uCD9C"), button:has-text("\uC81C\uCD9C"), a:has-text("\uC81C\uCD9C")';
   const AGREEMENT_PATTERNS = [
     /\uACF5\uAE09\uC790.*\uD589\uB3D9\uAC15\uB839.*\uB3D9\uC758/i,
     /\uCCAD\uB7C9\uACC4\uC57D.*\uC774\uD589\uAC01\uC11C.*\uB3D9\uC758/i,
     /\uC870\uC138\uD3EC\uD0AC.*\uC11C\uC57D\uC11C.*\uB3D9\uC758/i,
     /\uC704\uC758\uC0AC\uD56D.*\uD655\uC778\uD588\uC2B5\uB2C8\uB2E4/i
   ];
-  const SUBMIT_SELECTOR = '#button-1693-btnInnerEl, span.x-btn-inner:has-text("\uC81C\uCD9C"), button:has-text("\uC81C\uCD9C"), a:has-text("\uC81C\uCD9C")';
-  const contexts = () => [page, ...(page.frames?.() || [])];
+
+  const contexts = () => {
+    const list = [];
+    const seen = new Set();
+    const push = (ctx) => {
+      if (!ctx || seen.has(ctx)) return;
+      seen.add(ctx);
+      list.push(ctx);
+    };
+    push(page);
+    try {
+      for (const pg of page.context?.().pages?.() || []) {
+        if (!pg || pg.isClosed?.()) continue;
+        push(pg);
+      }
+    } catch {}
+    const pages = list.filter((ctx) => typeof ctx.frames === 'function');
+    for (const pg of pages) {
+      try {
+        for (const fr of pg.frames?.() || []) push(fr);
+      } catch {}
+    }
+    return list;
+  };
+
   let dumpedAgreementState = false;
   const ensureAgreementDump = async (tag = 'agreement_missing') => {
     if (dumpedAgreementState) return;
@@ -1168,28 +1227,121 @@ async function handleFinalAgreementAndSubmit(page, emit){
     await dumpKepcoHtml(page, emit, tag);
   };
 
-  // Close newly opened popup windows (공정위 안내 등)
-  try {
-    const ctx = page.context?.();
-    for (const extra of ctx?.pages?.() || []) {
-      if (!extra || extra === page || extra.isClosed?.()) continue;
-      const url = extra.url?.() || '';
-      if (/bidAttendPopup|noticeCollusive|Popup/i.test(url)) {
-        try { await extra.close({ runBeforeUnload:true }); log('info', `[KEPCO] 팝업 창 닫기: ${url}`); } catch {}
-      }
-    }
-  } catch {}
-
   const dismissInlineAlerts = async () => {
     for (const ctx of contexts()) {
       try {
-        const buttons = await ctx.$$(`button:has-text("확인"), a:has-text("확인"), span.x-btn-inner:has-text("확인")`);
-        for (const btn of buttons || []) await btn.click({ force:true }).catch(()=>{});
+        const buttons = await ctx.$$('button:has-text("\uD655\uC778"), a:has-text("\uD655\uC778"), span.x-btn-inner:has-text("\uD655\uC778"), button:has-text("\uB2EB\uAE30"), a:has-text("\uB2EB\uAE30")');
+        for (const btn of buttons || []) {
+          await btn.click({ force:true }).catch(()=>{});
+        }
       } catch {}
     }
   };
 
-  const checkAgreement = async (pattern) => {
+  const confirmYesDialog = async () => {
+    for (const ctx of contexts()) {
+      try {
+        const yesCandidates = await ctx.$$('span.x-btn-inner:has-text("\uC608"), button:has-text("\uC608"), a:has-text("\uC608"), [id$="-btnInnerEl"]');
+        for (const cand of yesCandidates || []) {
+          const text = ((await cand.textContent().catch(()=>'')) || '').replace(/\s+/g, '');
+          if (text !== '\uC608') continue;
+          const root = await cand.evaluateHandle((node) => node?.closest?.('a.x-btn, button, .x-btn') || node).catch(()=>null);
+          const rootEl = root?.asElement?.() || null;
+          if (rootEl) {
+            await rootEl.scrollIntoViewIfNeeded?.().catch(()=>{});
+            await rootEl.click({ force:true }).catch(()=>{});
+          } else {
+            await cand.click({ force:true }).catch(()=>{});
+          }
+          log('info', '[KEPCO] confirmation dialog "예" clicked');
+          return true;
+        }
+      } catch {}
+    }
+
+    for (const ctx of contexts()) {
+      try {
+        const extClicked = await ctx.evaluate(() => {
+          try {
+            if (!window.Ext || !Ext.ComponentQuery) return false;
+            const btns = Ext.ComponentQuery.query('button');
+            for (const btn of btns || []) {
+              const label = String(btn?.text || btn?.ariaLabel || btn?.el?.dom?.textContent || '').replace(/\s+/g, '');
+              if (label !== '\uC608') continue;
+              try { btn.setDisabled && btn.setDisabled(false); } catch {}
+              try { btn.focus && btn.focus(); } catch {}
+              try { btn.fireEvent && btn.fireEvent('click', btn); } catch {}
+              try { btn.handler && btn.handler.call(btn); } catch {}
+              return true;
+            }
+          } catch {}
+          return false;
+        });
+        if (extClicked) {
+          log('info', '[KEPCO] confirmation dialog "예" clicked via Ext fallback');
+          return true;
+        }
+      } catch {}
+    }
+    return false;
+  };
+
+  const checkConfirmedStatementBox = async () => {
+    for (const ctx of contexts()) {
+      try {
+        const hit = await ctx.evaluate(() => {
+          const candidates = Array.from(document.querySelectorAll(
+            'input[role="checkbox"][title*="\uC704\uC758 \uC0AC\uD56D" i], input[role="checkbox"][title*="\uD655\uC778" i], input.x-form-checkbox[role="checkbox"], .x-form-cb-wrap input[role="checkbox"]'
+          ));
+          for (const cb of candidates) {
+            if (!cb) continue;
+            const style = window.getComputedStyle(cb);
+            const rect = cb.getBoundingClientRect();
+            if (style.display === 'none' || style.visibility === 'hidden') continue;
+            if (!rect || rect.width <= 0 || rect.height <= 0) continue;
+            try { cb.focus?.(); } catch {}
+            try { cb.click(); } catch {}
+            cb.dispatchEvent?.(new MouseEvent('click', { bubbles:true, cancelable:true }));
+            cb.dispatchEvent?.(new Event('change', { bubbles:true }));
+            return true;
+          }
+          return false;
+        });
+        if (hit) {
+          log('info', '[KEPCO] confirmation statement checkbox clicked');
+          return true;
+        }
+      } catch {}
+    }
+    return false;
+  };
+
+  const waitForFinalStage = async (timeoutMs = 5000) => {
+    const end = Date.now() + timeoutMs;
+    while (Date.now() < end) {
+      for (const ctx of contexts()) {
+        try {
+          const ready = await ctx.evaluate((submitSelector) => {
+            const submit = document.querySelector(submitSelector);
+            if (submit) return true;
+            const boxes = Array.from(document.querySelectorAll('input[type="checkbox"], input[role="checkbox"], input.x-form-checkbox'));
+            const visible = boxes.filter((cb) => {
+              const style = window.getComputedStyle(cb);
+              const rect = cb.getBoundingClientRect();
+              if (style.display === 'none' || style.visibility === 'hidden') return false;
+              return rect && rect.width > 0 && rect.height > 0;
+            });
+            return visible.length >= 2;
+          }, SUBMIT_SELECTOR);
+          if (ready) return true;
+        } catch {}
+      }
+      await sleep(120);
+    }
+    return false;
+  };
+
+  const checkAgreementByPattern = async (pattern) => {
     const normalized = pattern instanceof RegExp ? pattern : new RegExp(pattern, 'i');
     for (const ctx of contexts()) {
       try {
@@ -1199,9 +1351,9 @@ async function handleFinalAgreementAndSubmit(page, emit){
           for (const node of nodes) {
             const text = (node.textContent || '').replace(/\s+/g,'');
             if (!text || !regex.test(text)) continue;
-            const checkbox = node.querySelector('input[type="checkbox"]')
-              || node.closest('tr, div, label')?.querySelector('input[type="checkbox"]')
-              || document.querySelector('input[type="checkbox"]');
+            const checkbox = node.querySelector('input[type="checkbox"], input[role="checkbox"], input.x-form-checkbox')
+              || node.closest('tr, div, label')?.querySelector('input[type="checkbox"], input[role="checkbox"], input.x-form-checkbox')
+              || document.querySelector('input[type="checkbox"], input[role="checkbox"], input.x-form-checkbox');
             if (checkbox) {
               checkbox.click();
               checkbox.checked = true;
@@ -1211,30 +1363,27 @@ async function handleFinalAgreementAndSubmit(page, emit){
           }
           return false;
         }, normalized.source);
-        if (matched) {
-          log('info', `[KEPCO] 동의 체크 완료: ${pattern}`);
-          return true;
-        }
+        if (matched) return true;
       } catch {}
     }
-    log('warn', `[KEPCO] 동의 체크박스를 찾지 못했습니다: ${pattern}`);
     return false;
   };
 
-  await dismissInlineAlerts();
-  let checked = 0;
-  for (const label of AGREEMENT_PATTERNS) {
-    if (await checkAgreement(label)) checked++;
-  }
-  let fallbackTouchedTotal = 0;
-  if (!checked) {
+  const checkAllVisibleAgreementBoxes = async () => {
+    let total = 0;
     for (const ctx of contexts()) {
       try {
         const touched = await ctx.evaluate(() => {
-          const boxes = Array.from(document.querySelectorAll('.x-window input[type="checkbox"], .x-panel input[type="checkbox"], input[type="checkbox"]'));
+          const boxes = Array.from(document.querySelectorAll('input[type="checkbox"], input[role="checkbox"], input.x-form-checkbox'));
           let count = 0;
           for (const cb of boxes) {
+            const style = window.getComputedStyle(cb);
+            const rect = cb.getBoundingClientRect();
+            const title = String(cb.getAttribute('title') || '').toLowerCase();
+            if (style.display === 'none' || style.visibility === 'hidden') continue;
+            if (!rect || rect.width <= 0 || rect.height <= 0) continue;
             if (cb.disabled) continue;
+            if (title.includes('today') || title.includes('오늘') || title.includes('다시 보지')) continue;
             if (!cb.checked) {
               cb.click();
               cb.checked = true;
@@ -1244,39 +1393,69 @@ async function handleFinalAgreementAndSubmit(page, emit){
           }
           return count;
         });
-        if (touched > 0) {
-          log('info', `[KEPCO] 텍스트 매칭 실패로 ${touched}개의 체크박스를 일괄 선택했습니다.`);
-          fallbackTouchedTotal += touched;
-          break;
-        }
-        fallbackTouchedTotal += touched;
+        total += Number(touched || 0);
       } catch {}
     }
+    if (total > 0) {
+      log('info', '[KEPCO] checked visible agreement checkboxes count=' + total);
+    }
+    return total;
+  };
+
+  try {
+    const ctx = page.context?.();
+    for (const extra of ctx?.pages?.() || []) {
+      if (!extra || extra === page || extra.isClosed?.()) continue;
+      const url = extra.url?.() || '';
+      if (/noticeCollusive|fishing|guidePopup/i.test(url)) {
+        try { await extra.close({ runBeforeUnload:true }); log('info', '[KEPCO] Closed unrelated popup: ' + url); } catch {}
+      }
+    }
+  } catch {}
+
+  await dismissInlineAlerts();
+  await confirmYesDialog();
+  await checkConfirmedStatementBox();
+
+  const reachedFinalStage = await waitForFinalStage(6000);
+  log('info', '[KEPCO] final stage detected=' + reachedFinalStage);
+
+  await closeKepcoPostLoginModals(page, emit, { protectWorkflowModal: true });
+  await dismissInlineAlerts();
+
+  let checkedByPattern = 0;
+  for (const pattern of AGREEMENT_PATTERNS) {
+    if (await checkAgreementByPattern(pattern)) checkedByPattern++;
   }
-  if (!checked && fallbackTouchedTotal === 0) {
+
+  const checkedByFallback = await checkAllVisibleAgreementBoxes();
+  if (!checkedByPattern && !checkedByFallback) {
     await ensureAgreementDump('agreement_missing');
   }
+
+  await closeKepcoPostLoginModals(page, emit, { protectWorkflowModal: true });
 
   let submitted = false;
   for (const ctx of contexts()) {
     try {
       const btn = await ctx.$(SUBMIT_SELECTOR);
-      if (btn) {
-        await btn.scrollIntoViewIfNeeded?.().catch(()=>{});
-        await btn.click({ force:true }).catch(()=>{});
-        log('info', '[KEPCO] 최종 "제출" 버튼 클릭');
-        submitted = true;
-        break;
-      }
+      if (!btn) continue;
+      await btn.scrollIntoViewIfNeeded?.().catch(()=>{});
+      await btn.click({ force:true }).catch(()=>{});
+      log('info', '[KEPCO] final submit button clicked');
+      submitted = true;
+      break;
     } catch {}
   }
+
   if (!submitted) {
-    log('warn', '[KEPCO] 최종 제출 버튼을 찾지 못했습니다. 수동 확인 필요');
+    log('warn', '[KEPCO] final submit button not found; manual check required');
     await ensureAgreementDump('submit_button_missing');
   }
-  await sleep(200);
-}
 
+  await sleep(200);
+  return { submitted };
+}
 async function navigateToApplication(page, emit) {
   const TEXT_BID_CONTRACT = "\uC785\uCC30/\uACC4\uC57D";
   const TEXT_BID_APPLY = "\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD";
@@ -1551,3 +1730,4 @@ module.exports = {
   applyAfterSearch,
   navigateToApplication,
 };
+

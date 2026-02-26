@@ -90,7 +90,7 @@ async function openAndPrepareLogin(job, emit, outDirProvider){
   const viewport = { width: 1280, height: 900 };
   const site = (job?.site || '').toLowerCase();
 
-  const requestedBrowser = String(job?.options?.browser || 'edge').toLowerCase();
+  const requestedBrowser = String(job?.options?.browser || 'chrome').toLowerCase();
   const browserChannelMap = {
     chrome: 'chrome',
     edge: 'msedge',
@@ -232,7 +232,7 @@ async function openAndPrepareLogin(job, emit, outDirProvider){
     const hasPw = !!(job?.auth?.pw);
     emit && emit({ type:'log', level:'info', msg:`자격정보 존재 여부: id=${hasId}, pw=${hasPw}` });
     if (site === 'kepco') {
-      const newPage = await loginKepco(page, emit, job?.auth || {});
+      const newPage = await loginKepco(page, emit, job?.auth || {}, job?.options || {});
       if (newPage) page = newPage;
       try { await closeKepcoPostLoginModals(page, emit, { abortOnCertModal: true }); } catch {}
     } else if (site === 'mnd') {
