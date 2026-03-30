@@ -1,4 +1,4 @@
-"use strict"
+﻿"use strict"
 
 const fs = require('fs');
 const path = require('path');
@@ -29,6 +29,7 @@ async function loginKepco(page, emit, auth = {}, options = {}) {
   };
   const timing = {
     popupWaitMs: asMs(options?.kepcoPopupWaitMs, 220),
+    resolveLoginTargetMs: asMs(options?.kepcoResolveLoginTargetMs, 1800),
     loginLinkTimeoutMs: asMs(options?.kepcoLoginLinkTimeoutMs, 2200),
     loginLinkRetryTimeoutMs: asMs(options?.kepcoLoginLinkRetryTimeoutMs, 1600),
     loginLinkPollMs: asMs(options?.kepcoLoginLinkPollMs, 80),
@@ -105,6 +106,81 @@ async function loginKepco(page, emit, auth = {}, options = {}) {
     }
     return popup;
   }
+
+  const visibleLoginFieldPairs = [
+    ['#username', '#password'],
+    ['form#loginFrm #username', 'form#loginFrm #password'],
+    ['div.formBox #username', 'div.formBox #password'],
+    ['input[name="username" i]', 'input[name="password" i]']
+  ];
+
+  const isVisibleHandle = async (handle) => {
+    if (!handle) return false;
+    try {
+      return await handle.evaluate((el) => {
+        if (!el) return false;
+        const style = window.getComputedStyle(el);
+        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
+        const rect = el.getBoundingClientRect();
+        if (!rect || rect.width <= 0 || rect.height <= 0) return false;
+        if (el.disabled) return false;
+        return true;
+      });
+    } catch {}
+    return false;
+  };
+
+  const hasVisibleLoginFields = async (ctx) => {
+    if (!ctx || typeof ctx.$ !== 'function') return false;
+    for (const [idSel, pwSel] of visibleLoginFieldPairs) {
+      try {
+        const idEl = await ctx.$(idSel);
+        if (!idEl) continue;
+        const pwEl = await ctx.$(pwSel);
+        if (!pwEl) continue;
+        if (await isVisibleHandle(idEl) && await isVisibleHandle(pwEl)) return true;
+      } catch {}
+    }
+    return false;
+  };
+
+  const collectCandidatePages = (primaryPage, popupPage) => {
+    const out = [];
+    const seen = new Set();
+    const push = (pg) => {
+      if (!pg || seen.has(pg) || pg.isClosed?.()) return;
+      seen.add(pg);
+      out.push(pg);
+    };
+    push(popupPage);
+    push(primaryPage);
+    try {
+      const ctxObj = typeof primaryPage?.context === 'function' ? primaryPage.context() : null;
+      for (const pg of ctxObj?.pages?.() || []) push(pg);
+    } catch {}
+    return out;
+  };
+
+  const resolveLoginPage = async (primaryPage, popupPage, timeoutMs = timing.resolveLoginTargetMs) => {
+    const deadline = Date.now() + timeoutMs;
+    const fallback = popupPage && !popupPage.isClosed?.() ? popupPage : primaryPage;
+    while (Date.now() < deadline) {
+      const pages = collectCandidatePages(primaryPage, popupPage);
+      for (const pg of pages) {
+        try { await pg.waitForLoadState('domcontentloaded', { timeout: 300 }).catch(()=>{}); } catch {}
+      }
+      for (const pg of pages) {
+        if (await hasVisibleLoginFields(pg)) return pg;
+        try {
+          for (const fr of pg.frames?.() || []) {
+            if (await hasVisibleLoginFields(fr)) return pg;
+          }
+        } catch {}
+      }
+      await primaryPage.waitForTimeout(80).catch(()=>{});
+    }
+    return fallback;
+  };
   try {
     await page.waitForLoadState('domcontentloaded').catch(() => {});
     await dumpKepcoHtml(page, emit, 'kepco_home_initial');
@@ -157,7 +233,12 @@ async function loginKepco(page, emit, auth = {}, options = {}) {
   mark('loginLink:click:start');
   const popup = await clickWithPopup(page, loginLinkCandidates);
   mark('loginLink:click:end', `popup=${!!popup}`);
-  const loginPage = popup || page;
+  mark('loginPage:resolve:start', `timeout=${timing.resolveLoginTargetMs}`);
+  let loginPage = await resolveLoginPage(page, popup, timing.resolveLoginTargetMs);
+  const resolvedBy = loginPage === popup ? 'popup'
+    : loginPage === page ? 'page'
+    : 'context-page';
+  mark('loginPage:resolve:end', `resolvedBy=${resolvedBy}`);
   // Ensure alert dialogs don't block automation
   try { loginPage.on('dialog', d => d.dismiss().catch(()=>{})); } catch {}
   await loginPage.waitForLoadState('domcontentloaded').catch(()=>{});
@@ -244,22 +325,6 @@ async function loginKepco(page, emit, auth = {}, options = {}) {
             'input[type="password"]', 'input[name*="pw" i]', 'input[id*="pw" i]'
           ]
         }
-      };
-
-      const isVisibleHandle = async (handle) => {
-        if (!handle) return false;
-        try {
-          return await handle.evaluate((el) => {
-            if (!el) return false;
-            const style = window.getComputedStyle(el);
-            if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
-            const rect = el.getBoundingClientRect();
-            if (!rect || rect.width <= 0 || rect.height <= 0) return false;
-            if (el.disabled) return false;
-            return true;
-          });
-        } catch {}
-        return false;
       };
 
       const modalFastSelectors = {
@@ -402,7 +467,7 @@ async function loginKepco(page, emit, auth = {}, options = {}) {
         pwHandle ||= located.pw;
         if (idHandle && pwHandle) return { id: idHandle, pw: pwHandle, source: 'locate-fields' };
 
-        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW ?????????????筌????????????밸븶筌믩끃??獄???????멥렑?????????????(????????袁⑸즴筌?씛彛???돗????????????????????거??????????????' });
+        emit && emit({ type:'log', level:'warn', msg:'[KEPCO] ID/PW ?????????????嶺????????????諛몃마嶺뚮?????????????硫λ젒?????????????(????????熬곣뫖利당춯??쎾퐲????????????????????????嫄??????????????' });
         try { await closeKepcoPostLoginModals(loginPage, emit, { abortOnCertModal: true }); } catch {}
         await loginPage.waitForTimeout(timing.locateRetryDelayMs).catch(()=>{});
         const retry = await locateFields(timing.locateFieldsRetryTimeoutMs);
@@ -569,6 +634,20 @@ async function closeKepcoPostLoginModals(page, emit, options = {}){
     'div.auclose ~ div a[onclick*="close" i]',
     'button:has([onclick*="popupClose"])'
   ];
+  const conservativeSelectors = [
+    '.popup-close',
+    '.btn-close',
+    'span[onclick*="close"]',
+    'a[onclick*="close" i]',
+    'img[onclick*="close" i]',
+    'button.btn-popup-close',
+    '#btnClose',
+    '.btn-popup-close',
+    '#reopenCheck ~ button',
+    'div.auclose ~ div button',
+    'div.auclose ~ div a[onclick*="close" i]',
+    'button:has([onclick*="popupClose"])'
+  ];
 
   const popupPagePatterns = KEPCO_POPUP_URL_PATTERNS;
   const handledElements = new WeakSet();
@@ -593,6 +672,7 @@ async function closeKepcoPostLoginModals(page, emit, options = {}){
 
   const abortOnCertModal = options.abortOnCertModal === true;
   const protectWorkflowModal = options.protectWorkflowModal === true;
+  const activeSelectors = protectWorkflowModal ? conservativeSelectors : selectors;
   const certSelectors = ['#nx-cert-select', '.nx-cert-select', '#browser-guide-added-wrapper', '#nx-cert-select-wrap'];
   const shouldPreserveWorkflowModal = async (elHandle) => {
     if (!protectWorkflowModal || !elHandle) return false;
@@ -601,8 +681,8 @@ async function closeKepcoPostLoginModals(page, emit, options = {}){
         const root = node?.closest?.('.x-window, .x-panel, .x-message-box') || node?.parentElement;
         if (!root) return false;
         const text = String(root.textContent || '').replace(/\s+/g, '');
-        const hasFlowCheckbox = !!root.querySelector('input[role="checkbox"], input.x-form-checkbox, .x-form-cb-wrap input');
-        if (/\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD|\uC704\uC758\uC0AC\uD56D|\uD655\uC778\uD558\uC600\uC2B5\uB2C8\uB2E4|\uB3D9\uC758\uC0AC\uD56D/.test(text) && hasFlowCheckbox) return true;
+        const hasFlowCheckbox = !!root.querySelector('input[type="checkbox"], input[role="checkbox"], input.x-form-checkbox, .x-form-cb-wrap input');
+        if (/\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD|\uC704\uC758\uC0AC\uD56D|\uD655\uC778\uD558\uC600\uC2B5\uB2C8\uB2E4|\uB3D9\uC758\uC0AC\uD56D|\uC785\uCC30\uB2F4\uD569\uC720\uC758\uC0AC\uD56D/.test(text) && hasFlowCheckbox) return true;
         if (/\uC81C\uCD9C/.test(text)) return true;
         return false;
       });
@@ -653,7 +733,9 @@ async function closeKepcoPostLoginModals(page, emit, options = {}){
     '#todayCheck',
     '#reopenCheck'
   ];
-  for (let attempt = 0; attempt < 5; attempt++) {
+
+  const maxAttempts = protectWorkflowModal ? 2 : 5;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     let closed = false;
     if (await hasCertificateModal()) {
       emit && emit({ type:'log', level:'debug', msg:'[KEPCO] certificate modal detected, stop notice-popup closer loop' });
@@ -662,6 +744,7 @@ async function closeKepcoPostLoginModals(page, emit, options = {}){
     for (const ctx of contexts()) {
       const forced = await forceClosePopupPage(ctx);
       if (forced) { closed = true; continue; }
+
       for (const chkSel of checkSelectors) {
         try {
           const chks = await ctx.$$(chkSel);
@@ -676,17 +759,25 @@ async function closeKepcoPostLoginModals(page, emit, options = {}){
           }
         } catch {}
       }
-      for (const sel of selectors) {
+
+      for (const sel of activeSelectors) {
         try {
           const btns = await ctx.$$(sel);
           if (btns && btns.length) {
             for (const btn of btns) {
               if (handledElements.has(btn)) continue;
+              const alreadyTouched = await btn.evaluate((el) => {
+                if (!el || !el.dataset) return false;
+                if (el.dataset.codexClosed === '1') return true;
+                el.dataset.codexClosed = '1';
+                return false;
+              }).catch(() => false);
+              if (alreadyTouched) continue;
               if (await shouldPreserveWorkflowModal(btn)) continue;
               await btn.click({ force: true }).catch(()=>{});
               handledElements.add(btn);
               closed = true;
-              emit && emit({ type:'log', level:'info', msg:`[KEPCO] ?????????濚밸Ŧ援???/??????嫄??????????????嫄???????????? ${sel}` });
+              emit && emit({ type:'log', level:'info', msg:`[KEPCO] popup close candidate clicked: ${sel}` });
             }
           }
         } catch {}
@@ -716,7 +807,7 @@ async function closeExtraKepcoWindows(page, emit, options = {}) {
     if (!allowNonPopupClose && !popupPatterns.some((rx) => rx.test(url))) continue;
     try {
       await current.close({ runBeforeUnload: true });
-      emit && emit({ type: 'log', level: 'info', msg: `[KEPCO] ?????????怨뺤떪??????????????????????????????μ떜媛?걫???? ${url}` });
+      emit && emit({ type: 'log', level: 'info', msg: `[KEPCO] ??????????⑤벡???????????????????????????????關?쒎첎?嫄???? ${url}` });
     } catch {}
   }
 }
@@ -929,9 +1020,9 @@ async function goToBidApplyAndSearch(page, emit, bidId){
   await waitForGrid(8000);
 }
 
-async function applyAfterSearch(page, emit){
+async function applyAfterSearch(page, emit, cert = {}, options = {}){
   const APPLY_BUTTON_TEXT = '\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD';
-  const SUBMIT_SELECTOR = '#button-1693-btnInnerEl, span.x-btn-inner:has-text("\uC81C\uCD9C"), button:has-text("\uC81C\uCD9C"), a:has-text("\uC81C\uCD9C")';
+  const SUBMIT_SELECTOR = 'span.x-btn-inner:has-text("\uC81C\uCD9C"), button:has-text("\uC81C\uCD9C"), a:has-text("\uC81C\uCD9C"), [id$="-btnInnerEl"]';
   const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
   const log = (level, msg)=>emit && emit({ type:'log', level, msg });
 
@@ -1179,16 +1270,23 @@ async function applyAfterSearch(page, emit){
     throw new Error('[KEPCO] Apply button click was not confirmed');
   }
 
-  const finalRes = await handleFinalAgreementAndSubmit(workPage, emit);
+  const finalRes = await handleFinalAgreementAndSubmit(workPage, emit, cert, options);
+  if (finalRes?.alreadyApplied) {
+    log('warn', '[KEPCO] already applied state detected; duplicate submission is not allowed');
+    throw new Error('[KEPCO] Bid is already applied and cannot be submitted again');
+  }
   if (!finalRes?.submitted) {
     throw new Error('[KEPCO] Final submit button click was not confirmed');
   }
+  if (!finalRes?.completed) {
+    throw new Error('[KEPCO] Final completion was not confirmed (' + (finalRes?.completionReason || 'unknown') + ')');
+  }
 }
 
-async function handleFinalAgreementAndSubmit(page, emit){
+async function handleFinalAgreementAndSubmit(page, emit, cert = {}, options = {}){
   const log = (level,msg)=>emit && emit({ type:'log', level, msg });
   const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
-  const SUBMIT_SELECTOR = '#button-1693-btnInnerEl, span.x-btn-inner:has-text("\uC81C\uCD9C"), button:has-text("\uC81C\uCD9C"), a:has-text("\uC81C\uCD9C")';
+  const SUBMIT_SELECTOR = 'span.x-btn-inner:has-text("\uC81C\uCD9C"), button:has-text("\uC81C\uCD9C"), a:has-text("\uC81C\uCD9C"), [id$="-btnInnerEl"]';
   const AGREEMENT_PATTERNS = [
     /\uACF5\uAE09\uC790.*\uD589\uB3D9\uAC15\uB839.*\uB3D9\uC758/i,
     /\uCCAD\uB7C9\uACC4\uC57D.*\uC774\uD589\uAC01\uC11C.*\uB3D9\uC758/i,
@@ -1227,16 +1325,64 @@ async function handleFinalAgreementAndSubmit(page, emit){
     await dumpKepcoHtml(page, emit, tag);
   };
 
-  const dismissInlineAlerts = async () => {
+  const dismissInlineAlerts = async (aggressive = false) => {
+    const conservative = [
+      '.popup-close',
+      '.btn-close',
+      'span[onclick*="close"]',
+      'a[onclick*="close" i]',
+      'img[onclick*="close" i]',
+      'button.btn-popup-close',
+      '#btnClose',
+      '.btn-popup-close'
+    ];
+    const aggressiveExtra = [
+      'button:has-text("\uD655\uC778")',
+      'a:has-text("\uD655\uC778")',
+      'span.x-btn-inner:has-text("\uD655\uC778")',
+      'button:has-text("\uB2EB\uAE30")',
+      'a:has-text("\uB2EB\uAE30")'
+    ];
+    const selectors = aggressive ? conservative.concat(aggressiveExtra) : conservative;
     for (const ctx of contexts()) {
-      try {
-        const buttons = await ctx.$$('button:has-text("\uD655\uC778"), a:has-text("\uD655\uC778"), span.x-btn-inner:has-text("\uD655\uC778"), button:has-text("\uB2EB\uAE30"), a:has-text("\uB2EB\uAE30")');
-        for (const btn of buttons || []) {
-          await btn.click({ force:true }).catch(()=>{});
-        }
-      } catch {}
+      for (const sel of selectors) {
+        try {
+          const buttons = await ctx.$$(sel);
+          for (const btn of buttons || []) {
+            const shouldSkip = await btn.evaluate((node) => {
+              try {
+                const root = node?.closest?.('.x-message-box, .x-window, .x-panel-popup, .x-layer, [role="dialog"]') || null;
+                if (!root) return true;
+                const text = String(root.textContent || '').replace(/\s+/g, '');
+                const hasUncheckedWorkflowBox = Array.from(
+                  root.querySelectorAll('input[role="checkbox"], input.x-form-checkbox, input[type="checkbox"], input[type="button"][role="checkbox"]')
+                ).some((cb) => {
+                  if (!cb) return false;
+                  const aria = cb.getAttribute?.('aria-checked');
+                  if (aria === 'true') return false;
+                  if (typeof cb.checked === 'boolean' && cb.checked) return false;
+                  return true;
+                });
+                if (/\uC785\uCC30\uB2F4\uD569\uC720\uC758\uC0AC\uD56D|\uC704\uC758\uC0AC\uD56D|\uD655\uC778\uD558\uC600\uC2B5\uB2C8\uB2E4/.test(text) && hasUncheckedWorkflowBox) {
+                  return true;
+                }
+              } catch {}
+              return false;
+            }).catch(() => false);
+            if (shouldSkip) continue;
+            const root = await btn.evaluateHandle((node) => node?.closest?.('a.x-btn, button, .x-btn, [role="button"]') || node).catch(()=>null);
+            const target = root?.asElement?.() || btn;
+            await target.click({ force:true }).catch(()=>{});
+          }
+        } catch {}
+      }
     }
   };
+
+  // Reset per-bid checkbox touch cache so previous bid state does not leak.
+  for (const ctx of contexts()) {
+    try { await ctx.evaluate(() => { delete window.__codexAgreementTouchedMap; }); } catch {}
+  }
 
   const confirmYesDialog = async () => {
     for (const ctx of contexts()) {
@@ -1253,7 +1399,7 @@ async function handleFinalAgreementAndSubmit(page, emit){
           } else {
             await cand.click({ force:true }).catch(()=>{});
           }
-          log('info', '[KEPCO] confirmation dialog "예" clicked');
+          log('info', '[KEPCO] confirmation dialog "?? clicked');
           return true;
         }
       } catch {}
@@ -1278,7 +1424,7 @@ async function handleFinalAgreementAndSubmit(page, emit){
           return false;
         });
         if (extClicked) {
-          log('info', '[KEPCO] confirmation dialog "예" clicked via Ext fallback');
+          log('info', '[KEPCO] confirmation dialog "?? clicked via Ext fallback');
           return true;
         }
       } catch {}
@@ -1290,20 +1436,39 @@ async function handleFinalAgreementAndSubmit(page, emit){
     for (const ctx of contexts()) {
       try {
         const hit = await ctx.evaluate(() => {
+          const isChecked = (cb) => {
+            if (!cb) return false;
+            if (typeof cb.checked === 'boolean' && cb.checked) return true;
+            const aria = String(cb.getAttribute?.('aria-checked') || '').toLowerCase();
+            if (aria === 'true') return true;
+            const cls = String(cb.className || '');
+            if (/\bx-form-cb-checked\b/.test(cls)) return true;
+            const wrapCls = String(cb.closest?.('.x-form-cb-wrap, .x-form-checkbox, label, td, tr, div')?.className || '');
+            return /\bx-form-cb-checked\b/.test(wrapCls);
+          };
           const candidates = Array.from(document.querySelectorAll(
-            'input[role="checkbox"][title*="\uC704\uC758 \uC0AC\uD56D" i], input[role="checkbox"][title*="\uD655\uC778" i], input.x-form-checkbox[role="checkbox"], .x-form-cb-wrap input[role="checkbox"]'
+            'input[type="checkbox"][title*="\uC704\uC758 \uC0AC\uD56D" i], input[type="checkbox"][title*="\uD655\uC778" i], input[role="checkbox"][title*="\uC704\uC758 \uC0AC\uD56D" i], input[role="checkbox"][title*="\uD655\uC778" i], input.x-form-checkbox, .x-form-cb-wrap input, input[type="checkbox"]'
           ));
           for (const cb of candidates) {
+            const nearbyText = String(cb?.closest?.('label, td, tr, div')?.textContent || '').replace(/\s+/g, '');
+            const title = String(cb?.getAttribute?.('title') || '').replace(/\s+/g, '');
+            const isTarget = /\uC704\uC758\uC0AC\uD56D|\uD655\uC778\uD558\uC600\uC2B5\uB2C8\uB2E4|\uC785\uCC30\uB2F4\uD569\uC720\uC758\uC0AC\uD56D/.test(nearbyText + title);
+            if (!isTarget) continue;
             if (!cb) continue;
             const style = window.getComputedStyle(cb);
             const rect = cb.getBoundingClientRect();
             if (style.display === 'none' || style.visibility === 'hidden') continue;
             if (!rect || rect.width <= 0 || rect.height <= 0) continue;
+            if (isChecked(cb)) return true;
             try { cb.focus?.(); } catch {}
             try { cb.click(); } catch {}
-            cb.dispatchEvent?.(new MouseEvent('click', { bubbles:true, cancelable:true }));
+            if (!isChecked(cb)) {
+              const wrap = cb.closest('.x-form-cb-wrap, label, .x-form-checkbox, .x-field, td, tr, div');
+              try { wrap?.click?.(); } catch {}
+            }
+            cb.dispatchEvent?.(new Event('input', { bubbles:true }));
             cb.dispatchEvent?.(new Event('change', { bubbles:true }));
-            return true;
+            if (isChecked(cb)) return true;
           }
           return false;
         });
@@ -1321,18 +1486,23 @@ async function handleFinalAgreementAndSubmit(page, emit){
     while (Date.now() < end) {
       for (const ctx of contexts()) {
         try {
-          const ready = await ctx.evaluate((submitSelector) => {
-            const submit = document.querySelector(submitSelector);
-            if (submit) return true;
-            const boxes = Array.from(document.querySelectorAll('input[type="checkbox"], input[role="checkbox"], input.x-form-checkbox'));
-            const visible = boxes.filter((cb) => {
-              const style = window.getComputedStyle(cb);
-              const rect = cb.getBoundingClientRect();
+          const ready = await ctx.evaluate(() => {
+            const norm = (s) => String(s || '').replace(/\s+/g, '');
+            const isVisible = (el) => {
+              if (!el) return false;
+              const style = window.getComputedStyle(el);
+              const rect = el.getBoundingClientRect();
               if (style.display === 'none' || style.visibility === 'hidden') return false;
-              return rect && rect.width > 0 && rect.height > 0;
-            });
-            return visible.length >= 2;
-          }, SUBMIT_SELECTOR);
+              return !!rect && rect.width > 0 && rect.height > 0;
+            };
+            const nodes = Array.from(document.querySelectorAll('span.x-btn-inner, button, a, [id$="-btnInnerEl"]'));
+            for (const node of nodes) {
+              if (norm(node.textContent) !== '제출') continue;
+              const target = node.closest?.('a.x-btn, button, .x-btn, [role="button"]') || node;
+              if (isVisible(target)) return true;
+            }
+            return false;
+          });
           if (ready) return true;
         } catch {}
       }
@@ -1373,24 +1543,161 @@ async function handleFinalAgreementAndSubmit(page, emit){
     let total = 0;
     for (const ctx of contexts()) {
       try {
-        const touched = await ctx.evaluate(() => {
-          const boxes = Array.from(document.querySelectorAll('input[type="checkbox"], input[role="checkbox"], input.x-form-checkbox'));
-          let count = 0;
-          for (const cb of boxes) {
-            const style = window.getComputedStyle(cb);
-            const rect = cb.getBoundingClientRect();
+        const touched = await ctx.evaluate(async () => {
+          const cbSelector = 'input[type="checkbox"], input[role="checkbox"], input.x-form-checkbox';
+          const rootScroller = document.scrollingElement || document.documentElement || document.body;
+          const wait = (ms = 90) => new Promise((resolve) => setTimeout(resolve, ms));
+
+          const norm = (s) => String(s || '').replace(/\s+/g, '');
+          const isVisible = (el) => {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            const rect = el.getBoundingClientRect();
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            return !!rect && rect.width > 0 && rect.height > 0;
+          };
+          const isChecked = (cb) => {
+            if (!cb) return false;
+            try {
+              const cmpId = cb.getAttribute?.('componentid') || String(cb.id || '').replace(/-inputEl$/, '');
+              if (cmpId && window.Ext && typeof Ext.getCmp === 'function') {
+                const cmp = Ext.getCmp(cmpId);
+                const v = cmp?.getValue?.();
+                if (typeof v === 'boolean') return v;
+              }
+            } catch {}
+            if (typeof cb.checked === 'boolean' && cb.checked) return true;
+            const aria = String(cb.getAttribute?.('aria-checked') || '').toLowerCase();
+            if (aria === 'true') return true;
+            const cls = String(cb.className || '');
+            if (/\bx-form-cb-checked\b/.test(cls)) return true;
+            const wrapCls = String(cb.closest?.('.x-form-cb-wrap, .x-form-checkbox, label, td, tr, div')?.className || '');
+            return /\bx-form-cb-checked\b/.test(wrapCls);
+          };
+          const setCheckedByExt = (cb) => {
+            try {
+              const cmpId = cb?.getAttribute?.('componentid') || String(cb?.id || '').replace(/-inputEl$/, '');
+              if (!cmpId || !(window.Ext && typeof Ext.getCmp === 'function')) return false;
+              const cmp = Ext.getCmp(cmpId);
+              if (!cmp) return false;
+              if (cmp.setValue) cmp.setValue(true);
+              try { cmp.fireEvent && cmp.fireEvent('change', cmp, true); } catch {}
+              return true;
+            } catch {}
+            return false;
+          };
+          const touchedMap = window.__codexAgreementTouchedMap || (window.__codexAgreementTouchedMap = {});
+
+          const agreementLike = (cb) => {
             const title = String(cb.getAttribute('title') || '').toLowerCase();
-            if (style.display === 'none' || style.visibility === 'hidden') continue;
-            if (!rect || rect.width <= 0 || rect.height <= 0) continue;
-            if (cb.disabled) continue;
-            if (title.includes('today') || title.includes('오늘') || title.includes('다시 보지')) continue;
-            if (!cb.checked) {
-              cb.click();
-              cb.checked = true;
-              cb.dispatchEvent(new Event('change', { bubbles:true }));
-              count++;
+            if (title.includes('today') || title.includes('?ㅻ뒛') || title.includes('?ㅼ떆')) return false;
+            const inDialog = cb.closest('.x-message-box, .x-window, .x-panel-popup, [role="dialog"]');
+            if (inDialog) return false;
+            const byAria = norm(cb.getAttribute('aria-label') || cb.getAttribute('name') || cb.id || '');
+            const parent = cb.closest('label, td, tr, li, div, .x-form-cb-wrap, .x-panel, .x-container');
+            const parentText = norm(parent?.textContent || '');
+            const combined = byAria + parentText;
+            if (!combined) return true;
+            if (/\uC624\uB298|\uB2E4\uC2DC\uBCF4\uAE30|\uD558\uB8E8\uB3D9\uC548|\uD31D\uC5C5/.test(combined)) return false;
+            return true;
+          };
+
+          const clickAgreementBoxes = () => {
+            let count = 0;
+            const boxes = Array.from(document.querySelectorAll(cbSelector));
+            for (const cb of boxes) {
+              if (!cb || cb.disabled) continue;
+              if (!agreementLike(cb)) continue;
+              if (isChecked(cb)) continue;
+              const touchKey = String(cb.id || cb.getAttribute?.('componentid') || '');
+              if (touchKey && touchedMap[touchKey]) continue;
+
+              const id = cb.id || '';
+              let label = null;
+              if (id) {
+                try {
+                  const safeId = (window.CSS && CSS.escape) ? CSS.escape(id) : id.replace(/([#.;?+*~\":!^$\[\]()=>|\/@])/g, '\\$1');
+                  label = document.querySelector(`label[for="${safeId}"]`);
+                } catch {}
+              }
+
+              try { cb.scrollIntoView?.({ block: 'center' }); } catch {}
+              try { cb.focus?.(); } catch {}
+              try { cb.click(); } catch {}
+              if (!isChecked(cb) && label && isVisible(label)) {
+                try { label.click(); } catch {}
+              }
+              if (!isChecked(cb)) {
+                const wrap = cb.closest('.x-form-cb-wrap, label, .x-form-checkbox, .x-field, td, tr, div');
+                try { wrap?.click?.(); } catch {}
+              }
+              if (!isChecked(cb)) {
+                setCheckedByExt(cb);
+              }
+
+              if (isChecked(cb)) {
+                if (touchKey) touchedMap[touchKey] = true;
+                cb.dispatchEvent?.(new Event('input', { bubbles: true }));
+                cb.dispatchEvent?.(new Event('change', { bubbles: true }));
+                count++;
+              }
             }
+            return count;
+          };
+
+          let count = 0;
+          try {
+            if (window.Ext && Ext.ComponentQuery) {
+              const comps = [
+                ...(Ext.ComponentQuery.query('checkboxfield') || []),
+                ...(Ext.ComponentQuery.query('checkbox') || [])
+              ];
+              for (const cmp of comps) {
+                try {
+                  if (!cmp || (cmp.isVisible && !cmp.isVisible()) || cmp.hidden) continue;
+                  const owner = cmp.up?.('window, messagebox, panel[cls*=popup], panel[floating=true]');
+                  if (owner) continue;
+                  const inputEl = cmp.inputEl?.dom || cmp.el?.down?.('input')?.dom || null;
+                  if (!inputEl || inputEl.disabled) continue;
+                  const title = norm(inputEl.getAttribute?.('title') || '');
+                  if (/오늘|다시보기|하루동안|팝업/.test(title)) continue;
+                  const text = norm(
+                    (cmp.boxLabel || '') + ' ' +
+                    (cmp.fieldLabel || '') + ' ' +
+                    (inputEl.getAttribute?.('aria-label') || '') + ' ' +
+                    (inputEl.closest?.('label, td, tr, div, .x-form-cb-wrap, .x-panel')?.textContent || '')
+                  );
+                  if (/오늘|다시보기|하루동안|팝업/.test(text)) continue;
+                  const before = !!(cmp.getValue?.() || isChecked(inputEl));
+                  if (!before) {
+                    try { cmp.setValue?.(true); } catch {}
+                    try { cmp.fireEvent?.('change', cmp, true); } catch {}
+                    const after = !!(cmp.getValue?.() || isChecked(inputEl));
+                    if (after) count++;
+                  }
+                } catch {}
+              }
+            }
+          } catch {}
+          count += clickAgreementBoxes();
+
+          const max = Math.max(0, (rootScroller.scrollHeight || 0) - (rootScroller.clientHeight || 0));
+          const step = Math.max(220, Math.floor((rootScroller.clientHeight || 700) * 0.8));
+          for (let pos = 0; pos <= max; pos += step) {
+            try {
+              rootScroller.scrollTop = pos;
+              rootScroller.dispatchEvent?.(new Event('scroll', { bubbles: true }));
+            } catch {}
+            await wait(110);
+            count += clickAgreementBoxes();
           }
+
+          try {
+            rootScroller.scrollTop = max;
+            rootScroller.dispatchEvent?.(new Event('scroll', { bubbles: true }));
+          } catch {}
+          await wait(140);
+          count += clickAgreementBoxes();
           return count;
         });
         total += Number(touched || 0);
@@ -1400,6 +1707,387 @@ async function handleFinalAgreementAndSubmit(page, emit){
       log('info', '[KEPCO] checked visible agreement checkboxes count=' + total);
     }
     return total;
+  };
+
+  
+  const clickSubmitButton = async () => {
+    for (const ctx of contexts()) {
+      try {
+        const clicked = await ctx.evaluate(() => {
+          const pickClickable = (node) => {
+            if (!node) return null;
+            return node.closest?.('a.x-btn, button, .x-btn, [role="button"]') || node;
+          };
+          const isVisible = (el) => {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            const rect = el.getBoundingClientRect();
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            return !!rect && rect.width > 0 && rect.height > 0;
+          };
+          const textOf = (el) => String(el?.textContent || '').replace(/\s+/g, '');
+
+          const nodeCandidates = Array.from(document.querySelectorAll('span.x-btn-inner, button, a, [id$="-btnInnerEl"]'));
+          for (const node of nodeCandidates) {
+            if (textOf(node) !== '\uC81C\uCD9C') continue;
+            const target = pickClickable(node);
+            if (!isVisible(target)) continue;
+            try { target.scrollIntoView?.({ block: 'center' }); } catch {}
+            try { target.click?.(); } catch {}
+            try { target.dispatchEvent?.(new MouseEvent('click', { bubbles: true, cancelable: true })); } catch {}
+            return true;
+          }
+          return false;
+        });
+        if (clicked) return true;
+      } catch {}
+
+      try {
+        const candidates = await ctx.$$(SUBMIT_SELECTOR);
+        for (const node of candidates || []) {
+          const text = ((await node.textContent().catch(() => '')) || '').replace(/\s+/g, '');
+          if (text !== '\uC81C\uCD9C') continue;
+          const root = await node.evaluateHandle((el) => el?.closest?.('a.x-btn, button, .x-btn, [role="button"]') || el).catch(() => null);
+          const target = root?.asElement?.() || node;
+          await target.scrollIntoViewIfNeeded?.().catch(()=>{});
+          await target.click({ force:true }).catch(()=>{});
+          return true;
+        }
+      } catch {}
+    }
+    return false;
+  };
+  const detectUncheckedAgreementCount = async () => {
+    for (const ctx of contexts()) {
+      try {
+        const left = await ctx.evaluate(() => {
+          const norm = (s) => String(s || '').replace(/\s+/g, '');
+          const isVisible = (el) => {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            const rect = el.getBoundingClientRect();
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            return !!rect && rect.width > 0 && rect.height > 0;
+          };
+          const isChecked = (cb) => {
+            if (!cb) return false;
+            try {
+              const cmpId = cb.getAttribute?.('componentid') || String(cb.id || '').replace(/-inputEl$/, '');
+              if (cmpId && window.Ext && typeof Ext.getCmp === 'function') {
+                const cmp = Ext.getCmp(cmpId);
+                const v = cmp?.getValue?.();
+                if (typeof v === 'boolean') return v;
+              }
+            } catch {}
+            if (typeof cb.checked === 'boolean' && cb.checked) return true;
+            const aria = String(cb.getAttribute?.('aria-checked') || '').toLowerCase();
+            if (aria === 'true') return true;
+            const cls = String(cb.className || '');
+            if (/\bx-form-cb-checked\b/.test(cls)) return true;
+            const wrapCls = String(cb.closest?.('.x-form-cb-wrap, .x-form-checkbox, label, td, tr, div')?.className || '');
+            return /\bx-form-cb-checked\b/.test(wrapCls);
+          };
+          try {
+            if (window.Ext && Ext.ComponentQuery) {
+              const comps = [
+                ...(Ext.ComponentQuery.query('checkboxfield') || []),
+                ...(Ext.ComponentQuery.query('checkbox') || [])
+              ];
+              let extRemaining = 0;
+              for (const cmp of comps) {
+                try {
+                  if (!cmp || (cmp.isVisible && !cmp.isVisible()) || cmp.hidden) continue;
+                  const owner = cmp.up?.('window, messagebox, panel[cls*=popup], panel[floating=true]');
+                  if (owner) continue;
+                  const inputEl = cmp.inputEl?.dom || cmp.el?.down?.('input')?.dom || null;
+                  if (!inputEl || inputEl.disabled || !isVisible(inputEl)) continue;
+                  const txt = norm(
+                    (cmp.boxLabel || '') + ' ' +
+                    (cmp.fieldLabel || '') + ' ' +
+                    (inputEl.getAttribute?.('aria-label') || '') + ' ' +
+                    (inputEl.closest?.('label, td, tr, div, .x-form-cb-wrap, .x-panel')?.textContent || '')
+                  );
+                  if (/오늘|다시보기|하루동안|팝업/.test(txt)) continue;
+                  const checked = !!(cmp.getValue?.() || isChecked(inputEl));
+                  if (!checked) extRemaining++;
+                } catch {}
+              }
+              if (extRemaining > 0) return extRemaining;
+            }
+          } catch {}
+          const boxes = Array.from(document.querySelectorAll('input[type="checkbox"], input[role="checkbox"], input.x-form-checkbox'));
+          let remaining = 0;
+          for (const cb of boxes) {
+            if (!isVisible(cb) || cb.disabled) continue;
+            const inDialog = cb.closest('.x-message-box, .x-window, .x-panel-popup, [role="dialog"]');
+            if (inDialog) continue;
+            const txt = norm((cb.closest('label, td, tr, div, .x-form-cb-wrap, .x-panel')?.textContent || '') + ' ' + (cb.getAttribute('aria-label') || '') + ' ' + (cb.getAttribute('name') || ''));
+            if (/\uC624\uB298|\uB2E4\uC2DC\uBCF4\uAE30|\uD558\uB8E8\uB3D9\uC548|\uD31D\uC5C5/.test(txt)) continue;
+            if (!isChecked(cb)) remaining++;
+          }
+          return remaining;
+        });
+        if (Number(left || 0) > 0) return Number(left || 0);
+      } catch {}
+    }
+    return 0;
+  };
+
+  const hasSubmitValidationAlert = async () => {
+    for (const ctx of contexts()) {
+      try {
+        const hit = await ctx.evaluate(() => {
+          const nodes = Array.from(document.querySelectorAll('.x-message-box, .x-window, [role="dialog"], .x-window-body, .x-panel-body'));
+          for (const node of nodes) {
+            const text = String(node.textContent || '').replace(/\s+/g, '');
+            if (!text) continue;
+            if (/\uD544\uC218|\uCCB4\uD06C|\uB3D9\uC758|\uC120\uD0DD|\uD655\uC778\uD558\uC138\uC694/.test(text)) return true;
+          }
+          return false;
+        });
+        if (hit) return true;
+      } catch {}
+    }
+    return false;
+  };
+
+  const hasCertificateModalAfterSubmit = async () => {
+    const certSelectors = [
+      '#nx-cert-select',
+      '.nx-cert-select',
+      '#nx-cert-select-wrap',
+      '#browser-guide-added-wrapper',
+      'input[name="cert-password" i]',
+      'input[type="password"][id*="cert" i]',
+      'input[type="password"][name*="cert" i]'
+    ];
+    for (const ctx of contexts()) {
+      for (const sel of certSelectors) {
+        try {
+          const el = await ctx.$(sel);
+          if (el) return true;
+        } catch {}
+      }
+    }
+    return false;
+  };
+
+  const closeCompletionDialogIfPresent = async () => {
+    for (const ctx of contexts()) {
+      try {
+        const hit = await ctx.evaluate(() => {
+          const norm = (s) => String(s || '').replace(/\s+/g, '');
+          const dialogs = Array.from(document.querySelectorAll('.x-message-box, .x-window, [role="dialog"], .x-window-body'));
+          const isCompletionText = (text) =>
+            /\uCC38\uAC00\uC2E0\uCCAD.*\uC644\uB8CC|\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD.*\uC644\uB8CC|\uC2E0\uCCAD.*\uC644\uB8CC|\uC81C\uCD9C.*\uC644\uB8CC|\uC81C\uCD9C\uD558\uC600\uC2B5\uB2C8\uB2E4|\uC811\uC218\uC644\uB8CC|\uCC98\uB9AC\uC644\uB8CC|\uC644\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4/.test(text);
+          const isConfirmLike = (text) => /^(\uD655\uC778|\uC608|\uB2EB\uAE30)/.test(text);
+          for (const dlg of dialogs) {
+            const text = norm(dlg.textContent || '');
+            if (!text || !isCompletionText(text)) continue;
+            const btns = Array.from(dlg.querySelectorAll(
+              'span.x-btn-inner, button, a, [id$="-btnInnerEl"], input[type="button"], input[type="submit"]'
+            ));
+            for (const b of btns) {
+              const bt = norm(b.textContent || b.getAttribute?.('value') || b.getAttribute?.('title') || '');
+              if (!isConfirmLike(bt)) continue;
+              const target = b.closest?.('a.x-btn, button, .x-btn, [role="button"]') || b;
+              try { target.click?.(); } catch {}
+              try { target.dispatchEvent?.(new MouseEvent('click', { bubbles:true, cancelable:true })); } catch {}
+              return true;
+            }
+          }
+          return false;
+        });
+        if (hit) return true;
+      } catch {}
+    }
+    return false;
+  };
+
+
+  const detectCompletionSignal = async () => {
+    for (const ctx of contexts()) {
+      try {
+        const sig = await ctx.evaluate(() => {
+          const norm = (s) => String(s || '').replace(/\s+/g, '');
+          const isVisible = (el) => {
+            if (!el) return false;
+            const style = window.getComputedStyle(el);
+            const rect = el.getBoundingClientRect();
+            if (style.display === 'none' || style.visibility === 'hidden') return false;
+            return !!rect && rect.width > 0 && rect.height > 0;
+          };
+
+          const fullText = norm(document.body?.innerText || document.body?.textContent || '');
+          const successText = /\uCC38\uAC00\uC2E0\uCCAD\uC774\uC644\uB8CC|\uCC38\uAC00\uC2E0\uCCAD\uC644\uB8CC|\uC2E0\uCCAD\uC774\uC644\uB8CC|\uC2E0\uCCAD\uC644\uB8CC|\uC81C\uCD9C\uC774\uC644\uB8CC|\uC81C\uCD9C\uC644\uB8CC|\uC815\uC0C1\uCC98\uB9AC|\uC811\uC218\uC644\uB8CC|\uCC98\uB9AC\uC644\uB8CC|\uC644\uB8CC\uB418\uC5C8\uC2B5\uB2C8\uB2E4/.test(fullText);
+
+          const submitNodes = Array.from(document.querySelectorAll('span.x-btn-inner, button, a, [id$="-btnInnerEl"]'));
+          const hasSubmitBtn = submitNodes.some((el) => isVisible(el) && norm(el.textContent) === '\uC81C\uCD9C');
+
+          const dialogNodes = Array.from(document.querySelectorAll('.x-message-box, .x-window, [role="dialog"]'));
+          const hasYesNoDialog = dialogNodes.some((el) => {
+            const txt = norm(el.textContent || '');
+            return /\uC608/.test(txt) && /\uC544\uB2C8\uC624/.test(txt);
+          });
+
+          return {
+            successText,
+            hasSubmitBtn,
+            hasYesNoDialog,
+            url: String(location.href || '')
+          };
+        });
+        if (sig?.successText) return { completed: true, reason: 'success_text', url: sig?.url || '' };
+        if (!sig?.hasSubmitBtn && !sig?.hasYesNoDialog) {
+          return { completed: true, reason: 'submit_disappeared', url: sig?.url || '' };
+        }
+      } catch {}
+    }
+    return { completed: false, reason: 'no_signal' };
+  };
+
+  const waitForFinalCompletion = async (timeoutMs = 12000) => {
+    const end = Date.now() + timeoutMs;
+    while (Date.now() < end) {
+      if (await hasCertificateModalAfterSubmit()) {
+        await sleep(180);
+        continue;
+      }
+      const closedInfoAlerts = await closeBlockingInfoAlerts();
+      if (closedInfoAlerts > 0) {
+        await sleep(180);
+      }
+      if (await closeCompletionDialogIfPresent()) {
+        return { completed: true, reason: 'completion_dialog_closed' };
+      }
+      if (await hasSubmitValidationAlert()) {
+        return { completed: false, reason: 'validation_alert' };
+      }
+      const unchecked = await detectUncheckedAgreementCount();
+      if (unchecked > 0) {
+        return { completed: false, reason: `unchecked_${unchecked}` };
+      }
+      const signal = await detectCompletionSignal();
+      if (signal?.completed) return signal;
+      await sleep(220);
+    }
+    return { completed: false, reason: 'completion_timeout' };
+  };
+
+  const probeLateCompletion = async (timeoutMs = 5000) => {
+    const end = Date.now() + timeoutMs;
+    while (Date.now() < end) {
+      await closeBlockingInfoAlerts();
+      if (await closeCompletionDialogIfPresent()) {
+        return { completed: true, reason: 'late_completion_dialog_closed' };
+      }
+      const signal = await detectCompletionSignal();
+      if (signal?.completed) return signal;
+      if (await hasCertificateModalAfterSubmit()) {
+        return { completed: true, reason: 'late_certificate_modal_detected' };
+      }
+      await sleep(220);
+    }
+    return { completed: false, reason: 'late_no_signal' };
+  };
+  const confirmYesDialogsAfterSubmit = async (maxRounds = 5) => {
+    let clicked = 0;
+    for (let i = 0; i < maxRounds; i++) {
+      if (await hasCertificateModalAfterSubmit()) {
+        log('info', '[KEPCO] certificate modal detected during yes-loop; stop yes loop');
+        break;
+      }
+
+      const ok = await confirmYesDialog();
+      if (!ok) {
+        await sleep(180);
+        if (await hasCertificateModalAfterSubmit()) {
+          log('info', '[KEPCO] certificate modal detected during yes-loop retry; stop yes loop');
+          break;
+        }
+        const retry = await confirmYesDialog();
+        if (!retry) break;
+        clicked += 1;
+      } else {
+        clicked += 1;
+      }
+
+      await sleep(240);
+      if (await hasCertificateModalAfterSubmit()) {
+        log('info', '[KEPCO] certificate modal detected after yes click; stop yes loop');
+        break;
+      }
+      await dismissInlineAlerts();
+      await closeBlockingInfoAlerts();
+    }
+    if (clicked > 0) {
+      log('info', `[KEPCO] submit follow-up "yes" clicks=${clicked}`);
+    }
+    return clicked;
+  };
+
+  const detectAlreadyAppliedDialog = async () => {
+    for (const ctx of contexts()) {
+      try {
+        const hit = await ctx.evaluate(() => {
+          const norm = (s) => String(s || '').replace(/\s+/g, '');
+          const dialogs = Array.from(document.querySelectorAll('.x-message-box, .x-window, [role="dialog"], .x-window-body, .x-panel-body'));
+          const hasAlreadyAppliedText = (text) =>
+            /\uC785\uCC30\uCC38\uAC00\uC2E0\uCCAD\uC744\uD558\uC2E4\uC218\uC788\uB294\uC0C1\uD0DC\uAC00\uC544\uB2D9\uB2C8\uB2E4/.test(text)
+            || /\uC774\uBBF8.*\uCC38\uAC00\uC2E0\uCCAD/.test(text);
+          for (const dlg of dialogs) {
+            const text = norm(dlg.textContent || '');
+            if (!text || !hasAlreadyAppliedText(text)) continue;
+            const buttons = Array.from(dlg.querySelectorAll('span.x-btn-inner, button, a, [id$="-btnInnerEl"], input[type="button"], input[type="submit"]'));
+            for (const b of buttons) {
+              const label = norm(b.textContent || b.getAttribute?.('value') || b.getAttribute?.('title') || '');
+              if (!/^(\uD655\uC778|\uC608|\uB2EB\uAE30)/.test(label)) continue;
+              const target = b.closest?.('a.x-btn, button, .x-btn, [role="button"]') || b;
+              try { target.click?.(); } catch {}
+              try { target.dispatchEvent?.(new MouseEvent('click', { bubbles: true, cancelable: true })); } catch {}
+              return true;
+            }
+            return true;
+          }
+          return false;
+        });
+        if (hit) return true;
+      } catch {}
+    }
+    return false;
+  };
+
+  const closeBlockingInfoAlerts = async () => {
+    let closed = 0;
+    for (const ctx of contexts()) {
+      try {
+        const hit = await ctx.evaluate(() => {
+          const norm = (s) => String(s || '').replace(/\s+/g, '');
+          const dialogs = Array.from(document.querySelectorAll('.x-message-box, .x-window, [role="dialog"], .x-window-body, .x-panel-body'));
+          let count = 0;
+          for (const dlg of dialogs) {
+            const text = norm(dlg.textContent || '');
+            if (!text) continue;
+            if (!/\uC54C\uB9BC|alert/i.test(text)) continue;
+            if (/\uC785\uCC30\uB2F4\uD569\uC720\uC758\uC0AC\uD56D|\uC704\uC758\uC0AC\uD56D|\uD655\uC778\uD558\uC600\uC2B5\uB2C8\uB2E4/.test(text)) continue;
+            const buttons = Array.from(dlg.querySelectorAll('span.x-btn-inner, button, a, [id$="-btnInnerEl"], input[type="button"], input[type="submit"]'));
+            for (const b of buttons) {
+              const label = norm(b.textContent || b.getAttribute?.('value') || b.getAttribute?.('title') || '');
+              if (!/^(\uD655\uC778|\uC608|\uB2EB\uAE30)/.test(label)) continue;
+              const target = b.closest?.('a.x-btn, button, .x-btn, [role="button"]') || b;
+              try { target.click?.(); } catch {}
+              try { target.dispatchEvent?.(new MouseEvent('click', { bubbles: true, cancelable: true })); } catch {}
+              count++;
+              break;
+            }
+          }
+          return count;
+        });
+        closed += Number(hit || 0);
+      } catch {}
+    }
+    if (closed > 0) log('info', `[KEPCO] closed blocking info alerts count=${closed}`);
+    return closed;
   };
 
   try {
@@ -1413,48 +2101,119 @@ async function handleFinalAgreementAndSubmit(page, emit){
     }
   } catch {}
 
-  await dismissInlineAlerts();
   await confirmYesDialog();
-  await checkConfirmedStatementBox();
+  const checkedStatement = await checkConfirmedStatementBox();
+  if (!checkedStatement) {
+    await sleep(120);
+    await checkConfirmedStatementBox();
+  }
+  await closeKepcoPostLoginModals(page, emit, { protectWorkflowModal: true });
+  await dismissInlineAlerts(true);
+  await closeBlockingInfoAlerts();
+
+  if (await detectAlreadyAppliedDialog()) {
+    log('info', '[KEPCO] already applied dialog detected');
+    return { submitted: false, completed: true, completionReason: 'already_applied', alreadyApplied: true };
+  }
 
   const reachedFinalStage = await waitForFinalStage(6000);
   log('info', '[KEPCO] final stage detected=' + reachedFinalStage);
+  if (!reachedFinalStage) {
+    await ensureAgreementDump('final_stage_not_ready');
+    return { submitted: false, completed: false, completionReason: 'final_stage_not_ready' };
+  }
 
   await closeKepcoPostLoginModals(page, emit, { protectWorkflowModal: true });
   await dismissInlineAlerts();
-
-  let checkedByPattern = 0;
-  for (const pattern of AGREEMENT_PATTERNS) {
-    if (await checkAgreementByPattern(pattern)) checkedByPattern++;
-  }
-
+  await closeBlockingInfoAlerts();
+  const checkedByPattern = 0;
   const checkedByFallback = await checkAllVisibleAgreementBoxes();
   if (!checkedByPattern && !checkedByFallback) {
     await ensureAgreementDump('agreement_missing');
   }
 
   await closeKepcoPostLoginModals(page, emit, { protectWorkflowModal: true });
+  await closeBlockingInfoAlerts();
+
+  const uncheckedBeforeSubmit = await detectUncheckedAgreementCount();
+  if (uncheckedBeforeSubmit > 0) {
+    log('warn', `[KEPCO] unchecked agreements before submit=${uncheckedBeforeSubmit}`);
+    await ensureAgreementDump('agreement_unchecked_before_submit');
+    return { submitted: false, completed: false, completionReason: `unchecked_before_submit_${uncheckedBeforeSubmit}` };
+  }
 
   let submitted = false;
-  for (const ctx of contexts()) {
-    try {
-      const btn = await ctx.$(SUBMIT_SELECTOR);
-      if (!btn) continue;
-      await btn.scrollIntoViewIfNeeded?.().catch(()=>{});
-      await btn.click({ force:true }).catch(()=>{});
-      log('info', '[KEPCO] final submit button clicked');
-      submitted = true;
-      break;
-    } catch {}
+  for (let submitTry = 0; submitTry < 3 && !submitted; submitTry++) {
+    await closeBlockingInfoAlerts();
+    submitted = await clickSubmitButton();
+    if (!submitted) {
+      await sleep(180);
+    }
+  }
+  if (submitted) {
+    log('info', '[KEPCO] final submit button clicked');
+    await confirmYesDialogsAfterSubmit(12);
+    await closeBlockingInfoAlerts();
+    await sleep(260);
+
+    const certModalOpen = await hasCertificateModalAfterSubmit();
+    if (certModalOpen) {
+      log('info', '[KEPCO] post-submit certificate modal detected');
+      const certRes = await handleKepcoCertificate(page, emit, cert || {}, {
+        site: 'kepco',
+        fastMode: options?.kepcoFastMode !== false,
+        postSubmit: true
+      }).catch((err) => ({ ok: false, error: (err && err.message) || err }));
+      if (!certRes?.ok) {
+        submitted = false;
+        log('warn', `[KEPCO] post-submit certificate failed: ${certRes?.error || 'unknown'}`);
+        await ensureAgreementDump('post_submit_certificate_failed');
+      } else {
+        log('info', '[KEPCO] post-submit certificate completed');
+        await closeBlockingInfoAlerts();
+        if (await closeCompletionDialogIfPresent()) {
+          log('info', '[KEPCO] completion dialog closed right after certificate');
+        }
+      }
+    }
+
+    await sleep(350);
+    const uncheckedLeft = await detectUncheckedAgreementCount();
+    const hasValidation = await hasSubmitValidationAlert();
+    if (uncheckedLeft > 0 || hasValidation) {
+      submitted = false;
+      log('warn', `[KEPCO] submit validation failed (unchecked=${uncheckedLeft}, validationDialog=${hasValidation})`);
+      await ensureAgreementDump('submit_validation_failed');
+    }
+  }
+
+  let completed = false;
+  let completionReason = 'not_submitted';
+  if (submitted) {
+    const completion = await waitForFinalCompletion(options?.kepcoSubmitCompleteWaitMs || 12000);
+    completed = completion?.completed === true;
+    completionReason = completion?.reason || 'unknown';
+    log(completed ? 'info' : 'warn', `[KEPCO] final completion detected=${completed} reason=${completionReason}`);
+    if (!completed) {
+      await ensureAgreementDump('final_completion_not_confirmed');
+    }
   }
 
   if (!submitted) {
-    log('warn', '[KEPCO] final submit button not found; manual check required');
-    await ensureAgreementDump('submit_button_missing');
+    const late = await probeLateCompletion(options?.kepcoLateCompletionProbeMs || 5000);
+    if (late?.completed) {
+      submitted = true;
+      completed = true;
+      completionReason = late?.reason || 'late_success';
+      log('warn', `[KEPCO] submit click not captured but completion detected (${completionReason})`);
+    } else {
+      log('warn', '[KEPCO] final submit button not found or submit validation failed; manual check required');
+      await ensureAgreementDump('submit_button_missing');
+    }
   }
 
   await sleep(200);
-  return { submitted };
+  return { submitted, completed, completionReason };
 }
 async function navigateToApplication(page, emit) {
   const TEXT_BID_CONTRACT = "\uC785\uCC30/\uACC4\uC57D";
@@ -1730,4 +2489,5 @@ module.exports = {
   applyAfterSearch,
   navigateToApplication,
 };
+
 

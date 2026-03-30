@@ -236,7 +236,7 @@ async function run(job, emit) {
         try { await dismissCommonOverlays(openRes.page, emit); } catch {}
         emit({ type:'progress', step:'search_bid', pct: 88 });
         try {
-          await applyAfterSearch(openRes.page, emit);
+          await applyAfterSearch(openRes.page, emit, job?.cert || {}, job?.options || {});
         } catch (e) {
           const msg = `[KEPCO] 공고번호 ${bid} 참가신청 실패: ${(e && e.message) || e}`;
           emit({ type:'log', level:'error', msg });
@@ -326,3 +326,4 @@ async function run(job, emit) {
 }
 
 module.exports = { run };
+
